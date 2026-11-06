@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../core/widgets/app_back_button.dart';
+import '../../../../core/widgets/app_auth_header.dart';
 import '../../../../core/widgets/app_onboarding_layout.dart';
-import '../../../../core/widgets/toward_him_logo.dart';
 
-/// A navigable UI-only destination until the approved Login design arrives.
-class LoginPlaceholderScreen extends StatelessWidget {
-  const LoginPlaceholderScreen({super.key});
+/// UI-only route until the Forgot Password Figma screen is approved.
+class ForgotPasswordPlaceholderScreen extends StatelessWidget {
+  const ForgotPasswordPlaceholderScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -16,30 +15,18 @@ class LoginPlaceholderScreen extends StatelessWidget {
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SizedBox(
-            height: AppSpacing.logoHeight,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                const Center(child: TowardHimLogo()),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: AppBackButton(
-                    onPressed: () => Navigator.of(context).maybePop(),
-                  ),
-                ),
-              ],
-            ),
+          AppAuthHeader(
+            onBack: () => Navigator.of(context).maybePop(),
           ),
           const SizedBox(height: AppSpacing.logoToHeading),
           const Text(
-            'Log In',
+            'Forgot Password',
             style: AppTypography.heading,
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.headingToDescription),
           const Text(
-            'Login screen UI will be added in the next module.',
+            'Password recovery UI will be added in a future module.',
             style: AppTypography.description,
             textAlign: TextAlign.center,
           ),

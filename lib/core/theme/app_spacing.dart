@@ -16,6 +16,8 @@ abstract final class AppSpacing {
   static const double fieldIconGap = 12;
   static const double fieldRadius = 10;
   static const double formToDivider = 25;
+  static const double passwordToForgot = 15;
+  static const double forgotToDivider = 25;
   static const double dividerToSocial = 25;
   static const double socialButtonsGap = 15;
   static const double bottomSectionGap = 15;

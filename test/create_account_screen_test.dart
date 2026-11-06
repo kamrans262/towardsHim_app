@@ -10,7 +10,7 @@ import 'package:towards_him_app/core/widgets/app_or_divider.dart';
 import 'package:towards_him_app/core/widgets/app_social_auth_button.dart';
 import 'package:towards_him_app/core/widgets/app_text_field.dart';
 import 'package:towards_him_app/features/auth/presentation/screens/create_account_screen.dart';
-import 'package:towards_him_app/features/auth/presentation/screens/login_placeholder_screen.dart';
+import 'package:towards_him_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:towards_him_app/features/onboarding/presentation/screens/welcome_screen.dart';
 
 void main() {
@@ -76,7 +76,7 @@ void main() {
     expect(find.byType(WelcomeScreen), findsOneWidget);
   });
 
-  testWidgets('Log In from Create Account opens its UI-only route',
+  testWidgets('Log In from Create Account opens Login UI',
       (tester) async {
     await tester.pumpWidget(MaterialApp(
       initialRoute: AppRoutes.createAccount,
@@ -87,7 +87,7 @@ void main() {
     expect(find.byKey(const Key('inline_login_action')), findsOneWidget);
     await tester.tap(find.byKey(const Key('inline_login_action')));
     await tester.pumpAndSettle();
-    expect(find.byType(LoginPlaceholderScreen), findsOneWidget);
+    expect(find.byType(LoginScreen), findsOneWidget);
   });
 
   testWidgets('Bottom Create Account action ends 25px above safe-area bottom',

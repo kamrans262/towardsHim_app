@@ -8,12 +8,14 @@ class AppInlineLink extends StatelessWidget {
     required this.message,
     required this.action,
     required this.onPressed,
+    this.actionKey = const Key('inline_login_action'),
     super.key,
   });
 
   final String message;
   final String action;
   final VoidCallback onPressed;
+  final Key actionKey;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +33,7 @@ class AppInlineLink extends StatelessWidget {
             onTap: onPressed,
             child: Text(
               action,
-              key: const Key('inline_login_action'),
+              key: actionKey,
               style: AppTypography.description.copyWith(
                 color: AppColors.primaryOrange,
               ),

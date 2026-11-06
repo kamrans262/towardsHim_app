@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../features/auth/presentation/screens/create_account_screen.dart';
-import '../../features/auth/presentation/screens/login_placeholder_screen.dart';
+import '../../features/auth/presentation/screens/forgot_password_placeholder_screen.dart';
+import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/onboarding/presentation/screens/splash_screen.dart';
 import '../../features/onboarding/presentation/screens/welcome_screen.dart';
 
@@ -10,6 +11,7 @@ abstract final class AppRoutes {
   static const welcome = '/welcome';
   static const createAccount = '/create-account';
   static const login = '/login';
+  static const forgotPassword = '/forgot-password';
 }
 
 abstract final class AppRouter {
@@ -34,7 +36,14 @@ abstract final class AppRouter {
             onBack: () => Navigator.of(context).maybePop(),
             onLogin: () => Navigator.of(context).pushNamed(AppRoutes.login),
           ),
-        AppRoutes.login => const LoginPlaceholderScreen(),
+        AppRoutes.login => LoginScreen(
+            onBack: () => Navigator.of(context).maybePop(),
+            onCreateAccount: () =>
+                Navigator.of(context).pushNamed(AppRoutes.createAccount),
+            onForgotPassword: () =>
+                Navigator.of(context).pushNamed(AppRoutes.forgotPassword),
+          ),
+        AppRoutes.forgotPassword => const ForgotPasswordPlaceholderScreen(),
         _ => const WelcomeScreen(),
       },
     );

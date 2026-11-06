@@ -71,4 +71,14 @@ abstract final class AppTypography {
     letterSpacing: -0.3,
     color: AppColors.heading,
   );
+
+  static const forgotPassword = TextStyle(
+    fontFamily: 'DMSans',
+    fontSize: 14,
+    fontWeight: FontWeight.w500,
+    fontVariations: [FontVariation('wght', 500)],
+    height: 1,
+    letterSpacing: -0.3,
+    color: AppColors.primaryOrange,
+  );
 }

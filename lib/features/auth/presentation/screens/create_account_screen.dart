@@ -2,14 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../core/widgets/app_back_button.dart';
+import '../../../../core/widgets/app_auth_header.dart';
+import '../../../../core/widgets/app_auth_social_section.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_inline_link.dart';
 import '../../../../core/widgets/app_onboarding_layout.dart';
-import '../../../../core/widgets/app_or_divider.dart';
-import '../../../../core/widgets/app_social_auth_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
-import '../../../../core/widgets/toward_him_logo.dart';
 
 /// UI-only form. Local field state is disposed when the screen is removed.
 /// Authentication will be connected only in a later development phase.
@@ -80,19 +78,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          SizedBox(
-            height: AppSpacing.logoHeight,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                const Center(child: TowardHimLogo()),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: AppBackButton(onPressed: _goBack),
-                ),
-              ],
-            ),
-          ),
+          AppAuthHeader(onBack: _goBack),
           const SizedBox(height: AppSpacing.logoToHeading),
           const Text(
             'Create Your Account',
@@ -159,18 +145,11 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                     onSubmitted: (_) => _confirmPasswordFocus.unfocus(),
                   ),
                   const SizedBox(height: AppSpacing.formToDivider),
-                  const AppOrDivider(),
-                  const SizedBox(height: AppSpacing.dividerToSocial),
-                  AppSocialAuthButton(
-                    label: 'Continue with Google',
-                    iconAsset: 'assets/icons/google.svg',
-                    onPressed: () => _showUiOnlyNotice('Google sign-in'),
-                  ),
-                  const SizedBox(height: AppSpacing.socialButtonsGap),
-                  AppSocialAuthButton(
-                    label: 'Continue with Apple',
-                    iconAsset: 'assets/icons/mdi_apple.svg',
-                    onPressed: () => _showUiOnlyNotice('Apple sign-in'),
+                  AppAuthSocialSection(
+                    onGooglePressed: () =>
+                        _showUiOnlyNotice('Google sign-in'),
+                    onApplePressed: () =>
+                        _showUiOnlyNotice('Apple sign-in'),
                   ),
                 ],
               ),
