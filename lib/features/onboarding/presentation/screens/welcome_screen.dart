@@ -37,12 +37,12 @@ class WelcomeScreen extends StatelessWidget {
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: AppSpacing.headingToDescription),
-          const Center(
+          Center(
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 maxWidth: AppSpacing.descriptionMaxWidth,
               ),
-              child: Text(
+              child: const Text(
                 description,
                 style: AppTypography.description,
                 textAlign: TextAlign.center,
