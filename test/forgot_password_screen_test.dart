@@ -6,7 +6,6 @@ import 'package:towards_him_app/core/theme/app_spacing.dart';
 import 'package:towards_him_app/core/theme/app_typography.dart';
 import 'package:towards_him_app/core/widgets/app_auth_header.dart';
 import 'package:towards_him_app/core/widgets/app_back_button.dart';
-import 'package:towards_him_app/core/widgets/app_button.dart';
 import 'package:towards_him_app/core/widgets/app_otp_input.dart';
 import 'package:towards_him_app/core/widgets/app_send_icon_button.dart';
 import 'package:towards_him_app/core/widgets/app_text_field.dart';
@@ -69,8 +68,7 @@ void main() {
     expect(first.left, closeTo(42, 0.1));
     expect(last.right, closeTo(430 - 42, 0.1));
     for (var i = 0; i < 6; i++) {
-      final box = tester.widget<Container>(find.byKey(Key('otp_box_' +
-          i.toString())));
+      final box = tester.widget<Container>(find.byKey(Key('otp_box_$i')));
       final style = box.decoration! as BoxDecoration;
       expect(style.color, AppColors.outlinedButtonBackground);
       expect(style.border!.top.color, AppColors.otpBorder);
@@ -193,7 +191,7 @@ void main() {
     const Size(430, 932),
     const Size(820, 1180),
   ]) {
-    testWidgets('Responsive Forgot Password ' + size.width.toString(),
+    testWidgets('Responsive Forgot Password ${size.width}',
         (tester) async {
       tester.view.physicalSize = size;
       tester.view.devicePixelRatio = 1;
