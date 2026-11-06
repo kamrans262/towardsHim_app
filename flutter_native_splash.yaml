@@ -1,15 +1,15 @@
-# Toward HIM — native launch screen, Android and iOS.
-# Use the supplied official logo artwork without redesigning it.
+# Toward HIM native splash (Android and iOS).
+# Run: dart run flutter_native_splash:create
 flutter_native_splash:
-  color: "#F6EDDE"
-  color_dark: "#F6EDDE"
+  color: "#F7EDDF"
+  color_dark: "#F7EDDF"
   image: assets/splash/toward_him_logo.png
   image_dark: assets/splash/toward_him_logo.png
   android: true
   ios: true
   web: false
   android_12:
-    color: "#F6EDDE"
-    color_dark: "#F6EDDE"
+    color: "#F7EDDF"
+    color_dark: "#F7EDDF"
     image: assets/splash/toward_him_android12.png
     image_dark: assets/splash/toward_him_android12.png

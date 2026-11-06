@@ -1,17 +1,20 @@
-# towards_him_app
+# Toward HIM — Flutter UI
 
-A new Flutter project.
+Flutter Android/iOS UI project. The current milestone includes the Splash and Welcome screens only. No backend services or authentication are implemented.
 
-## Getting Started
+## Structure
 
-This project is a starting point for a Flutter application.
+- `lib/core/theme/`: centralized color, spacing, typography, and app theme tokens
+- `lib/core/widgets/`: shared logo and button components
+- `lib/core/navigation/`: named app routes
+- `lib/features/onboarding/presentation/screens/`: Splash and Welcome
+- `assets/branding/toward_him_logo.svg`: official raster logo embedded in an SVG container, pending the original vector source
+- `assets/fonts/`: bundled OFL-licensed Playfair Display and DM Sans variable fonts
 
-A few resources to get you started if this is your first Flutter project:
+The supplied logo files are JPG/PNG, not the original vector SVG. The branded SVG container preserves their artwork but does **not** transform the image into editable vector paths. Replace the asset with the official SVG when it becomes available, without changing the widget interface.
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## Local verification
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Run `flutter pub get`, `dart run flutter_native_splash:create`, `flutter analyze`, and `flutter test test/widget_test.dart`. Run `flutter test` before declaring the milestone fully verified. Native splash generation must be repeated after color changes; iOS builds must run on macOS.
+
+The Login, Create Account, and Guest destinations show temporary UI-only notices until their approved designs are implemented in later modules.
