@@ -1,0 +1,32 @@
+name: M1 Flutter UI checks
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'lib/**'
+      - 'assets/branding/**'
+      - 'assets/fonts/**'
+      - 'test/**'
+      - 'pubspec.yaml'
+      - 'pubspec.lock'
+      - '.github/workflows/m1_flutter_ui_checks.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  onboarding-ui:
+    name: Analyze and test M1 UI
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test test/widget_test.dart
