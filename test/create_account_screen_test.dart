@@ -94,7 +94,8 @@ void main() {
     await tester.pumpAndSettle();
     final bounds =
         tester.getRect(find.byKey(const Key('create_account_bottom_actions')));
-    expect(bounds.bottom, closeTo(1100 - 25, 1));
+    final screen = tester.getRect(find.byType(Scaffold));
+    expect(bounds.bottom, closeTo(screen.bottom - AppSpacing.screenBottom, 1));
   });
 
   for (final size in <Size>[
