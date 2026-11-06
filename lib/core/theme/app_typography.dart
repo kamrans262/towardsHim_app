@@ -41,4 +41,34 @@ abstract final class AppTypography {
     letterSpacing: -0.3,
     color: AppColors.secondaryText,
   );
+
+  static const inputPlaceholder = TextStyle(
+    fontFamily: 'DMSans',
+    fontSize: 14,
+    fontWeight: FontWeight.w500,
+    fontVariations: [FontVariation('wght', 500)],
+    height: 1,
+    letterSpacing: -0.3,
+    color: AppColors.secondaryText,
+  );
+
+  static const inputValue = TextStyle(
+    fontFamily: 'DMSans',
+    fontSize: 14,
+    fontWeight: FontWeight.w500,
+    fontVariations: [FontVariation('wght', 500)],
+    height: 1,
+    letterSpacing: -0.3,
+    color: AppColors.heading,
+  );
+
+  static const socialButton = TextStyle(
+    fontFamily: 'DMSans',
+    fontSize: 16,
+    fontWeight: FontWeight.w500,
+    fontVariations: [FontVariation('wght', 500)],
+    height: 1,
+    letterSpacing: -0.3,
+    color: AppColors.heading,
+  );
 }

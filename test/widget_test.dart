@@ -47,6 +47,7 @@ void main() {
     expect(AppTypography.description.fontFamily, 'DMSans');
     expect(AppTypography.description.fontSize, 16);
     expect(AppTypography.description.color, AppColors.secondaryText);
+    expect(AppSpacing.welcomeBottom, 25);
     final buttons = tester.widgetList<AppButton>(find.byType(AppButton)).toList();
     expect(buttons.map((button) => button.variant), [
       AppButtonVariant.outlined,
@@ -77,6 +78,18 @@ void main() {
     expect(guestPressed, isTrue);
   });
 
+  testWidgets('Welcome actions end 25px above safe-area bottom',
+      (tester) async {
+    tester.view.physicalSize = const Size(430, 1100);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(const MaterialApp(home: WelcomeScreen()));
+    await tester.pumpAndSettle();
+    final bounds = tester.getRect(find.byKey(const Key('welcome_bottom_actions')));
+    expect(bounds.bottom, closeTo(1100 - 25, 1));
+  });
+
   for (final size in <Size>[
     const Size(320, 568),
     const Size(375, 667),
@@ -94,7 +107,7 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.byType(AppButton), findsNWidgets(2));
       expect(find.text('Welcome to Toward HIM'), findsOneWidget);
-      expect(find.byType(SingleChildScrollView), findsOneWidget);
+      expect(find.byType(CustomScrollView), findsOneWidget);
     });
   }
 }

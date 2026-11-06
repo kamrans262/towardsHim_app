@@ -7,4 +7,7 @@ abstract final class AppColors {
   static const heading = Color(0xFF1C1C1C);
   static const secondaryText = Color(0xFF8C8A8A);
   static const white = Color(0xFFFFFFFF);
+  static const inputBorder = Color(0x268C8A8A);
+  static const divider = Color(0x148C8A8A);
+  static const backShadow = Color(0x14000000);
 }

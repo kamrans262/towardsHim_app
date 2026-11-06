@@ -1,4 +1,4 @@
-name: M1 Flutter UI checks
+name: Toward HIM targeted Flutter UI checks
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
     paths:
       - 'lib/**'
       - 'assets/branding/**'
+      - 'assets/icons/**'
       - 'assets/fonts/**'
       - 'test/**'
       - 'pubspec.yaml'
@@ -18,7 +19,7 @@ permissions:
 
 jobs:
   onboarding-ui:
-    name: Analyze and test M1 UI
+    name: Analyze and test onboarding/auth UI
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
@@ -29,4 +30,4 @@ jobs:
           cache: true
       - run: flutter pub get
       - run: flutter analyze
-      - run: flutter test test/widget_test.dart
+      - run: flutter test test/widget_test.dart test/create_account_screen_test.dart

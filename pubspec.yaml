@@ -22,6 +22,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/branding/toward_him_logo.svg
+    - assets/icons/
   fonts:
     - family: PlayfairDisplay
       fonts:

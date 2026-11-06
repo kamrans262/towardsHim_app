@@ -1,20 +1,19 @@
 # Toward HIM — Flutter UI
 
-Flutter Android/iOS UI project. The current milestone includes the Splash and Welcome screens only. No backend services or authentication are implemented.
+This repository contains Flutter Android and iOS screens for Toward HIM.
+Current work is **UI-only**. No registration, sign-in, backend, Firebase, or social authentication integrations are implemented.
 
-## Structure
+## Implemented UI
+- Native splash and Flutter splash, Welcome, and Create Account screens.
+- Shared `#F7EDDF` backgrounds, Playfair Display / DM Sans, buttons, logo, back action, fields, social buttons, and OR divider.
+- Original supplied SVG icons under `assets/icons/`. Google/Apple buttons show temporary UI-only notices.
+- Welcome and Create Account bottom actions use the same 25-pixel safe-area padding and scroll naturally on small devices or when the keyboard is open.
+- Create Account and Login routes are connected. Login currently displays an explicit UI-only placeholder until its Figma is provided.
 
-- `lib/core/theme/`: centralized color, spacing, typography, and app theme tokens
-- `lib/core/widgets/`: shared logo and button components
-- `lib/core/navigation/`: named app routes
-- `lib/features/onboarding/presentation/screens/`: Splash and Welcome
-- `assets/branding/toward_him_logo.svg`: official raster logo embedded in an SVG container, pending the original vector source
-- `assets/fonts/`: bundled OFL-licensed Playfair Display and DM Sans variable fonts
+The official original vector logo was not supplied. `assets/branding/toward_him_logo.svg` embeds the supplied raster artwork to preserve its exact appearance; it is not editable vector paths.
 
-The supplied logo files are JPG/PNG, not the original vector SVG. The branded SVG container preserves their artwork but does **not** transform the image into editable vector paths. Replace the asset with the official SVG when it becomes available, without changing the widget interface.
+## Local checks
 
-## Local verification
+Run `flutter pub get`, `flutter analyze`, and `flutter test test/widget_test.dart test/create_account_screen_test.dart`. The existing targeted GitHub workflow runs the same checks when this UI changes.
 
-Run `flutter pub get`, `dart run flutter_native_splash:create`, `flutter analyze`, and `flutter test test/widget_test.dart`. Run `flutter test` before declaring the milestone fully verified. Native splash generation must be repeated after color changes; iOS builds must run on macOS.
-
-The Login, Create Account, and Guest destinations show temporary UI-only notices until their approved designs are implemented in later modules.
+Run `dart run flutter_native_splash:create` only when updating the native launch splash assets. iOS builds require macOS.

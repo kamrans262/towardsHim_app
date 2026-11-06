@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 
+import '../../features/auth/presentation/screens/create_account_screen.dart';
+import '../../features/auth/presentation/screens/login_placeholder_screen.dart';
 import '../../features/onboarding/presentation/screens/splash_screen.dart';
 import '../../features/onboarding/presentation/screens/welcome_screen.dart';
 
 abstract final class AppRoutes {
   static const splash = '/';
   static const welcome = '/welcome';
+  static const createAccount = '/create-account';
+  static const login = '/login';
 }
 
 abstract final class AppRouter {
@@ -18,16 +22,19 @@ abstract final class AppRouter {
                 .pushReplacementNamed(AppRoutes.welcome),
           ),
         AppRoutes.welcome => WelcomeScreen(
-            onCreateAccount: () => _notifyFutureModule(
-              context,
-              'Create Account',
-            ),
-            onLogin: () => _notifyFutureModule(context, 'Login'),
+            onCreateAccount: () =>
+                Navigator.of(context).pushNamed(AppRoutes.createAccount),
+            onLogin: () => Navigator.of(context).pushNamed(AppRoutes.login),
             onContinueAsGuest: () => _notifyFutureModule(
               context,
               'Guest Home',
             ),
           ),
+        AppRoutes.createAccount => CreateAccountScreen(
+            onBack: () => Navigator.of(context).maybePop(),
+            onLogin: () => Navigator.of(context).pushNamed(AppRoutes.login),
+          ),
+        AppRoutes.login => const LoginPlaceholderScreen(),
         _ => const WelcomeScreen(),
       },
     );
