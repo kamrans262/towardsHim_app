@@ -61,7 +61,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Create Account opens from Welcome; back and Log In navigate',
+  testWidgets('Create Account opens from Welcome and back returns',
       (tester) async {
     await tester.pumpWidget(MaterialApp(
       initialRoute: AppRoutes.welcome,
@@ -74,11 +74,17 @@ void main() {
     await tester.tap(find.byType(AppBackButton));
     await tester.pumpAndSettle();
     expect(find.byType(WelcomeScreen), findsOneWidget);
+  });
 
-    await tester.tap(find.text('Create Account'));
+  testWidgets('Log In from Create Account opens its UI-only route',
+      (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      initialRoute: AppRoutes.createAccount,
+      onGenerateRoute: AppRouter.onGenerateRoute,
+    ));
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.byKey(const Key('inline_login_action')));
-    await tester.pumpAndSettle();
+    expect(find.byType(CreateAccountScreen), findsOneWidget);
+    expect(find.byKey(const Key('inline_login_action')), findsOneWidget);
     await tester.tap(find.byKey(const Key('inline_login_action')));
     await tester.pumpAndSettle();
     expect(find.byType(LoginPlaceholderScreen), findsOneWidget);
