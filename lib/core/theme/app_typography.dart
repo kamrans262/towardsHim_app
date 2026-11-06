@@ -81,4 +81,12 @@ abstract final class AppTypography {
     letterSpacing: -0.3,
     color: AppColors.primaryOrange,
   );
+
+  static const otpCharacter = TextStyle(
+    fontFamily: 'DMSans',
+    fontSize: 20,
+    fontWeight: FontWeight.w500,
+    fontVariations: [FontVariation('wght', 500)],
+    height: 1,
+  );
 }

@@ -33,6 +33,8 @@ class AppButton extends StatelessWidget {
             style: FilledButton.styleFrom(
               backgroundColor: AppColors.primaryOrange,
               foregroundColor: AppColors.white,
+              disabledBackgroundColor: AppColors.secondaryText,
+              disabledForegroundColor: AppColors.white,
               textStyle: AppTypography.button,
               shape: shape,
               padding: EdgeInsets.zero,

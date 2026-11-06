@@ -10,4 +10,6 @@ abstract final class AppColors {
   static const inputBorder = Color(0x268C8A8A);
   static const divider = Color(0x148C8A8A);
   static const backShadow = Color(0x14000000);
+  static const otpBorder = Color(0x33C8C8C1);
+  static const otpShadow = Color(0x08000000);
 }

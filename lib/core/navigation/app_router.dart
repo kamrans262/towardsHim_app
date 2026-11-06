@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../features/auth/presentation/screens/create_account_screen.dart';
-import '../../features/auth/presentation/screens/forgot_password_placeholder_screen.dart';
+import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/onboarding/presentation/screens/splash_screen.dart';
 import '../../features/onboarding/presentation/screens/welcome_screen.dart';
@@ -43,7 +43,11 @@ abstract final class AppRouter {
             onForgotPassword: () =>
                 Navigator.of(context).pushNamed(AppRoutes.forgotPassword),
           ),
-        AppRoutes.forgotPassword => const ForgotPasswordPlaceholderScreen(),
+        AppRoutes.forgotPassword => ForgotPasswordScreen(
+            onBack: () => Navigator.of(context).maybePop(),
+            onBackToLogin: () =>
+                Navigator.of(context).pushReplacementNamed(AppRoutes.login),
+          ),
         _ => const WelcomeScreen(),
       },
     );

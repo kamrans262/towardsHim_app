@@ -11,7 +11,7 @@ import 'package:towards_him_app/core/widgets/app_or_divider.dart';
 import 'package:towards_him_app/core/widgets/app_social_auth_button.dart';
 import 'package:towards_him_app/core/widgets/app_text_field.dart';
 import 'package:towards_him_app/features/auth/presentation/screens/create_account_screen.dart';
-import 'package:towards_him_app/features/auth/presentation/screens/forgot_password_placeholder_screen.dart';
+import 'package:towards_him_app/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:towards_him_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:towards_him_app/features/onboarding/presentation/screens/welcome_screen.dart';
 
@@ -108,7 +108,7 @@ void main() {
     expect(find.byType(CreateAccountScreen), findsOneWidget);
   });
 
-  testWidgets('Forgot Password navigates to UI-only route and back',
+  testWidgets('Forgot Password navigates to verification UI and back',
       (tester) async {
     await tester.pumpWidget(MaterialApp(
       initialRoute: AppRoutes.login,
@@ -116,7 +116,7 @@ void main() {
     ));
     await tester.tap(find.byKey(const Key('login_forgot_password')));
     await tester.pumpAndSettle();
-    expect(find.byType(ForgotPasswordPlaceholderScreen), findsOneWidget);
+    expect(find.byType(ForgotPasswordScreen), findsOneWidget);
     await tester.tap(find.byType(AppBackButton));
     await tester.pumpAndSettle();
     expect(find.byType(LoginScreen), findsOneWidget);

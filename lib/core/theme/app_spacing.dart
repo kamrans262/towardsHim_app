@@ -21,6 +21,10 @@ abstract final class AppSpacing {
   static const double dividerToSocial = 25;
   static const double socialButtonsGap = 15;
   static const double bottomSectionGap = 15;
+  static const double sendButtonSize = 48;
+  static const double emailToSendGap = 10;
+  static const double emailToVerifyHeading = 30;
+  static const double verifyDescriptionToOtp = 20;
 
   static const double buttonsGap = 20;
   static const double loginToGuest = 15;
