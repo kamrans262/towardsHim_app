@@ -51,7 +51,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
       context: context,
       backgroundColor: AppColors.background,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (sheetContext) {
         return SafeArea(
@@ -71,7 +71,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                 for (final speed in const [0.75, 1.0, 1.25, 1.5, 2.0])
                   ListTile(
                     title: Text(
-                      '${speed}×',
+                      '$speed×',
                       style: AppTypography.quickAccessLabel,
                     ),
                     trailing: speed == _player.speed
@@ -98,7 +98,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
       context: context,
       backgroundColor: AppColors.background,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (sheetContext) {
         return SafeArea(
