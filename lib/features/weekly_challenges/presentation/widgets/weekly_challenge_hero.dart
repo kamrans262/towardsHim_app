@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_back_button.dart';
-import '../../data/weekly_challenge_detail_demo_data.dart';
 
 /// Shared hero and rounded content surface for Weekly and Daily details.
 ///
@@ -21,6 +20,11 @@ class WeeklyChallengeHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Exactly 80px from the back button's lower edge to the card top.
+    final headerHeight = MediaQuery.paddingOf(context).top +
+        AppSpacing.screenTop +
+        AppSpacing.backButtonSize +
+        AppSpacing.weeklyBackToContainerGap;
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -28,7 +32,7 @@ class WeeklyChallengeHero extends StatelessWidget {
           top: 0,
           left: 0,
           right: 0,
-          height: WeeklyChallengeDetailDemoData.heroImageHeight,
+          height: headerHeight + 20,
           child: Image.asset(
             WeeklyChallengeDetailDemoData.heroAsset,
             key: const Key('weekly_detail_hero'),
@@ -40,7 +44,7 @@ class WeeklyChallengeHero extends StatelessWidget {
           children: [
             SizedBox(
               width: double.infinity,
-              height: WeeklyChallengeDetailDemoData.heroVisibleHeight,
+              height: headerHeight,
               child: Stack(
                 children: [
                   Positioned(

@@ -85,6 +85,7 @@ abstract final class AppSpacing {
   static const double playerControlsToActions = 50;
   static const double playerActionLabelGap = 5;
   // Weekly Toward HIM 3 card and header geometry.
+  static const double weeklyBackToContainerGap = 80;
   static const double weeklyHeaderToTitle = 25;
   static const double weeklyCardPadding = 15;
   static const double weeklyCardGap = 15;

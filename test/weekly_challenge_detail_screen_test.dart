@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:towards_him_app/core/theme/app_spacing.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:towards_him_app/core/widgets/app_back_button.dart';
 import 'package:towards_him_app/core/widgets/app_bottom_navigation.dart';
@@ -28,6 +29,15 @@ void main() {
       find.byKey(const Key('challenge_detail_rounded_container')),
     );
     expect(rounded.padding, const EdgeInsets.only(top: 20));
+    // The image/content transition is exactly 80px below the button.
+    final buttonRect = tester.getRect(find.byType(AppBackButton));
+    final containerRect = tester.getRect(
+      find.byKey(const Key('challenge_detail_rounded_container')),
+    );
+    expect(
+      containerRect.top - buttonRect.bottom,
+      closeTo(AppSpacing.weeklyBackToContainerGap, 0.1),
+    );
     final decoration = rounded.decoration! as BoxDecoration;
     expect(
       decoration.borderRadius,
