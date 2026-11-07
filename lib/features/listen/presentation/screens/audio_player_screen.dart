@@ -49,6 +49,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
   void _showSpeedPicker() {
     showModalBottomSheet<void>(
       context: context,
+      isScrollControlled: true,
       backgroundColor: AppColors.background,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),

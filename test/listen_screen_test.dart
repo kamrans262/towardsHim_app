@@ -13,6 +13,7 @@ import 'package:towards_him_app/core/widgets/app_circular_play_button.dart';
 import 'package:towards_him_app/core/widgets/app_main_screen_header.dart';
 import 'package:towards_him_app/core/widgets/app_svg_icon_button.dart';
 import 'package:towards_him_app/features/home/presentation/widgets/home_quick_access_card.dart';
+import 'package:towards_him_app/features/home/presentation/screens/home_shell_screen.dart';
 import 'package:towards_him_app/features/listen/data/listen_demo_data.dart';
 import 'package:towards_him_app/features/listen/presentation/screens/listen_screen.dart';
 import 'package:towards_him_app/features/listen/presentation/widgets/listen_audio_list_item.dart';
@@ -38,7 +39,7 @@ void main() {
 
   Future<void> openListen(WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-      initialRoute: AppRoutes.home,
+      home: const HomeShellScreen(),
       onGenerateRoute: AppRouter.onGenerateRoute,
     ));
     await tester.tap(find.byKey(const Key('nav_Listen')));
