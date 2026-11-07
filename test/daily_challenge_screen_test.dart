@@ -40,6 +40,16 @@ void main() {
     expect(find.byType(AppBottomNavigation), findsNothing);
     expect(find.text('October 8 – Daily Challenge'), findsOneWidget);
     expect(find.text('Taste, See or Share'), findsOneWidget);
+    final rounded = tester.widget<Container>(
+      find.byKey(const Key('challenge_detail_rounded_container')),
+    );
+    expect(rounded.padding, const EdgeInsets.only(top: 20));
+    final decoration = rounded.decoration! as BoxDecoration;
+    expect(
+      decoration.borderRadius,
+      const BorderRadius.vertical(top: Radius.circular(20)),
+    );
+ 
     expect(find.byType(DailyChallengeOptionCard), findsNWidgets(3));
     await tester.tap(find.byType(AppBackButton));
     await tester.pumpAndSettle();

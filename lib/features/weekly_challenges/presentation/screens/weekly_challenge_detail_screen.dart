@@ -65,16 +65,6 @@ class _WeeklyChallengeDetailScreenState
                 SliverToBoxAdapter(
                   child: WeeklyChallengeHero(
                     onBack: () => Navigator.of(context).maybePop(),
-                  ),
-                ),
-                SliverToBoxAdapter(
-                  child: DecoratedBox(
-                    decoration: const BoxDecoration(
-                      color: AppColors.background,
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(20),
-                      ),
-                    ),
                     child: Center(
                       child: ConstrainedBox(
                         constraints: const BoxConstraints(
@@ -83,7 +73,7 @@ class _WeeklyChallengeDetailScreenState
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(
                             AppSpacing.screenHorizontal,
-                            20,
+                            0,
                             AppSpacing.screenHorizontal,
                             AppSpacing.screenBottom,
                           ),

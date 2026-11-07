@@ -49,19 +49,9 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
             key: const Key('daily_challenge_scroll'),
             slivers: [
               SliverToBoxAdapter(
-                child: WeeklyChallengeHero(
-                  onBack: () => Navigator.of(context).maybePop(),
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: DecoratedBox(
-                  decoration: const BoxDecoration(
-                    color: AppColors.background,
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(20),
-                    ),
-                  ),
-                  child: Center(
+                  child: WeeklyChallengeHero(
+                    onBack: () => Navigator.of(context).maybePop(),
+                    child: Center(
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(
                         maxWidth: AppSpacing.homeContentMaxWidth,
@@ -69,7 +59,7 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
                       child: Padding(
                         padding: EdgeInsets.fromLTRB(
                           AppSpacing.screenHorizontal,
-                          20,
+                          0,
                           AppSpacing.screenHorizontal,
                           AppSpacing.screenBottom +
                               MediaQuery.paddingOf(context).bottom,

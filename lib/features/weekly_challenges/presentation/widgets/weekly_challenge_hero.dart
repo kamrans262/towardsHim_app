@@ -1,41 +1,72 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_back_button.dart';
 import '../../data/weekly_challenge_detail_demo_data.dart';
 
-/// Shared full-bleed sunrise hero; back button honors the device safe area.
+/// Shared hero and rounded content surface for Weekly and Daily details.
+///
+/// The image remains visible behind both 20px top corner cutouts. The
+/// first content label starts exactly 20px below the container's top.
 class WeeklyChallengeHero extends StatelessWidget {
-  const WeeklyChallengeHero({required this.onBack, super.key});
+  const WeeklyChallengeHero({
+    required this.onBack,
+    required this.child,
+    super.key,
+  });
 
   final VoidCallback onBack;
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: WeeklyChallengeDetailDemoData.heroVisibleHeight,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            height: WeeklyChallengeDetailDemoData.heroImageHeight,
-            child: Image.asset(
-              WeeklyChallengeDetailDemoData.heroAsset,
-              key: const Key('weekly_detail_hero'),
-              fit: BoxFit.cover,
-              alignment: Alignment.center,
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Positioned(
+          top: 0,
+          left: 0,
+          right: 0,
+          height: WeeklyChallengeDetailDemoData.heroImageHeight,
+          child: Image.asset(
+            WeeklyChallengeDetailDemoData.heroAsset,
+            key: const Key('weekly_detail_hero'),
+            fit: BoxFit.cover,
+            alignment: Alignment.center,
+          ),
+        ),
+        Column(
+          children: [
+            SizedBox(
+              width: double.infinity,
+              height: WeeklyChallengeDetailDemoData.heroVisibleHeight,
+              child: Stack(
+                children: [
+                  Positioned(
+                    top: MediaQuery.paddingOf(context).top +
+                        AppSpacing.screenTop,
+                    left: AppSpacing.screenHorizontal,
+                    child: AppBackButton(onPressed: onBack),
+                  ),
+                ],
+              ),
             ),
-          ),
-          Positioned(
-            top: MediaQuery.paddingOf(context).top + AppSpacing.screenTop,
-            left: AppSpacing.screenHorizontal,
-            child: AppBackButton(onPressed: onBack),
-          ),
-        ],
-      ),
+            Container(
+              key: const Key('challenge_detail_rounded_container'),
+              width: double.infinity,
+              padding: const EdgeInsets.only(top: 20),
+              decoration: const BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
+              ),
+              child: child,
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
