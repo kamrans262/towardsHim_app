@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/app_back_button.dart';
+import '../../data/weekly_challenge_detail_demo_data.dart';
 
 /// Shared hero and rounded content surface for Weekly and Daily details.
 ///
