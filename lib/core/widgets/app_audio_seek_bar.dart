@@ -32,6 +32,8 @@ class AppAudioSeekBar extends StatelessWidget {
           slider: true,
           label: 'Playback position',
           value: '${(value * 100).round()} percent',
+          increasedValue: '${((value + 0.05).clamp(0.0, 1.0) * 100).round()} percent',
+          decreasedValue: '${((value - 0.05).clamp(0.0, 1.0) * 100).round()} percent',
           onIncrease: () => onChanged((value + 0.05).clamp(0.0, 1.0)),
           onDecrease: () => onChanged((value - 0.05).clamp(0.0, 1.0)),
           child: GestureDetector(
