@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../core/widgets/app_svg_icon_button.dart';
+import '../../../../core/widgets/app_header_actions.dart';
 import '../../domain/models/home_models.dart';
 
 class HomeHeroHeader extends StatelessWidget {
@@ -56,16 +56,9 @@ class HomeHeroHeader extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  AppSvgIconButton(
-                    asset: 'assets/icons/home/notification.svg',
-                    label: 'Notifications',
-                    onPressed: onNotifications,
-                  ),
-                  const SizedBox(width: AppSpacing.homeHeaderIconGap),
-                  AppSvgIconButton(
-                    asset: 'assets/icons/home/profile.svg',
-                    label: 'Profile',
-                    onPressed: onProfile,
+                  AppHeaderActions(
+                    onNotifications: onNotifications,
+                    onProfile: onProfile,
                   ),
                 ],
               ),

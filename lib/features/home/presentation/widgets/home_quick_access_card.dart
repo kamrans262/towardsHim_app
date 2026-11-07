@@ -10,11 +10,13 @@ class HomeQuickAccessCard extends StatelessWidget {
   const HomeQuickAccessCard({
     required this.item,
     required this.onPressed,
+    this.height = AppSpacing.homeQuickCardHeight,
     super.key,
   });
 
   final HomeQuickAccess item;
   final VoidCallback onPressed;
+  final double height;
 
   Color get background => switch (item.type) {
         HomeQuickType.podcast => AppColors.podcastTile,
@@ -25,7 +27,7 @@ class HomeQuickAccessCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: AppSpacing.homeQuickCardHeight,
+      height: height,
       child: Material(
         color: background,
         shape: RoundedRectangleBorder(

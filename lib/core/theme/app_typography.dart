@@ -162,6 +162,16 @@ abstract final class AppTypography {
     height: 1,
     color: AppColors.heading,
   );
+  static const mainScreenTitle = TextStyle(
+    fontFamily: 'DMSans',
+    fontSize: 24,
+    fontWeight: FontWeight.w700,
+    fontVariations: [FontVariation('wght', 700)],
+    height: 1,
+    letterSpacing: 0,
+    color: AppColors.heading,
+  );
+
   static const navigationLabel = TextStyle(
     fontFamily: 'DMSans',
     fontSize: 14,

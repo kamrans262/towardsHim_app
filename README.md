@@ -8,9 +8,10 @@ and verification emails are not integrated.
 
 - Native/Flutter splash, Welcome, Create Account, Login, Forgot Password / OTP
 - Home dashboard based on the approved 430px Figma design
+- Listen tab with its approved Figma header, quick categories, four audio demo rows and UI-only play state
 - Demo Login navigation to Home with no authentication
 - Five-tab main shell: Home, Listen, Towards HIM 3, Community, Store
-- Listen, challenge, Community and Store show UI-only placeholders until their
+- Challenge, Community and Store show UI-only placeholders until their
   approved designs / URL are available (no invented merchandise URL)
 
 ## Home design assets
@@ -35,6 +36,8 @@ and verification emails are not integrated.
   `ChangeNotifier`, disposed by the shell
 - `lib/features/home/presentation/widgets/`: reusable dashboard cards
 - `lib/features/home/presentation/screens/`: Home and preserved-tab shell
+- `lib/features/listen/`: structured episode demo models/data, reusable media rows and Listen UI
+- `lib/core/widgets/app_audio_content_row.dart`: reused for both 70px Home and 100px Listen thumbnails
 
 The Home scroll/play demo state remains alive between tab switches via
 `IndexedStack`. Store has no configured URL, so it shows a local placeholder
@@ -45,7 +48,7 @@ instead of opening an invented website.
 ```bash
 flutter pub get
 flutter analyze
-flutter test test/widget_test.dart test/create_account_screen_test.dart test/login_screen_test.dart test/forgot_password_screen_test.dart test/home_screen_test.dart
+flutter test test/widget_test.dart test/create_account_screen_test.dart test/login_screen_test.dart test/forgot_password_screen_test.dart test/home_screen_test.dart test/listen_screen_test.dart
 ```
 
 The targeted workflow performs those checks on `main`. Native iOS simulator

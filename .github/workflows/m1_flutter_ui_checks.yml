@@ -31,4 +31,4 @@ jobs:
           cache: true
       - run: flutter pub get
       - run: flutter analyze
-      - run: flutter test test/widget_test.dart test/create_account_screen_test.dart test/login_screen_test.dart test/forgot_password_screen_test.dart test/home_screen_test.dart
+      - run: flutter test test/widget_test.dart test/create_account_screen_test.dart test/login_screen_test.dart test/forgot_password_screen_test.dart test/home_screen_test.dart test/listen_screen_test.dart
