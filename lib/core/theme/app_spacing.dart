@@ -61,4 +61,27 @@ abstract final class AppSpacing {
   static const double listenQuickCardHeight = 100;
   static const double listenThumbnailSize = 100;
   static const double listenDividerGap = 15;
+
+  // Full-screen Audio Player.
+  static const double playerHeaderToCover = 20;
+  static const double playerCoverAspectRatio = 390 / 237;
+  static const double playerCoverRadius = 20;
+  static const double playerCoverToTag = 15;
+  static const double playerTagHorizontal = 12;
+  static const double playerTagVertical = 7;
+  static const double playerTagToTitle = 20;
+  static const double playerTitleToDuration = 5;
+  static const double playerDurationToDescription = 5;
+  static const double playerDescriptionToProgress = 20;
+  static const double playerSeekTouchHeight = 28;
+  static const double playerThumbSize = 12;
+  static const double playerProgressToTimes = 10;
+  static const double playerTimesToControls = 25;
+  static const double playerControlIcon = 30;
+  static const double playerSkipTapSize = 48;
+  static const double playerMainPlayDiameter = 70;
+  static const double playerMainPlayIcon = 34;
+  static const double playerControlGap = 35;
+  static const double playerControlsToActions = 50;
+  static const double playerActionLabelGap = 5;
 }

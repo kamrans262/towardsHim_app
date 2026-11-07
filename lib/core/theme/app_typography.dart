@@ -172,6 +172,26 @@ abstract final class AppTypography {
     color: AppColors.heading,
   );
 
+  static const playerTag = TextStyle(
+    fontFamily: 'DMSans',
+    fontSize: 12,
+    fontWeight: FontWeight.w500,
+    fontVariations: [FontVariation('wght', 500)],
+    height: 1,
+    letterSpacing: 0,
+    color: AppColors.primaryOrange,
+  );
+
+  static const playerTime = TextStyle(
+    fontFamily: 'DMSans',
+    fontSize: 12,
+    fontWeight: FontWeight.w500,
+    fontVariations: [FontVariation('wght', 500)],
+    height: 1,
+    letterSpacing: 0,
+    color: AppColors.secondaryText,
+  );
+
   static const navigationLabel = TextStyle(
     fontFamily: 'DMSans',
     fontSize: 14,

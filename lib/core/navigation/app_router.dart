@@ -4,6 +4,8 @@ import '../../features/auth/presentation/screens/create_account_screen.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/home/presentation/screens/home_shell_screen.dart';
+import '../../features/listen/domain/models/listen_audio_episode.dart';
+import '../../features/listen/presentation/screens/audio_player_screen.dart';
 import '../../features/onboarding/presentation/screens/splash_screen.dart';
 import '../../features/onboarding/presentation/screens/welcome_screen.dart';
 
@@ -14,6 +16,7 @@ abstract final class AppRoutes {
   static const login = '/login';
   static const forgotPassword = '/forgot-password';
   static const home = '/home';
+  static const player = '/player';
 }
 
 abstract final class AppRouter {
@@ -47,6 +50,11 @@ abstract final class AppRouter {
                 Navigator.of(context).pushNamed(AppRoutes.forgotPassword),
           ),
         AppRoutes.home => const HomeShellScreen(),
+        AppRoutes.player => settings.arguments is ListenAudioEpisode
+            ? AudioPlayerScreen(
+                episode: settings.arguments! as ListenAudioEpisode,
+              )
+            : const WelcomeScreen(),
         AppRoutes.forgotPassword => ForgotPasswordScreen(
             onBack: () => Navigator.of(context).maybePop(),
             onBackToLogin: () =>

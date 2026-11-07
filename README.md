@@ -8,7 +8,9 @@ and verification emails are not integrated.
 
 - Native/Flutter splash, Welcome, Create Account, Login, Forgot Password / OTP
 - Home dashboard based on the approved 430px Figma design
-- Listen tab with its approved Figma header, quick categories, four audio demo rows and UI-only play state
+- Listen tab with its approved Figma header, quick categories and four demo audio rows
+- Full-screen Audio Player opened from the selected Listen episode (no bottom tabs)
+- UI-only seek, rewind/forward 10s, play/pause, speed selection, download notice and More sheet
 - Demo Login navigation to Home with no authentication
 - Five-tab main shell: Home, Listen, Towards HIM 3, Community, Store
 - Challenge, Community and Store show UI-only placeholders until their
@@ -22,6 +24,8 @@ and verification emails are not integrated.
   supplied Golden Hour Meditation photo for audio and activity thumbnails
 - `assets/icons/home/`: supplied notification/profile SVGs and matching
   lightweight Podcast/Meditation/Prayer icons
+- `assets/images/player/golden_mountain_valleys_dusk.webp`: optimized supplied Player cover
+- `assets/icons/player/`: supplied speed/download/more/rewind assets and a matching forward-10 SVG
 - `assets/icons/navigation/`: the five supplied bottom-tab SVGs under
   descriptive names
 
@@ -36,7 +40,8 @@ and verification emails are not integrated.
   `ChangeNotifier`, disposed by the shell
 - `lib/features/home/presentation/widgets/`: reusable dashboard cards
 - `lib/features/home/presentation/screens/`: Home and preserved-tab shell
-- `lib/features/listen/`: structured episode demo models/data, reusable media rows and Listen UI
+- `lib/features/listen/`: episode models/demo data, Listen UI, Player UI and a disposable local playback-state controller
+- The Figma reference labels the first episode 28 minutes but displays a 24:00 demo timeline; the model stores both explicitly so no time value is inferred.
 - `lib/core/widgets/app_audio_content_row.dart`: reused for both 70px Home and 100px Listen thumbnails
 
 The Home scroll/play demo state remains alive between tab switches via
@@ -48,7 +53,7 @@ instead of opening an invented website.
 ```bash
 flutter pub get
 flutter analyze
-flutter test test/widget_test.dart test/create_account_screen_test.dart test/login_screen_test.dart test/forgot_password_screen_test.dart test/home_screen_test.dart test/listen_screen_test.dart
+flutter test test/widget_test.dart test/create_account_screen_test.dart test/login_screen_test.dart test/forgot_password_screen_test.dart test/home_screen_test.dart test/listen_screen_test.dart test/audio_player_screen_test.dart
 ```
 
 The targeted workflow performs those checks on `main`. Native iOS simulator

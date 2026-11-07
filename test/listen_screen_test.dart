@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:towards_him_app/core/navigation/app_router.dart';
+import 'package:towards_him_app/core/widgets/app_back_button.dart';
+import 'package:towards_him_app/features/listen/presentation/screens/audio_player_screen.dart';
 import 'package:towards_him_app/core/theme/app_spacing.dart';
 import 'package:towards_him_app/core/theme/app_typography.dart';
 import 'package:towards_him_app/core/widgets/app_audio_content_row.dart';
@@ -9,7 +12,6 @@ import 'package:towards_him_app/core/widgets/app_bottom_navigation.dart';
 import 'package:towards_him_app/core/widgets/app_circular_play_button.dart';
 import 'package:towards_him_app/core/widgets/app_main_screen_header.dart';
 import 'package:towards_him_app/core/widgets/app_svg_icon_button.dart';
-import 'package:towards_him_app/features/home/presentation/screens/home_shell_screen.dart';
 import 'package:towards_him_app/features/home/presentation/widgets/home_quick_access_card.dart';
 import 'package:towards_him_app/features/listen/data/listen_demo_data.dart';
 import 'package:towards_him_app/features/listen/presentation/screens/listen_screen.dart';
@@ -35,7 +37,10 @@ void main() {
   });
 
   Future<void> openListen(WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(home: HomeShellScreen()));
+    await tester.pumpWidget(MaterialApp(
+      initialRoute: AppRoutes.home,
+      onGenerateRoute: AppRouter.onGenerateRoute,
+    ));
     await tester.tap(find.byKey(const Key('nav_Listen')));
     await tester.pumpAndSettle();
   }
@@ -124,24 +129,41 @@ void main() {
     expect(row.left, closeTo(20, 0.1));
   });
 
-  testWidgets('Play button toggles only its local UI state', (tester) async {
+  testWidgets('Listen play opens the selected Player and back restores tab',
+      (tester) async {
     await openListen(tester);
     final buttons = find.byType(AppCircularPlayButton);
     expect(tester.widget<AppCircularPlayButton>(buttons.first).isPlaying, false);
     await tester.tap(buttons.first);
-    await tester.pump();
-    expect(tester.widget<AppCircularPlayButton>(buttons.first).isPlaying, true);
-    await tester.tap(buttons.at(1));
-    await tester.pump();
-    expect(tester.widget<AppCircularPlayButton>(buttons.first).isPlaying, false);
-    expect(tester.widget<AppCircularPlayButton>(buttons.at(1)).isPlaying, true);
+    await tester.pumpAndSettle();
+    expect(find.byType(AudioPlayerScreen), findsOneWidget);
+    final player = tester.widget<AudioPlayerScreen>(find.byType(AudioPlayerScreen));
+    expect(player.episode.id, ListenDemoData.episodes.first.id);
+    expect(find.text('Player'), findsOneWidget);
+    expect(find.byType(AppBottomNavigation), findsNothing);
+    await tester.tap(find.byType(AppBackButton));
+    await tester.pumpAndSettle();
+    expect(find.byType(ListenScreen), findsOneWidget);
+    expect(
+      tester.widget<AppBottomNavigation>(find.byType(AppBottomNavigation))
+          .selectedIndex,
+      1,
+    );
+    expect(
+      tester.widget<AppCircularPlayButton>(
+        find.byType(AppCircularPlayButton).first,
+      ).isPlaying,
+      true,
+    );
   });
 
-  testWidgets('Home and Listen keep their own state across tab switches',
+  testWidgets('Home and Listen preserve state across Player and tab switching',
       (tester) async {
     await openListen(tester);
     await tester.tap(find.byType(AppCircularPlayButton).first);
-    await tester.pump();
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(AppBackButton));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('nav_Home')));
     await tester.pumpAndSettle();
     expect(find.text('Continue Where You Left Off'), findsOneWidget);
@@ -154,9 +176,8 @@ void main() {
       true,
     );
     expect(
-      tester.widget<AppBottomNavigation>(
-        find.byType(AppBottomNavigation),
-      ).selectedIndex,
+      tester.widget<AppBottomNavigation>(find.byType(AppBottomNavigation))
+          .selectedIndex,
       1,
     );
   });

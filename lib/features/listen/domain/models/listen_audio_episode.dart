@@ -9,6 +9,10 @@ class ListenAudioEpisode {
     required this.durationMinutes,
     required this.playbackProgress,
     required this.isCompleted,
+    this.playerTitle,
+    this.playerDescription,
+    this.coverAsset,
+    this.timelineDurationSeconds,
   });
 
   final String id;
@@ -19,4 +23,13 @@ class ListenAudioEpisode {
   final int durationMinutes;
   final double playbackProgress;
   final bool isCompleted;
+
+  /// Optional detail-screen metadata. List titles and thumbnails remain
+  /// unchanged when the Player displays the longer Figma copy/cover.
+  final String? playerTitle;
+  final String? playerDescription;
+  final String? coverAsset;
+
+  /// Optional preview timeline length when demo duration labels differ.
+  final int? timelineDurationSeconds;
 }

@@ -7,17 +7,21 @@ class AppCircularPlayButton extends StatelessWidget {
   const AppCircularPlayButton({
     required this.isPlaying,
     required this.onPressed,
+    this.diameter = AppSpacing.homePlayDiameter,
+    this.iconSize = 20,
     super.key,
   });
 
   final bool isPlaying;
   final VoidCallback onPressed;
+  final double diameter;
+  final double iconSize;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: AppSpacing.homePlayDiameter,
-      height: AppSpacing.homePlayDiameter,
+      width: diameter,
+      height: diameter,
       child: Material(
         color: AppColors.primaryOrange,
         shape: const CircleBorder(),
@@ -27,7 +31,7 @@ class AppCircularPlayButton extends StatelessWidget {
           child: Icon(
             isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
             color: AppColors.white,
-            size: 20,
+            size: iconSize,
           ),
         ),
       ),

@@ -7,6 +7,7 @@ import '../../../../core/widgets/app_main_screen_header.dart';
 import '../../../home/data/home_demo_data.dart';
 import '../../../home/presentation/widgets/home_quick_access_card.dart';
 import '../../data/listen_demo_data.dart';
+import '../../domain/models/listen_audio_episode.dart';
 import '../widgets/listen_audio_list_item.dart';
 
 /// UI-only Listen tab. The parent IndexedStack preserves the scroll and
@@ -14,10 +15,12 @@ import '../widgets/listen_audio_list_item.dart';
 class ListenScreen extends StatefulWidget {
   const ListenScreen({
     required this.onNotice,
+    required this.onOpenEpisode,
     super.key,
   });
 
   final ValueChanged<String> onNotice;
+  final ValueChanged<ListenAudioEpisode> onOpenEpisode;
 
   @override
   State<ListenScreen> createState() => _ListenScreenState();
@@ -26,10 +29,9 @@ class ListenScreen extends StatefulWidget {
 class _ListenScreenState extends State<ListenScreen> {
   String? _playingEpisodeId;
 
-  void _toggleEpisode(String episodeId) {
-    setState(() {
-      _playingEpisodeId = _playingEpisodeId == episodeId ? null : episodeId;
-    });
+  void _openEpisode(ListenAudioEpisode episode) {
+    setState(() => _playingEpisodeId = episode.id);
+    widget.onOpenEpisode(episode);
   }
 
   @override
@@ -105,7 +107,7 @@ class _ListenScreenState extends State<ListenScreen> {
                           isPlaying: _playingEpisodeId ==
                               ListenDemoData.episodes[i].id,
                           onPlayPressed: () =>
-                              _toggleEpisode(ListenDemoData.episodes[i].id),
+                              _openEpisode(ListenDemoData.episodes[i]),
                         ),
                       ],
                     ],

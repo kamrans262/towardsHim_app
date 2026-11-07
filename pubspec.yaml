@@ -26,6 +26,8 @@ flutter:
     - assets/icons/home/
     - assets/icons/navigation/
     - assets/images/home/
+    - assets/icons/player/
+    - assets/images/player/
   fonts:
     - family: PlayfairDisplay
       fonts:

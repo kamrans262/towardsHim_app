@@ -5,11 +5,13 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_bottom_navigation.dart';
+import '../../../../core/navigation/app_router.dart';
 import '../../data/home_demo_data.dart';
 import '../../domain/models/home_models.dart';
 import '../controllers/home_navigation_controller.dart';
 import 'home_dashboard_screen.dart';
 import '../../../listen/presentation/screens/listen_screen.dart';
+import '../../../listen/domain/models/listen_audio_episode.dart';
 
 /// UI-only shell with a fixed bottom bar and preserved tab widget states.
 class HomeShellScreen extends StatefulWidget {
@@ -62,7 +64,15 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
                   onSelectTab: _select,
                   onNotice: _showNotice,
                 ),
-                ListenScreen(onNotice: _showNotice),
+                ListenScreen(
+                  onNotice: _showNotice,
+                  onOpenEpisode: (ListenAudioEpisode episode) {
+                    Navigator.of(context).pushNamed(
+                      AppRoutes.player,
+                      arguments: episode,
+                    );
+                  },
+                ),
                 const _UpcomingTab(
                   title: 'Towards HIM 3',
                   message: 'Weekly challenge UI will be added in its module.',
