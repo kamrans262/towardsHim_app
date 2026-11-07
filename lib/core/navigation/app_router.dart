@@ -6,6 +6,8 @@ import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/home/presentation/screens/home_shell_screen.dart';
 import '../../features/listen/domain/models/listen_audio_episode.dart';
 import '../../features/weekly_challenges/domain/models/weekly_challenge.dart';
+import '../../features/weekly_challenges/domain/models/daily_challenge.dart';
+import '../../features/weekly_challenges/presentation/screens/daily_challenge_screen.dart';
 import '../../features/weekly_challenges/presentation/screens/weekly_challenge_detail_screen.dart';
 import '../../features/listen/presentation/screens/audio_player_screen.dart';
 import '../../features/onboarding/presentation/screens/splash_screen.dart';
@@ -20,6 +22,7 @@ abstract final class AppRoutes {
   static const home = '/home';
   static const player = '/player';
   static const weeklyChallengeDetail = '/weekly-challenge-detail';
+  static const dailyChallengeDetail = '/daily-challenge-detail';
 }
 
 abstract final class AppRouter {
@@ -53,6 +56,11 @@ abstract final class AppRouter {
                 Navigator.of(context).pushNamed(AppRoutes.forgotPassword),
           ),
         AppRoutes.home => const HomeShellScreen(),
+        AppRoutes.dailyChallengeDetail => settings.arguments is DailyChallenge
+            ? DailyChallengeScreen(
+                challenge: settings.arguments! as DailyChallenge,
+              )
+            : const WelcomeScreen(),
         AppRoutes.weeklyChallengeDetail => settings.arguments is WeeklyChallenge
             ? WeeklyChallengeDetailScreen(
                 challenge: settings.arguments! as WeeklyChallenge,

@@ -13,7 +13,7 @@ abstract final class WeeklyChallengeDetailDemoData {
   static const double heroVisibleHeight = 166;
   static const dates = 'Mar 10 – Mar 17';
   static const description =
-      'Deepen your faith through daily intentional steps. This week , focus on spending time with god with his presence, feel him, living with purpose, and showing his love to others';
+      'Deepen your faith through daily intentional steps. This week, focus on spending time with god with his presence, feel him, living with purpose, and showing his love to others';
 
   static const initiallyCompletedDays = <int>{1, 2, 4};
 
