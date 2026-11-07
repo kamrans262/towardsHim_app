@@ -11,8 +11,9 @@ import '../widgets/weekly_challenge_card.dart';
 
 /// UI-only Weekly tab; the existing Home shell keeps its fixed five-item nav.
 class WeeklyChallengesScreen extends StatefulWidget {
-  const WeeklyChallengesScreen({required this.onNotice, super.key});
+  const WeeklyChallengesScreen({required this.onNotice, required this.onOpenChallenge, super.key});
   final ValueChanged<String> onNotice;
+  final ValueChanged<WeeklyChallenge> onOpenChallenge;
 
   @override
   State<WeeklyChallengesScreen> createState() => _WeeklyChallengesScreenState();
@@ -145,7 +146,6 @@ class _WeeklyChallengesScreenState extends State<WeeklyChallengesScreen> {
   }
 
   void _openChallenge(WeeklyChallenge challenge) {
-    // A detail route can replace this notice when that screen is available.
-    widget.onNotice(challenge.title + ' details UI is coming soon.');
+    widget.onOpenChallenge(challenge);
   }
 }

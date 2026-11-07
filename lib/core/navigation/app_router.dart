@@ -5,6 +5,8 @@ import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/home/presentation/screens/home_shell_screen.dart';
 import '../../features/listen/domain/models/listen_audio_episode.dart';
+import '../../features/weekly_challenges/domain/models/weekly_challenge.dart';
+import '../../features/weekly_challenges/presentation/screens/weekly_challenge_detail_screen.dart';
 import '../../features/listen/presentation/screens/audio_player_screen.dart';
 import '../../features/onboarding/presentation/screens/splash_screen.dart';
 import '../../features/onboarding/presentation/screens/welcome_screen.dart';
@@ -17,6 +19,7 @@ abstract final class AppRoutes {
   static const forgotPassword = '/forgot-password';
   static const home = '/home';
   static const player = '/player';
+  static const weeklyChallengeDetail = '/weekly-challenge-detail';
 }
 
 abstract final class AppRouter {
@@ -50,6 +53,11 @@ abstract final class AppRouter {
                 Navigator.of(context).pushNamed(AppRoutes.forgotPassword),
           ),
         AppRoutes.home => const HomeShellScreen(),
+        AppRoutes.weeklyChallengeDetail => settings.arguments is WeeklyChallenge
+            ? WeeklyChallengeDetailScreen(
+                challenge: settings.arguments! as WeeklyChallenge,
+              )
+            : const WelcomeScreen(),
         AppRoutes.player => settings.arguments is ListenAudioEpisode
             ? AudioPlayerScreen(
                 episode: settings.arguments! as ListenAudioEpisode,
