@@ -139,8 +139,12 @@ void main() {
       expect(tester.takeException(), isNull);
       expect(find.byType(CustomScrollView), findsOneWidget);
       expect(find.byType(AppBottomNavigation), findsOneWidget);
-      await tester.ensureVisible(find.text('Recent Activity'));
+      await tester.drag(
+        find.byType(CustomScrollView).first,
+        const Offset(0, -450),
+      );
       await tester.pumpAndSettle();
+      expect(find.text('Recent Activity'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
   }
