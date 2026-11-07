@@ -128,7 +128,7 @@ void main() {
     const Size(430, 932),
     const Size(820, 1180),
   ]) {
-    testWidgets('Home responsive at ' + size.width.toString(),
+    testWidgets('Home responsive at ${size.width}',
         (tester) async {
       tester.view.physicalSize = size;
       tester.view.devicePixelRatio = 1;
