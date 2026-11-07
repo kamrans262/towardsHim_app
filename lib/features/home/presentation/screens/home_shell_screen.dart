@@ -12,6 +12,7 @@ import '../controllers/home_navigation_controller.dart';
 import 'home_dashboard_screen.dart';
 import '../../../listen/presentation/screens/listen_screen.dart';
 import '../../../listen/domain/models/listen_audio_episode.dart';
+import '../../../weekly_challenges/presentation/screens/weekly_challenges_screen.dart';
 
 /// UI-only shell with a fixed bottom bar and preserved tab widget states.
 class HomeShellScreen extends StatefulWidget {
@@ -73,10 +74,7 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
                     );
                   },
                 ),
-                const _UpcomingTab(
-                  title: 'Towards HIM 3',
-                  message: 'Weekly challenge UI will be added in its module.',
-                ),
+                WeeklyChallengesScreen(onNotice: _showNotice),
                 const _UpcomingTab(
                   title: 'Community',
                   message: 'Community UI will be added in its module.',

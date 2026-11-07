@@ -9,12 +9,16 @@ class AppContentCard extends StatelessWidget {
     required this.child,
     this.padding = const EdgeInsets.all(AppSpacing.homeCardPadding),
     this.minHeight,
+    this.backgroundColor = AppColors.outlinedButtonBackground,
+    this.borderColor = AppColors.cardBorder,
     super.key,
   });
 
   final Widget child;
   final EdgeInsetsGeometry padding;
   final double? minHeight;
+  final Color backgroundColor;
+  final Color borderColor;
 
   @override
   Widget build(BuildContext context) {
@@ -25,8 +29,8 @@ class AppContentCard extends StatelessWidget {
           : BoxConstraints(minHeight: minHeight!),
       padding: padding,
       decoration: BoxDecoration(
-        color: AppColors.outlinedButtonBackground,
-        border: Border.all(color: AppColors.cardBorder),
+        color: backgroundColor,
+        border: Border.all(color: borderColor),
         borderRadius: BorderRadius.circular(AppSpacing.homeCardRadius),
       ),
       child: child,

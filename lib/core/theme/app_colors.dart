@@ -15,6 +15,7 @@ abstract final class AppColors {
 
   // Home UI tokens (shared with upcoming content/listening modules).
   static const cardBorder = Color(0x14E47821);
+  static const weeklyCurrentBorder = Color(0x4DE47821);
   static const podcastTile = Color(0x14E47821);
   static const meditationTile = Color(0x142870B8);
   static const prayerTile = Color(0x1443A047);
