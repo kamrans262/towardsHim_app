@@ -23,6 +23,9 @@ flutter:
   assets:
     - assets/branding/toward_him_logo.svg
     - assets/icons/
+    - assets/icons/home/
+    - assets/icons/navigation/
+    - assets/images/home/
   fonts:
     - family: PlayfairDisplay
       fonts:

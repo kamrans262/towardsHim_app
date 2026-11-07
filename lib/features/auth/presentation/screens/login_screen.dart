@@ -16,12 +16,14 @@ class LoginScreen extends StatefulWidget {
     this.onBack,
     this.onCreateAccount,
     this.onForgotPassword,
+    this.onLogin,
     super.key,
   });
 
   final VoidCallback? onBack;
   final VoidCallback? onCreateAccount;
   final VoidCallback? onForgotPassword;
+  final VoidCallback? onLogin;
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -167,7 +169,7 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               AppButton(
                 label: 'Login',
-                onPressed: () => _showUiOnlyNotice('Login'),
+                onPressed: widget.onLogin ?? () => _showUiOnlyNotice('Login'),
               ),
               const SizedBox(height: AppSpacing.bottomSectionGap),
               AppInlineLink(

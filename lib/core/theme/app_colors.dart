@@ -12,4 +12,12 @@ abstract final class AppColors {
   static const backShadow = Color(0x14000000);
   static const otpBorder = Color(0x33C8C8C1);
   static const otpShadow = Color(0x08000000);
+
+  // Home UI tokens (shared with upcoming content/listening modules).
+  static const cardBorder = Color(0x14E47821);
+  static const podcastTile = Color(0x14E47821);
+  static const meditationTile = Color(0x142870B8);
+  static const prayerTile = Color(0x1443A047);
+  static const progressTrack = Color(0x14E47821);
+  static const navShadow = Color(0x14000000);
 }

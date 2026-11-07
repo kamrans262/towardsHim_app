@@ -1,38 +1,53 @@
 # Toward HIM — Flutter UI
 
-Flutter app for Android and iOS. The current phase is **UI-only**:
-no backend, account creation, sign-in, Apple/Google SDK, email sending,
-or password recovery/OTP verification service.
+Flutter Android/iOS project. Current phase: **UI only**. Authentication, actual
+audio playback, notifications, payments, data fetching, external Store launching,
+and verification emails are not integrated.
 
-## Screens
-- Native/Flutter splash, Welcome, Create Account, Login
-- Forgot Password and Verify Your Account (single Figma screen)
-- Shared 25 px bottom-safe-area action placement and scrolling on smaller devices
+## Implemented screens
 
-## Shared components
-- `lib/core/theme/` — background `#F7EDDF`, colors, typography, spacing
-- `lib/core/widgets/` — logo, auth header, inputs, buttons, icon send button,
-  six-box OTP input, social section, divider, inline link, and safe-area layout
-- `lib/core/navigation/` — named routes
-- `assets/icons/` — supplied original SVGs
-- `lib/features/auth/` — screen-owned text controllers and focus nodes
+- Native/Flutter splash, Welcome, Create Account, Login, Forgot Password / OTP
+- Home dashboard based on the approved 430px Figma design
+- Demo Login navigation to Home with no authentication
+- Five-tab main shell: Home, Listen, Towards HIM 3, Community, Store
+- Listen, challenge, Community and Store show UI-only placeholders until their
+  approved designs / URL are available (no invented merchandise URL)
 
-### Forgot Password UI behavior
-- Send displays a UI-only notice; **no email is sent**.
-- Six visible OTP boxes use one native numeric input, supporting normal
-  typing, full-code paste, deletion and SMS one-time-code autofill.
-- Verify stays disabled until a valid-looking email and six digits exist.
-  If tapped after completion it displays an UI-only notice; **no code is
-  actually verified**.
-- Back to login returns to the existing Login UI.
+## Home design assets
 
-The supplied official branding artwork is embedded in
-`assets/branding/toward_him_logo.svg` as raster content, not editable
-vector paths.
+- `assets/images/home/misty_sunrise_mountain_lake.webp`: optimized from the
+  supplied misty sunrise image; full-bleed Home hero and featured-card visual
+- `assets/images/home/golden_hour_meditation.webp`: optimized from the
+  supplied Golden Hour Meditation photo for audio and activity thumbnails
+- `assets/icons/home/`: supplied notification/profile SVGs and matching
+  lightweight Podcast/Meditation/Prayer icons
+- `assets/icons/navigation/`: the five supplied bottom-tab SVGs under
+  descriptive names
 
-## Validation
-`flutter pub get && flutter analyze && flutter test test/widget_test.dart test/create_account_screen_test.dart test/login_screen_test.dart test/forgot_password_screen_test.dart`
+## Architecture
 
-The targeted GitHub workflow performs the same checks on `main`.
-iOS simulator builds require macOS. Only run
-`dart run flutter_native_splash:create` when changing native splash assets.
+- `lib/core/theme/`: shared colors, spacing, typography
+- `lib/core/widgets/`: global content card, section heading, progress,
+  play button, svg icon action, and fixed bottom navigation
+- `lib/features/home/domain/models/`: typed dashboard/demo models
+- `lib/features/home/data/home_demo_data.dart`: reference demo content
+- `lib/features/home/presentation/controllers/`: feature-scoped navigation
+  `ChangeNotifier`, disposed by the shell
+- `lib/features/home/presentation/widgets/`: reusable dashboard cards
+- `lib/features/home/presentation/screens/`: Home and preserved-tab shell
+
+The Home scroll/play demo state remains alive between tab switches via
+`IndexedStack`. Store has no configured URL, so it shows a local placeholder
+instead of opening an invented website.
+
+## Tests
+
+```bash
+flutter pub get
+flutter analyze
+flutter test test/widget_test.dart test/create_account_screen_test.dart test/login_screen_test.dart test/forgot_password_screen_test.dart test/home_screen_test.dart
+```
+
+The targeted workflow performs those checks on `main`. Native iOS simulator
+visual checks require macOS. Only regenerate `flutter_native_splash` when
+changing the native launch design.
