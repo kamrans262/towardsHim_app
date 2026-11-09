@@ -29,6 +29,8 @@ flutter:
     - assets/icons/player/
     - assets/images/player/
     - assets/images/weekly/
+    - assets/images/community/
+    - assets/icons/community/
   fonts:
     - family: PlayfairDisplay
       fonts:

@@ -14,6 +14,7 @@ import '../../../listen/presentation/screens/listen_screen.dart';
 import '../../../listen/domain/models/listen_audio_episode.dart';
 import '../../../weekly_challenges/presentation/screens/weekly_challenges_screen.dart';
 import '../../../weekly_challenges/domain/models/weekly_challenge.dart';
+import '../../../community/presentation/screens/community_screen.dart';
 
 /// UI-only shell with a fixed bottom bar and preserved tab widget states.
 class HomeShellScreen extends StatefulWidget {
@@ -84,10 +85,7 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
                     );
                   },
                 ),
-                const _UpcomingTab(
-                  title: 'Community',
-                  message: 'Community UI will be added in its module.',
-                ),
+                CommunityScreen(onNotice: _showNotice),
                 const _UpcomingTab(
                   title: 'Store',
                   message: 'Merchandise Store URL has not been configured.',
