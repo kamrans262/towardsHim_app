@@ -14,6 +14,7 @@ import 'package:towards_him_app/features/onboarding/presentation/screens/welcome
 import 'package:towards_him_app/features/profile/data/profile_demo_data.dart';
 import 'package:towards_him_app/features/profile/domain/models/profile_models.dart';
 import 'package:towards_him_app/features/profile/presentation/screens/profile_screen.dart';
+import 'package:towards_him_app/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:towards_him_app/features/profile/presentation/screens/delete_account_screen.dart';
 import 'package:towards_him_app/features/profile/presentation/widgets/profile_menu_card.dart';
 import 'package:towards_him_app/features/profile/presentation/widgets/profile_user_card.dart';
@@ -136,6 +137,23 @@ void main() {
     expect(find.byType(ProfileScreen), findsOneWidget);
     expect(find.byType(AppBottomNavigation), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+
+  testWidgets('My Profile menu and pencil both open the edit screen',
+      (tester) async {
+    await openProfile(tester);
+    final menu = find.byKey(const Key('profile_menu_myProfile'));
+    await tester.ensureVisible(menu);
+    await tester.pumpAndSettle();
+    await tester.tap(menu);
+    await tester.pumpAndSettle();
+    expect(find.byType(EditProfileScreen), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('profile_edit_button')));
+    await tester.pumpAndSettle();
+    expect(find.byType(EditProfileScreen), findsOneWidget);
   });
 
   testWidgets('Log Out returns to Welcome', (tester) async {

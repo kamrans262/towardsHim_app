@@ -17,6 +17,7 @@ class ListenScreen extends StatefulWidget {
     required this.onNotice,
     this.onNotifications,
     this.onProfile,
+    this.onOpenQuickMedia,
     required this.onOpenEpisode,
     super.key,
   });
@@ -24,6 +25,7 @@ class ListenScreen extends StatefulWidget {
   final ValueChanged<String> onNotice;
   final VoidCallback? onNotifications;
   final VoidCallback? onProfile;
+  final ValueChanged<HomeQuickType>? onOpenQuickMedia;
   final ValueChanged<ListenAudioEpisode> onOpenEpisode;
 
   @override
@@ -88,9 +90,14 @@ class _ListenScreenState extends State<ListenScreen> {
                               child: HomeQuickAccessCard(
                                 item: HomeDemoData.quickAccess[i],
                                 height: AppSpacing.listenQuickCardHeight,
-                                onPressed: () => widget.onNotice(
-                                  '${HomeDemoData.quickAccess[i].title} category UI is coming soon.',
-                                ),
+                                onPressed: () {
+                                  final action = widget.onOpenQuickMedia;
+                                  if (action != null) {
+                                    action(HomeDemoData.quickAccess[i].type);
+                                  } else {
+                                    widget.onNotice('Select a category from Home.');
+                                  }
+                                },
                               ),
                             ),
                           ],

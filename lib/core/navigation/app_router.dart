@@ -19,6 +19,8 @@ import '../../features/onboarding/presentation/screens/splash_screen.dart';
 import '../../features/onboarding/presentation/screens/welcome_screen.dart';
 import '../../features/profile/presentation/screens/about_toward_him_screen.dart';
 import '../../features/profile/presentation/screens/delete_account_screen.dart';
+import '../../features/profile/presentation/screens/edit_profile_screen.dart';
+import '../../features/profile/presentation/controllers/profile_controller.dart';
 
 abstract final class AppRoutes {
   static const splash = '/';
@@ -30,6 +32,7 @@ abstract final class AppRoutes {
   static const notifications = '/notifications';
   static const aboutTowardHim = '/about-toward-him';
   static const deleteAccount = '/profile/delete-account';
+  static const editProfile = '/profile/edit';
   static const player = '/player';
   static const weeklyChallengeDetail = '/weekly-challenge-detail';
   static const dailyChallengeDetail = '/daily-challenge-detail';
@@ -78,6 +81,11 @@ abstract final class AppRouter {
         AppRoutes.home => const HomeShellScreen(),
         AppRoutes.aboutTowardHim => const AboutTowardHimScreen(),
         AppRoutes.deleteAccount => const DeleteAccountScreen(),
+        AppRoutes.editProfile => settings.arguments is ProfileController
+            ? EditProfileScreen(
+                controller: settings.arguments! as ProfileController,
+              )
+            : const WelcomeScreen(),
         AppRoutes.notifications => settings.arguments is NotificationsController
             ? NotificationsScreen(
                 controller: settings.arguments! as NotificationsController,

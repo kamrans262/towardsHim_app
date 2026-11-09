@@ -12,11 +12,13 @@ import '../../domain/models/home_models.dart';
 import '../controllers/home_navigation_controller.dart';
 import 'home_dashboard_screen.dart';
 import '../../../listen/presentation/screens/listen_screen.dart';
+import '../../../listen/data/spoken_demo_data.dart';
 import '../../../listen/domain/models/listen_audio_episode.dart';
 import '../../../weekly_challenges/presentation/screens/weekly_challenges_screen.dart';
 import '../../../weekly_challenges/domain/models/weekly_challenge.dart';
 import '../../../community/presentation/screens/community_screen.dart';
 import '../../../profile/presentation/screens/profile_screen.dart';
+import '../../../profile/presentation/controllers/profile_controller.dart';
 
 /// UI-only shell with a fixed bottom bar and preserved tab widget states.
 class HomeShellScreen extends StatefulWidget {
@@ -29,6 +31,8 @@ class HomeShellScreen extends StatefulWidget {
 class _HomeShellScreenState extends State<HomeShellScreen> {
   late final HomeNavigationController _navigation;
   late final NotificationsController _notifications;
+  late final ProfileController _profile;
+  late final Listenable _shellListeners;
   bool _showProfile = false;
 
   @override
@@ -36,12 +40,15 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
     super.initState();
     _navigation = HomeNavigationController();
     _notifications = NotificationsController();
+    _profile = ProfileController();
+    _shellListeners = Listenable.merge([_navigation, _profile]);
   }
 
   @override
   void dispose() {
     _navigation.dispose();
     _notifications.dispose();
+    _profile.dispose();
     super.dispose();
   }
 
@@ -55,6 +62,13 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
     Navigator.of(context).pushNamed(
       AppRoutes.notifications,
       arguments: _notifications,
+    );
+  }
+
+  void _openQuickMedia(HomeQuickType type) {
+    Navigator.of(context).pushNamed(
+      AppRoutes.player,
+      arguments: SpokenDemoData.forCategory(type),
     );
   }
 
@@ -80,7 +94,7 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
       child: AnimatedBuilder(
-        animation: _navigation,
+        animation: _shellListeners,
         builder: (context, _) {
           final selected = _navigation.selected;
           return Scaffold(
@@ -94,7 +108,9 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
                     index: selected.index,
               children: [
                 HomeDashboardScreen(
+                  firstName: _profile.user.fullName.trim().split(RegExp(r'\s+')).first,
                   onSelectTab: _select,
+                  onOpenQuickMedia: _openQuickMedia,
                   onNotice: _showNotice,
                   onNotifications: _openNotifications,
                   onProfile: _openProfile,
@@ -103,6 +119,7 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
                   onNotice: _showNotice,
                   onNotifications: _openNotifications,
                   onProfile: _openProfile,
+                  onOpenQuickMedia: _openQuickMedia,
                   onOpenEpisode: (ListenAudioEpisode episode) {
                     Navigator.of(context).pushNamed(
                       AppRoutes.player,
@@ -135,6 +152,7 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
               ),
               if (_showProfile)
                 ProfileScreen(
+                  controller: _profile,
                   onNotifications: _openNotifications,
                   onNotice: _showNotice,
                   onLogout: _logout,

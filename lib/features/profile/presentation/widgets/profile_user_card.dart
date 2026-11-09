@@ -27,6 +27,7 @@ class ProfileUserCard extends StatelessWidget {
           AppUserAvatar(
             key: const Key('profile_user_avatar'),
             asset: user.avatarAsset,
+            bytes: user.avatarBytes,
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -46,6 +47,16 @@ class ProfileUserCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
+                if ((user.about ?? '').trim().isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Text(
+                    user.about!,
+                    key: const Key('profile_display_bio'),
+                    style: AppTypography.homeSecondary,
+                    maxLines: 4,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ],
             ),
           ),

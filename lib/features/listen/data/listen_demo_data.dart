@@ -1,5 +1,6 @@
 import '../../home/data/home_demo_data.dart';
 import '../domain/models/listen_audio_episode.dart';
+import 'spoken_demo_data.dart';
 
 /// Reference content is intentionally repeated to match the supplied Figma.
 abstract final class ListenDemoData {
@@ -13,6 +14,8 @@ abstract final class ListenDemoData {
       description: 'A conversation about trusting god when life feels uncertain',
       thumbnailAsset: HomeDemoData.meditationAsset,
       contentType: 'Podcast',
+      narrationText: SpokenDemoData.podcastScript,
+      narrationDurationSeconds: 70,
       durationMinutes: 28,
       // The supplied Figma shows a 28m episode with a 24m demo timeline.
       timelineDurationSeconds: 1440,
@@ -29,6 +32,8 @@ abstract final class ListenDemoData {
       description: 'A conversation about trusting god when life feels uncertain',
       thumbnailAsset: HomeDemoData.meditationAsset,
       contentType: 'Podcast',
+      narrationText: SpokenDemoData.podcastScript,
+      narrationDurationSeconds: 70,
       durationMinutes: 24,
       playbackProgress: 0,
       isCompleted: false,
@@ -43,6 +48,8 @@ abstract final class ListenDemoData {
       description: 'A conversation about trusting god when life feels uncertain',
       thumbnailAsset: HomeDemoData.meditationAsset,
       contentType: 'Podcast',
+      narrationText: SpokenDemoData.podcastScript,
+      narrationDurationSeconds: 70,
       durationMinutes: 19,
       playbackProgress: 0,
       isCompleted: false,
@@ -57,6 +64,8 @@ abstract final class ListenDemoData {
       description: 'A conversation about trusting god when life feels uncertain',
       thumbnailAsset: HomeDemoData.meditationAsset,
       contentType: 'Podcast',
+      narrationText: SpokenDemoData.podcastScript,
+      narrationDurationSeconds: 70,
       durationMinutes: 21,
       playbackProgress: 0,
       isCompleted: false,

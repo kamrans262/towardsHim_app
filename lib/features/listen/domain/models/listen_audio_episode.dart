@@ -13,6 +13,8 @@ class ListenAudioEpisode {
     this.playerDescription,
     this.coverAsset,
     this.timelineDurationSeconds,
+    this.narrationText,
+    this.narrationDurationSeconds,
   });
 
   final String id;
@@ -32,4 +34,8 @@ class ListenAudioEpisode {
 
   /// Optional preview timeline length when demo duration labels differ.
   final int? timelineDurationSeconds;
+
+  /// Original spoken demo script; null for visual-only content.
+  final String? narrationText;
+  final int? narrationDurationSeconds;
 }

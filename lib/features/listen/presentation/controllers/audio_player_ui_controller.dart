@@ -2,14 +2,18 @@ import 'package:flutter/foundation.dart';
 
 import '../../domain/models/listen_audio_episode.dart';
 
-/// Ephemeral, screen-scoped presentation state. Does not stream or play audio.
+/// Player presentation state; narration engine updates this for playable tracks.
 class AudioPlayerUiController extends ChangeNotifier {
   AudioPlayerUiController(this.episode)
-      : _positionSeconds = (episode.playbackProgress *
-                (episode.timelineDurationSeconds ??
+      : _positionSeconds = ((episode.narrationText == null
+                ? episode.playbackProgress
+                : 0.0) *
+                (episode.narrationDurationSeconds ??
+                    episode.timelineDurationSeconds ??
                     episode.durationMinutes * 60))
             .round()
-            .clamp(0, episode.timelineDurationSeconds ??
+            .clamp(0, episode.narrationDurationSeconds ??
+                episode.timelineDurationSeconds ??
                 episode.durationMinutes * 60)
             .toInt();
 
@@ -19,7 +23,9 @@ class AudioPlayerUiController extends ChangeNotifier {
   double _speed = 1.0;
 
   int get durationSeconds =>
-      episode.timelineDurationSeconds ?? episode.durationMinutes * 60;
+      episode.narrationDurationSeconds ??
+      episode.timelineDurationSeconds ??
+      episode.durationMinutes * 60;
   int get positionSeconds => _positionSeconds;
   bool get isPlaying => _isPlaying;
   double get speed => _speed;
@@ -33,6 +39,24 @@ class AudioPlayerUiController extends ChangeNotifier {
     final minutes = seconds ~/ 60;
     final remainder = seconds % 60;
     return '${minutes.toString().padLeft(2, '0')}:${remainder.toString().padLeft(2, '0')}';
+  }
+
+  void finishNarration() {
+    _positionSeconds = durationSeconds;
+    _isPlaying = false;
+    notifyListeners();
+  }
+
+  void updateNarrationProgress(double fraction) {
+    final seconds = (fraction.clamp(0.0, 1.0) * durationSeconds).round();
+    _setPosition(seconds);
+  }
+
+  void togglePlayPauseIfPlaying() {
+    if (_isPlaying) {
+      _isPlaying = false;
+      notifyListeners();
+    }
   }
 
   void togglePlayPause() {

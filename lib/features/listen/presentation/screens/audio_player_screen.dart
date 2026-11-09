@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -8,6 +10,7 @@ import '../../../../core/widgets/app_back_button.dart';
 import '../../../../core/widgets/app_content_type_tag.dart';
 import '../../domain/models/listen_audio_episode.dart';
 import '../controllers/audio_player_ui_controller.dart';
+import '../services/narration_engine.dart';
 import '../widgets/player_playback_controls.dart';
 import '../widgets/player_secondary_action.dart';
 import '../widgets/player_time_row.dart';
@@ -16,10 +19,12 @@ import '../widgets/player_time_row.dart';
 class AudioPlayerScreen extends StatefulWidget {
   const AudioPlayerScreen({
     required this.episode,
+    this.narrationEngine,
     super.key,
   });
 
   final ListenAudioEpisode episode;
+  final NarrationEngine? narrationEngine;
 
   @override
   State<AudioPlayerScreen> createState() => _AudioPlayerScreenState();
@@ -27,17 +32,48 @@ class AudioPlayerScreen extends StatefulWidget {
 
 class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
   late final AudioPlayerUiController _player;
+  NarrationEngine? _narration;
 
   @override
   void initState() {
     super.initState();
     _player = AudioPlayerUiController(widget.episode);
+    final script = widget.episode.narrationText;
+    if (script != null && script.isNotEmpty) {
+      _narration = widget.narrationEngine ?? DeviceNarrationEngine();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        unawaited(_narration!.start(
+          script,
+          onProgress: (fraction) {
+            if (mounted) _player.updateNarrationProgress(fraction);
+          },
+          onComplete: () {
+            if (mounted) _player.finishNarration();
+          },
+          onError: (message) {
+            if (mounted) {
+              _player.togglePlayPauseIfPlaying();
+              _showNotice('Audio playback is unavailable: $message');
+            }
+          },
+        ));
+      });
+    }
   }
 
   @override
   void dispose() {
+    final voice = _narration;
+    if (voice != null) unawaited(voice.stop());
     _player.dispose();
     super.dispose();
+  }
+
+  void _skip(int seconds) {
+    _player.skipSeconds(seconds);
+    final voice = _narration;
+    if (voice != null) unawaited(voice.seek(_player.progress));
   }
 
   void _showNotice(String message) {
@@ -83,6 +119,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                         : null,
                     onTap: () {
                       _player.setSpeed(speed);
+                      final voice = _narration;
+                      if (voice != null) unawaited(voice.setSpeed(speed));
                       Navigator.of(sheetContext).pop();
                     },
                   ),
@@ -196,7 +234,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                   ),
                   const SizedBox(height: AppSpacing.playerTitleToDuration),
                   Text(
-                    '${episode.durationMinutes} min',
+                    episode.narrationText != null
+                      ? 'Spoken demo · about 1 min'
+                      : '${episode.durationMinutes} min',
                     style: AppTypography.homeSecondary,
                   ),
                   const SizedBox(height: AppSpacing.playerDurationToDescription),
@@ -213,7 +253,13 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                         children: [
                           AppAudioSeekBar(
                             progress: _player.progress,
-                            onChanged: _player.seekFraction,
+                            onChanged: (fraction) {
+                              _player.seekFraction(fraction);
+                              final voice = _narration;
+                              if (voice != null) {
+                                unawaited(voice.seek(fraction));
+                              }
+                            },
                           ),
                           const SizedBox(height: AppSpacing.playerProgressToTimes),
                           PlayerTimeRow(
@@ -223,9 +269,18 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                           const SizedBox(height: AppSpacing.playerTimesToControls),
                           PlayerPlaybackControls(
                             isPlaying: _player.isPlaying,
-                            onToggle: _player.togglePlayPause,
-                            onRewind: () => _player.skipSeconds(-10),
-                            onForward: () => _player.skipSeconds(10),
+                            onToggle: () {
+                              _player.togglePlayPause();
+                              final voice = _narration;
+                              if (voice == null) return;
+                              if (_player.isPlaying) {
+                                unawaited(voice.resume());
+                              } else {
+                                unawaited(voice.pause());
+                              }
+                            },
+                            onRewind: () => _skip(-10),
+                            onForward: () => _skip(10),
                           ),
                         ],
                       );

@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 
 /// UI-only profile and menu definitions, with no backend dependency.
 class ProfileUser {
@@ -8,6 +9,7 @@ class ProfileUser {
     required this.avatarAsset,
     this.phone,
     this.about,
+    this.avatarBytes,
   });
 
   final String id;
@@ -16,6 +18,22 @@ class ProfileUser {
   final String avatarAsset;
   final String? phone;
   final String? about;
+  final Uint8List? avatarBytes;
+
+  ProfileUser copyWith({
+    String? fullName,
+    String? email,
+    String? about,
+    Uint8List? avatarBytes,
+  }) => ProfileUser(
+        id: id,
+        fullName: fullName ?? this.fullName,
+        email: email ?? this.email,
+        avatarAsset: avatarAsset,
+        phone: phone,
+        about: about ?? this.about,
+        avatarBytes: avatarBytes ?? this.avatarBytes,
+      );
 }
 
 enum ProfileMenuAction {

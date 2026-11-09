@@ -13,10 +13,36 @@ import 'package:towards_him_app/features/listen/data/listen_demo_data.dart';
 import 'package:towards_him_app/features/home/presentation/screens/home_shell_screen.dart';
 import 'package:towards_him_app/features/listen/presentation/controllers/audio_player_ui_controller.dart';
 import 'package:towards_him_app/features/listen/presentation/screens/audio_player_screen.dart';
+import 'package:towards_him_app/features/listen/presentation/services/narration_engine.dart';
 import 'package:towards_him_app/features/listen/presentation/widgets/player_playback_controls.dart';
 import 'package:towards_him_app/features/listen/presentation/widgets/player_secondary_action.dart';
 import 'package:towards_him_app/features/listen/presentation/widgets/player_skip_button.dart';
 import 'package:towards_him_app/features/listen/presentation/widgets/player_time_row.dart';
+
+class FakeNarrationEngine implements NarrationEngine {
+  int starts = 0;
+  int pauses = 0;
+  int resumes = 0;
+  int stops = 0;
+  double? seekFraction;
+  double? speechSpeed;
+  @override
+  Future<void> start(String text, {
+    required void Function(double) onProgress,
+    required void Function() onComplete,
+    required void Function(String) onError,
+  }) async { starts++; }
+  @override
+  Future<void> pause() async { pauses++; }
+  @override
+  Future<void> resume() async { resumes++; }
+  @override
+  Future<void> seek(double fraction) async { seekFraction = fraction; }
+  @override
+  Future<void> setSpeed(double value) async { speechSpeed = value; }
+  @override
+  Future<void> stop() async { stops++; }
+}
 
 void main() {
   final demoEpisode = ListenDemoData.episodes.first;
@@ -25,20 +51,20 @@ void main() {
     final controller = AudioPlayerUiController(demoEpisode);
     addTearDown(controller.dispose);
     expect(controller.isPlaying, true);
-    expect(controller.currentTime, '12:30');
-    expect(controller.totalTime, '24:00');
+    expect(controller.currentTime, '00:00');
+    expect(controller.totalTime, '01:10');
     expect(demoEpisode.durationMinutes, 28);
-    expect(controller.positionSeconds, 750);
+    expect(controller.positionSeconds, 0);
     controller.skipSeconds(-10);
-    expect(controller.currentTime, '12:20');
+    expect(controller.currentTime, '00:00');
     controller.skipSeconds(10);
-    expect(controller.currentTime, '12:30');
+    expect(controller.currentTime, '00:10');
     controller.skipSeconds(-99999);
     expect(controller.positionSeconds, 0);
     controller.skipSeconds(99999);
-    expect(controller.positionSeconds, 1440);
+    expect(controller.positionSeconds, 70);
     controller.seekFraction(0.5);
-    expect(controller.currentTime, '12:00');
+    expect(controller.currentTime, '00:35');
     controller.togglePlayPause();
     expect(controller.isPlaying, false);
     controller.setSpeed(1.5);
@@ -52,7 +78,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(MaterialApp(
-      home: AudioPlayerScreen(episode: demoEpisode),
+      home: AudioPlayerScreen(episode: demoEpisode, narrationEngine: FakeNarrationEngine()),
     ));
     await tester.pumpAndSettle();
 
@@ -92,11 +118,11 @@ void main() {
   testWidgets('Player shows episode data, typography, tag, time and progress',
       (tester) async {
     await tester.pumpWidget(MaterialApp(
-      home: AudioPlayerScreen(episode: demoEpisode),
+      home: AudioPlayerScreen(episode: demoEpisode, narrationEngine: FakeNarrationEngine()),
     ));
     await tester.pumpAndSettle();
     expect(find.text('Finding hope in difficult seasons'), findsOneWidget);
-    expect(find.text('28 min'), findsOneWidget);
+    expect(find.text('Spoken demo · about 1 min'), findsOneWidget);
     expect(find.text(demoEpisode.playerDescription!), findsOneWidget);
     expect(find.text('Podcast'), findsOneWidget);
     final tag = tester.widget<AppContentTypeTag>(
@@ -110,8 +136,8 @@ void main() {
     final progress = tester.getRect(find.byType(AppAudioProgressBar));
     expect(progress.height, 5);
     final times = tester.widget<PlayerTimeRow>(find.byType(PlayerTimeRow));
-    expect(times.current, '12:30');
-    expect(times.total, '24:00');
+    expect(times.current, '00:00');
+    expect(times.total, '01:10');
     expect(AppTypography.playerTime.fontSize, 12);
   });
 
@@ -122,7 +148,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(MaterialApp(
-      home: AudioPlayerScreen(episode: demoEpisode),
+      home: AudioPlayerScreen(episode: demoEpisode, narrationEngine: FakeNarrationEngine()),
     ));
     await tester.pumpAndSettle();
     expect(find.byType(PlayerSkipButton), findsNWidgets(2));
@@ -133,15 +159,15 @@ void main() {
     expect(primary.isPlaying, true);
     await tester.tap(find.byKey(const Key('player_forward')));
     await tester.pump();
-    expect(find.text('12:40'), findsOneWidget);
+    expect(find.text('00:10'), findsOneWidget);
     await tester.tap(find.byKey(const Key('player_rewind')));
     await tester.pump();
-    expect(find.text('12:30'), findsOneWidget);
+    expect(find.text('00:00'), findsOneWidget);
 
     final seek = tester.getRect(find.byKey(const Key('player_seek_bar')));
     await tester.tapAt(Offset(seek.left + seek.width * 0.25, seek.center.dy));
     await tester.pump();
-    expect(find.text('06:00'), findsOneWidget);
+    expect(find.text('00:18'), findsOneWidget);
     await tester.tap(find.byKey(const Key('player_primary_play')));
     await tester.pump();
     expect(tester.widget<AppCircularPlayButton>(
@@ -152,7 +178,7 @@ void main() {
   testWidgets('Secondary actions use supplied icons and local bottom sheets',
       (tester) async {
     await tester.pumpWidget(MaterialApp(
-      home: AudioPlayerScreen(episode: demoEpisode),
+      home: AudioPlayerScreen(episode: demoEpisode, narrationEngine: FakeNarrationEngine()),
     ));
     await tester.pumpAndSettle();
     expect(find.byType(PlayerSecondaryAction), findsNWidgets(3));
@@ -220,7 +246,7 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
       await tester.pumpWidget(MaterialApp(
-        home: AudioPlayerScreen(episode: demoEpisode),
+        home: AudioPlayerScreen(episode: demoEpisode, narrationEngine: FakeNarrationEngine()),
       ));
       await tester.pumpAndSettle();
       expect(find.byType(SingleChildScrollView), findsOneWidget);

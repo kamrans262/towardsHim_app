@@ -99,8 +99,14 @@ void main() {
     expect(AppSpacing.listenQuickCardHeight,
         greaterThan(AppSpacing.homeQuickCardHeight));
     await tester.tap(find.byKey(const Key('quick_Podcast')));
-    await tester.pump();
-    expect(find.text('Podcast category UI is coming soon.'), findsOneWidget);
+    await tester.pumpAndSettle();
+    expect(find.byType(AudioPlayerScreen), findsOneWidget);
+    expect(
+      tester.widget<AudioPlayerScreen>(
+        find.byType(AudioPlayerScreen),
+      ).episode.contentType,
+      'Podcast',
+    );
   });
 
   testWidgets('Four rows have 100px thumbnails and three dividers',

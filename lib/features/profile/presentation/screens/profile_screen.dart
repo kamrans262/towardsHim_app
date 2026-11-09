@@ -8,17 +8,20 @@ import '../../../../core/widgets/app_main_screen_header.dart';
 import '../../data/profile_demo_data.dart';
 import '../../domain/models/profile_models.dart';
 import '../widgets/profile_user_card.dart';
+import '../controllers/profile_controller.dart';
 import '../widgets/profile_menu_card.dart';
 
 /// Main-shell Profile page: the parent keeps the original five-tab bar fixed.
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({
+    required this.controller,
     required this.onNotifications,
     required this.onNotice,
     required this.onLogout,
     super.key,
   });
 
+  final ProfileController controller;
   final VoidCallback onNotifications;
   final ValueChanged<String> onNotice;
   final VoidCallback onLogout;
@@ -26,7 +29,7 @@ class ProfileScreen extends StatelessWidget {
   void _activate(BuildContext context, ProfileMenuAction action) {
     switch (action) {
       case ProfileMenuAction.myProfile:
-        onNotice('My Profile details UI is coming soon.');
+        Navigator.of(context).pushNamed(AppRoutes.editProfile, arguments: controller);
         return;
       case ProfileMenuAction.about:
         Navigator.of(context).pushNamed(AppRoutes.aboutTowardHim);
@@ -51,7 +54,9 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, _) => SafeArea(
       bottom: false,
       child: CustomScrollView(
         key: const Key('profile_scroll'),
@@ -87,9 +92,10 @@ class ProfileScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 20),
                       ProfileUserCard(
-                        user: ProfileDemoData.user,
-                        onEdit: () => onNotice(
-                          'Edit Profile UI is coming soon.',
+                        user: controller.user,
+                        onEdit: () => Navigator.of(context).pushNamed(
+                          AppRoutes.editProfile,
+                          arguments: controller,
                         ),
                       ),
                       const SizedBox(height: 20),
@@ -114,6 +120,7 @@ class ProfileScreen extends StatelessWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }

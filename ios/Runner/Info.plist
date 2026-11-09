@@ -6,6 +6,8 @@
 		<true/>
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>Choose a photo for your Toward HIM profile.</string>
 		<key>CFBundleDisplayName</key>
 		<string>Towards Him App</string>
 		<key>CFBundleExecutable</key>

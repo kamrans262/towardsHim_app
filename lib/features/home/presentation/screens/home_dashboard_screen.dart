@@ -15,16 +15,20 @@ import '../widgets/home_recent_activity_card.dart';
 class HomeDashboardScreen extends StatefulWidget {
   const HomeDashboardScreen({
     required this.onSelectTab,
+    this.firstName,
     required this.onNotice,
     this.onNotifications,
     this.onProfile,
+    this.onOpenQuickMedia,
     super.key,
   });
 
   final ValueChanged<HomeTab> onSelectTab;
+  final String? firstName;
   final ValueChanged<String> onNotice;
   final VoidCallback? onNotifications;
   final VoidCallback? onProfile;
+  final ValueChanged<HomeQuickType>? onOpenQuickMedia;
 
   @override
   State<HomeDashboardScreen> createState() => _HomeDashboardScreenState();
@@ -77,8 +81,14 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                           Expanded(
                             child: HomeQuickAccessCard(
                               item: HomeDemoData.quickAccess[i],
-                              onPressed: () =>
-                                  widget.onSelectTab(HomeTab.listen),
+                              onPressed: () {
+                                final action = widget.onOpenQuickMedia;
+                                if (action != null) {
+                                  action(HomeDemoData.quickAccess[i].type);
+                                } else {
+                                  widget.onSelectTab(HomeTab.listen);
+                                }
+                              },
                             ),
                           ),
                         ],
@@ -164,7 +174,12 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
           left: 0,
           right: 0,
           child: HomeHeroHeader(
-            profile: HomeDemoData.profile,
+            profile: HomeUserProfile(
+              firstName: widget.firstName ?? HomeDemoData.profile.firstName,
+              greeting: HomeDemoData.profile.greeting,
+              scripture: HomeDemoData.profile.scripture,
+              scriptureReference: HomeDemoData.profile.scriptureReference,
+            ),
             onNotifications: widget.onNotifications ??
                                     () => widget.onNotice(
                                       'Notifications UI is coming soon.',
