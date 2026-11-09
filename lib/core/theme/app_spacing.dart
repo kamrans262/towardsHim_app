@@ -54,7 +54,7 @@ abstract final class AppSpacing {
   static const double homeNavHeight = 77;
   static const double homeNavIcon = 24;
   static const double homeHeaderIcon = 28;
-  static const double homeHeaderIconGap = 20;
+  static const double homeHeaderIconGap = 16;
 
   // Listen reuses Home's components with screen-specific sizing.
   static const double listenHeaderToDescription = 10;

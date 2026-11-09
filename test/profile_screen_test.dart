@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:towards_him_app/core/navigation/app_router.dart';
 import 'package:towards_him_app/core/theme/app_colors.dart';
+import 'package:towards_him_app/core/theme/app_spacing.dart';
 import 'package:towards_him_app/core/widgets/app_bottom_navigation.dart';
 import 'package:towards_him_app/core/widgets/app_content_card.dart';
 import 'package:towards_him_app/core/widgets/app_main_screen_header.dart';
@@ -75,6 +76,14 @@ void main() {
     expect(nav.items.length, 5);
     expect(nav.selectedIndex, 0);
     expect(find.byKey(const Key('profile_edit_button')), findsOneWidget);
+    final nameRect = tester.getRect(find.text('Sarah Johnson'));
+    final editRect = tester.getRect(
+      find.byKey(const Key('profile_edit_button')),
+    );
+    expect((nameRect.center.dy - editRect.center.dy).abs(), lessThan(12));
+    final edit = tester.widget<Text>(find.text('Edit'));
+    expect(edit.style!.decoration, TextDecoration.underline);
+    expect(AppSpacing.homeHeaderIconGap, 16);
     final card = tester.widget<AppContentCard>(
       find.byType(AppContentCard).first,
     );

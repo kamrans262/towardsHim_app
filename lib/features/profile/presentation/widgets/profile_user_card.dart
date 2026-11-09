@@ -34,11 +34,43 @@ class ProfileUserCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  user.fullName,
-                  style: AppTypography.cardTitle,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        user.fullName,
+                        style: AppTypography.cardTitle,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    TextButton.icon(
+                      key: const Key('profile_edit_button'),
+                      onPressed: onEdit,
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppColors.primaryOrange,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 8,
+                        ),
+                        minimumSize: const Size(0, 40),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      icon: const Icon(
+                        Icons.edit_outlined,
+                        size: 16,
+                      ),
+                      label: Text(
+                        'Edit',
+                        style: AppTypography.homeAccent.copyWith(
+                          decoration: TextDecoration.underline,
+                          decorationColor: AppColors.primaryOrange,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 5),
                 Text(
@@ -58,17 +90,6 @@ class ProfileUserCard extends StatelessWidget {
                   ),
                 ],
               ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          IconButton(
-            key: const Key('profile_edit_button'),
-            tooltip: 'Edit Profile',
-            onPressed: onEdit,
-            icon: const Icon(
-              Icons.edit_outlined,
-              size: 20,
-              color: AppColors.primaryOrange,
             ),
           ),
         ],
