@@ -15,11 +15,13 @@ import '../widgets/listen_audio_list_item.dart';
 class ListenScreen extends StatefulWidget {
   const ListenScreen({
     required this.onNotice,
+    this.onNotifications,
     required this.onOpenEpisode,
     super.key,
   });
 
   final ValueChanged<String> onNotice;
+  final VoidCallback? onNotifications;
   final ValueChanged<ListenAudioEpisode> onOpenEpisode;
 
   @override
@@ -58,9 +60,10 @@ class _ListenScreenState extends State<ListenScreen> {
                     children: [
                       AppMainScreenHeader(
                         title: 'Listen',
-                        onNotifications: () => widget.onNotice(
-                          'Notifications UI is coming soon.',
-                        ),
+                        onNotifications: widget.onNotifications ??
+                                    () => widget.onNotice(
+                                      'Notifications UI is coming soon.',
+                                    ),
                         onProfile: () => widget.onNotice(
                           'Profile UI is coming soon.',
                         ),

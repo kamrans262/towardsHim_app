@@ -4,6 +4,8 @@ import '../../features/auth/presentation/screens/create_account_screen.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/home/presentation/screens/home_shell_screen.dart';
+import '../../features/notifications/presentation/controllers/notifications_controller.dart';
+import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/community/presentation/models/community_replies_args.dart';
 import '../../features/community/presentation/screens/community_post_replies_screen.dart';
 import '../../features/community/presentation/screens/community_create_post_screen.dart';
@@ -23,6 +25,7 @@ abstract final class AppRoutes {
   static const login = '/login';
   static const forgotPassword = '/forgot-password';
   static const home = '/home';
+  static const notifications = '/notifications';
   static const player = '/player';
   static const weeklyChallengeDetail = '/weekly-challenge-detail';
   static const dailyChallengeDetail = '/daily-challenge-detail';
@@ -69,6 +72,11 @@ abstract final class AppRouter {
                 Navigator.of(context).pushNamed(AppRoutes.forgotPassword),
           ),
         AppRoutes.home => const HomeShellScreen(),
+        AppRoutes.notifications => settings.arguments is NotificationsController
+            ? NotificationsScreen(
+                controller: settings.arguments! as NotificationsController,
+              )
+            : const WelcomeScreen(),
         AppRoutes.communityPostReplies => settings.arguments is CommunityRepliesArgs
             ? CommunityPostRepliesScreen(
                 args: settings.arguments! as CommunityRepliesArgs,

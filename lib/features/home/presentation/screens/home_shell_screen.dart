@@ -6,6 +6,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_bottom_navigation.dart';
 import '../../../../core/navigation/app_router.dart';
+import '../../../notifications/presentation/controllers/notifications_controller.dart';
 import '../../data/home_demo_data.dart';
 import '../../domain/models/home_models.dart';
 import '../controllers/home_navigation_controller.dart';
@@ -26,22 +27,32 @@ class HomeShellScreen extends StatefulWidget {
 
 class _HomeShellScreenState extends State<HomeShellScreen> {
   late final HomeNavigationController _navigation;
+  late final NotificationsController _notifications;
 
   @override
   void initState() {
     super.initState();
     _navigation = HomeNavigationController();
+    _notifications = NotificationsController();
   }
 
   @override
   void dispose() {
     _navigation.dispose();
+    _notifications.dispose();
     super.dispose();
   }
 
   void _showNotice(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
+    );
+  }
+
+  void _openNotifications() {
+    Navigator.of(context).pushNamed(
+      AppRoutes.notifications,
+      arguments: _notifications,
     );
   }
 
@@ -66,9 +77,11 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
                 HomeDashboardScreen(
                   onSelectTab: _select,
                   onNotice: _showNotice,
+                  onNotifications: _openNotifications,
                 ),
                 ListenScreen(
                   onNotice: _showNotice,
+                  onNotifications: _openNotifications,
                   onOpenEpisode: (ListenAudioEpisode episode) {
                     Navigator.of(context).pushNamed(
                       AppRoutes.player,
@@ -78,6 +91,7 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
                 ),
                 WeeklyChallengesScreen(
                   onNotice: _showNotice,
+                  onNotifications: _openNotifications,
                   onOpenChallenge: (WeeklyChallenge challenge) {
                     Navigator.of(context).pushNamed(
                       AppRoutes.weeklyChallengeDetail,
@@ -85,7 +99,10 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
                     );
                   },
                 ),
-                CommunityScreen(onNotice: _showNotice),
+                CommunityScreen(
+                  onNotice: _showNotice,
+                  onNotifications: _openNotifications,
+                ),
                 const _UpcomingTab(
                   title: 'Store',
                   message: 'Merchandise Store URL has not been configured.',

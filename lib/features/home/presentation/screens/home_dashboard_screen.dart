@@ -16,11 +16,13 @@ class HomeDashboardScreen extends StatefulWidget {
   const HomeDashboardScreen({
     required this.onSelectTab,
     required this.onNotice,
+    this.onNotifications,
     super.key,
   });
 
   final ValueChanged<HomeTab> onSelectTab;
   final ValueChanged<String> onNotice;
+  final VoidCallback? onNotifications;
 
   @override
   State<HomeDashboardScreen> createState() => _HomeDashboardScreenState();
@@ -161,8 +163,10 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
           right: 0,
           child: HomeHeroHeader(
             profile: HomeDemoData.profile,
-            onNotifications: () =>
-                widget.onNotice('Notifications UI is coming soon.'),
+            onNotifications: widget.onNotifications ??
+                                    () => widget.onNotice(
+                                      'Notifications UI is coming soon.',
+                                    ),
             onProfile: () => widget.onNotice('Profile UI is coming soon.'),
           ),
         ),

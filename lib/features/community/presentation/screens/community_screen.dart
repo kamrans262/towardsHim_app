@@ -14,9 +14,11 @@ import '../widgets/community_segmented_tabs.dart';
 
 /// Community main tab. The existing Home shell owns the fixed navigation bar.
 class CommunityScreen extends StatefulWidget {
-  const CommunityScreen({required this.onNotice, super.key});
+  const CommunityScreen({required this.onNotice,
+    this.onNotifications, super.key});
 
   final ValueChanged<String> onNotice;
+  final VoidCallback? onNotifications;
 
   @override
   State<CommunityScreen> createState() => _CommunityScreenState();
@@ -76,9 +78,10 @@ class _CommunityScreenState extends State<CommunityScreen> {
                             children: [
                               AppMainScreenHeader(
                                 title: 'Community',
-                                onNotifications: () => widget.onNotice(
-                                  'Notifications UI is coming soon.',
-                                ),
+                                onNotifications: widget.onNotifications ??
+                                    () => widget.onNotice(
+                                      'Notifications UI is coming soon.',
+                                    ),
                                 onProfile: () => widget.onNotice(
                                   'Profile UI is coming soon.',
                                 ),
