@@ -13,11 +13,15 @@ class CommunityPostCard extends StatelessWidget {
   const CommunityPostCard({
     required this.post,
     required this.onHide,
+    this.onOpenReplies,
+    this.showRepliesIndicator = true,
     super.key,
   });
 
   final CommunityPost post;
   final ValueChanged<String> onHide;
+  final VoidCallback? onOpenReplies;
+  final bool showRepliesIndicator;
 
   @override
   Widget build(BuildContext context) {
@@ -115,29 +119,43 @@ class CommunityPostCard extends StatelessWidget {
             post.body,
             style: AppTypography.homeSecondary.copyWith(height: 1.25),
           ),
-          const SizedBox(height: 15),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SvgPicture.asset(
-                'assets/icons/community/community_reply_dot.svg',
-                width: 5,
-                height: 5,
-                semanticsLabel: 'Replies',
+          if (showRepliesIndicator) ...[
+            const SizedBox(height: 15),
+            if (onOpenReplies == null)
+              _replyIndicator()
+            else
+              InkWell(
+                key: Key('community_replies_${post.id}'),
+                onTap: onOpenReplies,
+                borderRadius: BorderRadius.circular(6),
+                child: _replyIndicator(),
               ),
-              const SizedBox(width: 6),
-              Text(
-                '${post.replyCount} ${post.replyCount == 1 ? 'reply' : 'replies'}',
-                style: AppTypography.homeSecondary.copyWith(
-                  fontWeight: FontWeight.w400,
-                  fontVariations: const [FontVariation('wght', 400)],
-                  height: 1,
-                ),
-              ),
-            ],
-          ),
+          ],
         ],
       ),
     );
   }
+  Widget _replyIndicator() {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SvgPicture.asset(
+          'assets/icons/community/community_reply_dot.svg',
+          width: 5,
+          height: 5,
+          semanticsLabel: 'Replies',
+        ),
+        const SizedBox(width: 6),
+        Text(
+          '${post.replyCount} ${post.replyCount == 1 ? 'reply' : 'replies'}',
+          style: AppTypography.homeSecondary.copyWith(
+            fontWeight: FontWeight.w400,
+            fontVariations: const [FontVariation('wght', 400)],
+            height: 1,
+          ),
+        ),
+      ],
+    );
+  }
+
 }

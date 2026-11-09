@@ -4,6 +4,8 @@ import '../../features/auth/presentation/screens/create_account_screen.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/home/presentation/screens/home_shell_screen.dart';
+import '../../features/community/presentation/models/community_replies_args.dart';
+import '../../features/community/presentation/screens/community_post_replies_screen.dart';
 import '../../features/community/presentation/screens/community_create_post_screen.dart';
 import '../../features/listen/domain/models/listen_audio_episode.dart';
 import '../../features/weekly_challenges/domain/models/weekly_challenge.dart';
@@ -25,6 +27,7 @@ abstract final class AppRoutes {
   static const weeklyChallengeDetail = '/weekly-challenge-detail';
   static const dailyChallengeDetail = '/daily-challenge-detail';
   static const communityCreatePost = '/community/create-post';
+  static const communityPostReplies = '/community/post-replies';
 }
 
 abstract final class AppRouter {
@@ -66,6 +69,11 @@ abstract final class AppRouter {
                 Navigator.of(context).pushNamed(AppRoutes.forgotPassword),
           ),
         AppRoutes.home => const HomeShellScreen(),
+        AppRoutes.communityPostReplies => settings.arguments is CommunityRepliesArgs
+            ? CommunityPostRepliesScreen(
+                args: settings.arguments! as CommunityRepliesArgs,
+              )
+            : const WelcomeScreen(),
         AppRoutes.dailyChallengeDetail => settings.arguments is DailyChallenge
             ? DailyChallengeScreen(
                 challenge: settings.arguments! as DailyChallenge,

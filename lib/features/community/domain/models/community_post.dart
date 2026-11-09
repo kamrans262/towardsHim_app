@@ -20,4 +20,15 @@ class CommunityPost {
   final DateTime createdAt;
   final String timeLabel;
   final int replyCount;
+
+  CommunityPost copyWith({int? replyCount}) => CommunityPost(
+        id: id,
+        authorId: authorId,
+        authorName: authorName,
+        avatarAsset: avatarAsset,
+        body: body,
+        createdAt: createdAt,
+        timeLabel: timeLabel,
+        replyCount: replyCount ?? this.replyCount,
+      );
 }

@@ -6,6 +6,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_main_screen_header.dart';
 import '../../data/community_demo_data.dart';
 import '../controllers/community_controller.dart';
+import '../models/community_replies_args.dart';
 import '../../../../core/navigation/app_router.dart';
 
 import '../widgets/community_post_card.dart';
@@ -111,6 +112,13 @@ class _CommunityScreenState extends State<CommunityScreen> {
                                   key: ValueKey(posts[i].id),
                                   post: posts[i],
                                   onHide: _controller.hidePost,
+                                  onOpenReplies: () => Navigator.of(context).pushNamed(
+                                    AppRoutes.communityPostReplies,
+                                    arguments: CommunityRepliesArgs(
+                                      postId: posts[i].id,
+                                      controller: _controller,
+                                    ),
+                                  ),
                                 ),
                               ],
                             ],

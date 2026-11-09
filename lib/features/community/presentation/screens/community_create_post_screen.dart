@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../core/widgets/app_back_button.dart';
+import '../../../../core/widgets/app_detail_page_header.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_content_card.dart';
 
@@ -72,28 +72,10 @@ class _CommunityCreatePostScreenState extends State<CommunityCreatePostScreen> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              SizedBox(
-                                height: AppSpacing.backButtonSize,
-                                child: Stack(
-                                  alignment: Alignment.center,
-                                  children: [
-                                    Align(
-                                      alignment: Alignment.centerLeft,
-                                      child: AppBackButton(
-                                        onPressed: () =>
-                                            Navigator.of(context).maybePop(),
-                                      ),
-                                    ),
-                                    const IgnorePointer(
-                                      child: Text(
-                                        'Create a Post',
-                                        key: Key('community_create_post_title'),
-                                        style: AppTypography.mainScreenTitle,
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                              AppDetailPageHeader(
+                                title: 'Create a Post',
+                                titleKey: const Key('community_create_post_title'),
+                                onBack: () => Navigator.of(context).maybePop(),
                               ),
                               const SizedBox(height: 25),
                               SizedBox(
