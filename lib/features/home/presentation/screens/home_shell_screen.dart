@@ -16,6 +16,7 @@ import '../../../listen/domain/models/listen_audio_episode.dart';
 import '../../../weekly_challenges/presentation/screens/weekly_challenges_screen.dart';
 import '../../../weekly_challenges/domain/models/weekly_challenge.dart';
 import '../../../community/presentation/screens/community_screen.dart';
+import '../../../profile/presentation/screens/profile_screen.dart';
 
 /// UI-only shell with a fixed bottom bar and preserved tab widget states.
 class HomeShellScreen extends StatefulWidget {
@@ -28,6 +29,7 @@ class HomeShellScreen extends StatefulWidget {
 class _HomeShellScreenState extends State<HomeShellScreen> {
   late final HomeNavigationController _navigation;
   late final NotificationsController _notifications;
+  bool _showProfile = false;
 
   @override
   void initState() {
@@ -56,8 +58,21 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
     );
   }
 
+  void _openProfile() {
+    if (_showProfile) return;
+    setState(() => _showProfile = true);
+  }
+
+  void _logout() {
+    Navigator.of(context).pushNamedAndRemoveUntil(
+      AppRoutes.welcome,
+      (route) => false,
+    );
+  }
+
   void _select(HomeTab tab) {
     _navigation.select(tab);
+    if (_showProfile) setState(() => _showProfile = false);
   }
 
   @override
@@ -71,17 +86,23 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
           return Scaffold(
             key: const Key('home_shell'),
             backgroundColor: AppColors.background,
-            body: IndexedStack(
-              index: selected.index,
+            body: Stack(
+              children: [
+                Offstage(
+                  offstage: _showProfile,
+                  child: IndexedStack(
+                    index: selected.index,
               children: [
                 HomeDashboardScreen(
                   onSelectTab: _select,
                   onNotice: _showNotice,
                   onNotifications: _openNotifications,
+                  onProfile: _openProfile,
                 ),
                 ListenScreen(
                   onNotice: _showNotice,
                   onNotifications: _openNotifications,
+                  onProfile: _openProfile,
                   onOpenEpisode: (ListenAudioEpisode episode) {
                     Navigator.of(context).pushNamed(
                       AppRoutes.player,
@@ -92,6 +113,7 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
                 WeeklyChallengesScreen(
                   onNotice: _showNotice,
                   onNotifications: _openNotifications,
+                  onProfile: _openProfile,
                   onOpenChallenge: (WeeklyChallenge challenge) {
                     Navigator.of(context).pushNamed(
                       AppRoutes.weeklyChallengeDetail,
@@ -102,10 +124,20 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
                 CommunityScreen(
                   onNotice: _showNotice,
                   onNotifications: _openNotifications,
+                  onProfile: _openProfile,
                 ),
                 const _UpcomingTab(
                   title: 'Store',
                   message: 'Merchandise Store URL has not been configured.',
+                ),
+                  ],
+                ),
+              ),
+              if (_showProfile)
+                ProfileScreen(
+                  onNotifications: _openNotifications,
+                  onNotice: _showNotice,
+                  onLogout: _logout,
                 ),
               ],
             ),

@@ -16,12 +16,14 @@ class ListenScreen extends StatefulWidget {
   const ListenScreen({
     required this.onNotice,
     this.onNotifications,
+    this.onProfile,
     required this.onOpenEpisode,
     super.key,
   });
 
   final ValueChanged<String> onNotice;
   final VoidCallback? onNotifications;
+  final VoidCallback? onProfile;
   final ValueChanged<ListenAudioEpisode> onOpenEpisode;
 
   @override
@@ -64,9 +66,10 @@ class _ListenScreenState extends State<ListenScreen> {
                                     () => widget.onNotice(
                                       'Notifications UI is coming soon.',
                                     ),
-                        onProfile: () => widget.onNotice(
-                          'Profile UI is coming soon.',
-                        ),
+                        onProfile: widget.onProfile ??
+                                    () => widget.onNotice(
+                                      'Profile UI is coming soon.',
+                                    ),
                       ),
                       const SizedBox(height: AppSpacing.listenHeaderToDescription),
                       const Text(

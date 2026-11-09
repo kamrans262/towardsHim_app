@@ -17,12 +17,14 @@ class HomeDashboardScreen extends StatefulWidget {
     required this.onSelectTab,
     required this.onNotice,
     this.onNotifications,
+    this.onProfile,
     super.key,
   });
 
   final ValueChanged<HomeTab> onSelectTab;
   final ValueChanged<String> onNotice;
   final VoidCallback? onNotifications;
+  final VoidCallback? onProfile;
 
   @override
   State<HomeDashboardScreen> createState() => _HomeDashboardScreenState();
@@ -167,7 +169,10 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                                     () => widget.onNotice(
                                       'Notifications UI is coming soon.',
                                     ),
-            onProfile: () => widget.onNotice('Profile UI is coming soon.'),
+            onProfile: widget.onProfile ??
+                                    () => widget.onNotice(
+                                      'Profile UI is coming soon.',
+                                    ),
           ),
         ),
       ],
