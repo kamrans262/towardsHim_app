@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:towards_him_app/core/navigation/app_router.dart';
+import 'package:towards_him_app/features/community/presentation/screens/community_create_post_screen.dart';
 
 import 'package:towards_him_app/core/theme/app_colors.dart';
 import 'package:towards_him_app/core/widgets/app_bottom_navigation.dart';
@@ -46,7 +48,7 @@ void main() {
 
   Future<void> openCommunity(WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(home: HomeShellScreen()),
+      MaterialApp(home: const HomeShellScreen(), onGenerateRoute: AppRouter.onGenerateRoute),
     );
     await tester.tap(find.byKey(const Key('nav_Community')));
     await tester.pumpAndSettle();
@@ -96,18 +98,23 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Create Post sheet adds an in-memory post to My Posts',
+  testWidgets('Create Post page adds an in-memory post to My Posts',
       (tester) async {
     await openCommunity(tester);
     await tester.tap(find.byKey(const Key('community_add_post')));
     await tester.pumpAndSettle();
-    expect(find.text('Create Post'), findsOneWidget);
+    expect(find.byType(CommunityCreatePostScreen), findsOneWidget);
+    expect(find.byType(AppBottomNavigation), findsNothing);
+    expect(find.text('Create a Post'), findsOneWidget);
     await tester.enterText(
       find.byKey(const Key('community_post_input')),
       'Grateful for today',
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Post', findRichText: true));
+    await tester.tap(find.text('Publish Post'));
+    await tester.pumpAndSettle();
+    expect(find.byType(CommunityCreatePostScreen), findsNothing);
+    expect(find.byType(CommunityScreen), findsOneWidget);
     await tester.pumpAndSettle();
     expect(find.text('Grateful for today'), findsOneWidget);
     expect(find.byType(CommunityPostCard), findsNWidgets(3));

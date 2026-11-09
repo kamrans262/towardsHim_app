@@ -11,12 +11,16 @@ class AppButton extends StatelessWidget {
     required this.label,
     required this.onPressed,
     this.variant = AppButtonVariant.filled,
+    this.outlinedBackgroundColor,
+    this.outlinedBorderColor,
     super.key,
   });
 
   final String label;
   final VoidCallback? onPressed;
   final AppButtonVariant variant;
+  final Color? outlinedBackgroundColor;
+  final Color? outlinedBorderColor;
 
   @override
   Widget build(BuildContext context) {
@@ -44,11 +48,11 @@ class AppButton extends StatelessWidget {
         AppButtonVariant.outlined => OutlinedButton(
             onPressed: onPressed,
             style: OutlinedButton.styleFrom(
-              backgroundColor: AppColors.outlinedButtonBackground,
+              backgroundColor: outlinedBackgroundColor ?? AppColors.outlinedButtonBackground,
               foregroundColor: AppColors.primaryOrange,
               disabledForegroundColor: AppColors.primaryOrange,
               side: BorderSide(
-                color: AppColors.primaryOrange.withValues(alpha: 0.5),
+                color: outlinedBorderColor ?? AppColors.primaryOrange.withValues(alpha: 0.5),
                 width: 1,
               ),
               textStyle: AppTypography.button,

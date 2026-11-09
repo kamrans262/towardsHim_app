@@ -29,14 +29,27 @@ class CommunityPostCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ClipOval(
-                child: Image.asset(
-                  post.avatarAsset,
-                  key: Key('community_avatar_${post.id}'),
-                  width: 48,
-                  height: 48,
-                  fit: BoxFit.cover,
-                  filterQuality: FilterQuality.high,
+              SizedBox(
+                width: 48,
+                height: 48,
+                child: ClipOval(
+                  child: Image.asset(
+                    post.avatarAsset,
+                    key: Key('community_avatar_${post.id}'),
+                    width: 48,
+                    height: 48,
+                    fit: BoxFit.cover,
+                    filterQuality: FilterQuality.high,
+                    errorBuilder: (context, error, stackTrace) =>
+                        const ColoredBox(
+                          color: AppColors.podcastTile,
+                          child: Icon(
+                            Icons.person_outline_rounded,
+                            size: 24,
+                            color: AppColors.primaryOrange,
+                          ),
+                        ),
+                  ),
                 ),
               ),
               const SizedBox(width: 10),

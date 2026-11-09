@@ -6,7 +6,8 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_main_screen_header.dart';
 import '../../data/community_demo_data.dart';
 import '../controllers/community_controller.dart';
-import '../widgets/community_create_post_sheet.dart';
+import '../../../../core/navigation/app_router.dart';
+
 import '../widgets/community_post_card.dart';
 import '../widgets/community_segmented_tabs.dart';
 
@@ -36,14 +37,8 @@ class _CommunityScreenState extends State<CommunityScreen> {
   }
 
   Future<void> _createPost() async {
-    final text = await showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.background,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) => const CommunityCreatePostSheet(),
+    final text = await Navigator.of(context).pushNamed<String>(
+      AppRoutes.communityCreatePost,
     );
     if (!mounted || text == null || text.trim().isEmpty) return;
     _controller.createPost(text);

@@ -5,7 +5,7 @@ abstract final class CommunityDemoData {
   static const currentUserId = 'sarah-johnson';
   static const currentUserName = 'Sarah Johnson';
   static const avatarAsset =
-      'assets/images/community/community_user_avatar.jpg';
+      'assets/images/community/community_profile_portrait.jpg';
   static const description =
       'Share, encourage and grow together in faith';
   static const samplePost =
