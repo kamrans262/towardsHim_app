@@ -7,7 +7,6 @@ import '../../../../core/theme/app_typography.dart';
 import '../../data/about_toward_him_demo_data.dart';
 import '../../domain/models/about_toward_him.dart';
 import '../widgets/about_contact_card.dart';
-import '../../../../core/widgets/toward_him_logo.dart';
 import '../../../weekly_challenges/presentation/widgets/weekly_challenge_hero.dart';
 import '../widgets/about_section_card.dart';
 
@@ -64,7 +63,14 @@ class AboutTowardHimScreen extends StatelessWidget {
             SliverToBoxAdapter(
               child: WeeklyChallengeHero(
                 onBack: () => Navigator.of(context).maybePop(),
-                centeredHeaderOverlay: const TowardHimLogo(),
+                centeredHeaderOverlay: const Image(
+                  key: Key('about_header_logo'),
+                  image: AssetImage('assets/branding/about_toward_him_header_logo.png'),
+                  width: 150,
+                  height: 100,
+                  fit: BoxFit.contain,
+                  semanticLabel: 'Toward HIM',
+                ),
                 child: Center(
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(

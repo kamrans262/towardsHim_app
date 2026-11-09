@@ -22,6 +22,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/branding/toward_him_logo.svg
+    - assets/branding/about_toward_him_header_logo.png
     - assets/icons/
     - assets/icons/home/
     - assets/icons/navigation/

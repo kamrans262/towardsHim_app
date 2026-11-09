@@ -6,7 +6,6 @@ import 'package:towards_him_app/core/navigation/app_router.dart';
 import 'package:towards_him_app/core/widgets/app_back_button.dart';
 import 'package:towards_him_app/core/widgets/app_bottom_navigation.dart';
 import 'package:towards_him_app/core/widgets/app_content_card.dart';
-import 'package:towards_him_app/core/widgets/toward_him_logo.dart';
 import 'package:towards_him_app/features/home/presentation/screens/home_shell_screen.dart';
 import 'package:towards_him_app/features/profile/data/about_toward_him_demo_data.dart';
 import 'package:towards_him_app/features/profile/presentation/screens/about_toward_him_screen.dart';
@@ -64,7 +63,11 @@ void main() {
     expect(find.byType(AboutTowardHimScreen), findsOneWidget);
     expect(find.byType(AppBottomNavigation), findsNothing);
     expect(find.byType(AppBackButton), findsOneWidget);
-    expect(find.byType(TowardHimLogo), findsOneWidget);
+    expect(find.byKey(const Key('about_header_logo')), findsOneWidget);
+    final logo = tester.widget<Image>(find.byKey(const Key('about_header_logo')));
+    expect((logo.image as AssetImage).assetName, 'assets/branding/about_toward_him_header_logo.png');
+    expect(logo.width, 150);
+    expect(logo.height, 100);
     expect(find.byType(WeeklyChallengeHero), findsOneWidget);
     expect(find.byKey(const Key('weekly_detail_hero')), findsOneWidget);
     final heroImage = tester.widget<Image>(
@@ -78,7 +81,7 @@ void main() {
       tester.widget<WeeklyChallengeHero>(
         find.byType(WeeklyChallengeHero),
       ).centeredHeaderOverlay,
-      isA<TowardHimLogo>(),
+      isA<Image>(),
     );
     expect(find.byType(AboutSectionCard), findsNWidgets(3));
     expect(find.byType(AboutContactCard), findsOneWidget);
