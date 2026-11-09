@@ -117,10 +117,10 @@ class _NotificationSwipeCardState extends State<NotificationSwipeCard> {
                     ),
                     Semantics(
                       customSemanticsActions: {
-                        const CustomSemanticsAction(
+                        CustomSemanticsAction(
                           label: 'Show delete action',
                         ): widget.onOpen,
-                        const CustomSemanticsAction(
+                        CustomSemanticsAction(
                           label: 'Hide delete action',
                         ): widget.onClose,
                       },
