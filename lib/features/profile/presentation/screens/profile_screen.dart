@@ -38,10 +38,10 @@ class ProfileScreen extends StatelessWidget {
         onNotice('Merchandise Store URL is not configured yet.');
         return;
       case ProfileMenuAction.privacy:
-        onNotice('Privacy Policy UI is coming soon.');
+        Navigator.of(context).pushNamed(AppRoutes.privacyPolicy);
         return;
       case ProfileMenuAction.terms:
-        onNotice('Terms of Service UI is coming soon.');
+        Navigator.of(context).pushNamed(AppRoutes.termsOfService);
         return;
       case ProfileMenuAction.deleteAccount:
         Navigator.of(context).pushNamed(AppRoutes.deleteAccount);

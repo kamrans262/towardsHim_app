@@ -5,6 +5,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_main_screen_header.dart';
 import '../../../home/data/home_demo_data.dart';
+import '../../../home/domain/models/home_models.dart';
 import '../../../home/presentation/widgets/home_quick_access_card.dart';
 import '../../data/listen_demo_data.dart';
 import '../../domain/models/listen_audio_episode.dart';
