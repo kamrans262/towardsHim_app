@@ -13,6 +13,9 @@ class AppButton extends StatelessWidget {
     this.variant = AppButtonVariant.filled,
     this.outlinedBackgroundColor,
     this.outlinedBorderColor,
+    this.filledBackgroundColor,
+    this.filledForegroundColor,
+    this.outlinedForegroundColor,
     super.key,
   });
 
@@ -21,6 +24,9 @@ class AppButton extends StatelessWidget {
   final AppButtonVariant variant;
   final Color? outlinedBackgroundColor;
   final Color? outlinedBorderColor;
+  final Color? filledBackgroundColor;
+  final Color? filledForegroundColor;
+  final Color? outlinedForegroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -35,8 +41,8 @@ class AppButton extends StatelessWidget {
         AppButtonVariant.filled => FilledButton(
             onPressed: onPressed,
             style: FilledButton.styleFrom(
-              backgroundColor: AppColors.primaryOrange,
-              foregroundColor: AppColors.white,
+              backgroundColor: filledBackgroundColor ?? AppColors.primaryOrange,
+              foregroundColor: filledForegroundColor ?? AppColors.white,
               disabledBackgroundColor: AppColors.secondaryText,
               disabledForegroundColor: AppColors.white,
               textStyle: AppTypography.button,
@@ -49,8 +55,8 @@ class AppButton extends StatelessWidget {
             onPressed: onPressed,
             style: OutlinedButton.styleFrom(
               backgroundColor: outlinedBackgroundColor ?? AppColors.outlinedButtonBackground,
-              foregroundColor: AppColors.primaryOrange,
-              disabledForegroundColor: AppColors.primaryOrange,
+              foregroundColor: outlinedForegroundColor ?? AppColors.primaryOrange,
+              disabledForegroundColor: outlinedForegroundColor ?? AppColors.primaryOrange,
               side: BorderSide(
                 color: outlinedBorderColor ?? AppColors.primaryOrange.withValues(alpha: 0.5),
                 width: 1,

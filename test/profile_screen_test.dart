@@ -14,6 +14,7 @@ import 'package:towards_him_app/features/onboarding/presentation/screens/welcome
 import 'package:towards_him_app/features/profile/data/profile_demo_data.dart';
 import 'package:towards_him_app/features/profile/domain/models/profile_models.dart';
 import 'package:towards_him_app/features/profile/presentation/screens/profile_screen.dart';
+import 'package:towards_him_app/features/profile/presentation/screens/delete_account_screen.dart';
 import 'package:towards_him_app/features/profile/presentation/widgets/profile_menu_card.dart';
 import 'package:towards_him_app/features/profile/presentation/widgets/profile_user_card.dart';
 
@@ -118,7 +119,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Delete confirmation is safe and does not remove data',
+  testWidgets('Delete Account opens the dedicated safe detail page',
       (tester) async {
     await openProfile(tester);
     final delete = find.byKey(const Key('profile_menu_deleteAccount'));
@@ -126,16 +127,14 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(delete);
     await tester.pumpAndSettle();
-    expect(find.text('Delete Account?'), findsOneWidget);
-    await tester.tap(find.byKey(const Key('profile_delete_cancel')));
+    expect(find.byType(DeleteAccountScreen), findsOneWidget);
+    expect(find.byType(AppBottomNavigation), findsNothing);
+    expect(find.text('Delete Account'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('delete_account_cancel_button')));
     await tester.pumpAndSettle();
-    expect(find.text('Delete Account?'), findsNothing);
-    await tester.tap(delete);
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('profile_delete_confirm')));
-    await tester.pumpAndSettle();
+    expect(find.byType(DeleteAccountScreen), findsNothing);
     expect(find.byType(ProfileScreen), findsOneWidget);
-    expect(find.textContaining('no account or data was deleted'), findsOneWidget);
+    expect(find.byType(AppBottomNavigation), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 

@@ -1,7 +1,6 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/navigation/app_router.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -24,42 +23,6 @@ class ProfileScreen extends StatelessWidget {
   final ValueChanged<String> onNotice;
   final VoidCallback onLogout;
 
-  Future<void> _confirmDelete(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: AppColors.outlinedButtonBackground,
-        title: const Text(
-          'Delete Account?',
-          style: AppTypography.sectionHeading,
-        ),
-        content: const Text(
-          'Account deletion is permanent. This is a UI demo; '
-          'confirming will not delete your account or any data.',
-          style: AppTypography.homeSecondary,
-        ),
-        actions: [
-          TextButton(
-            key: const Key('profile_delete_cancel'),
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            key: const Key('profile_delete_confirm'),
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: const Text(
-              'Confirm',
-              style: TextStyle(color: Color(0xFFE32222)),
-            ),
-          ),
-        ],
-      ),
-    );
-    if (confirmed == true && context.mounted) {
-      onNotice('Demo only: no account or data was deleted.');
-    }
-  }
-
   void _activate(BuildContext context, ProfileMenuAction action) {
     switch (action) {
       case ProfileMenuAction.myProfile:
@@ -78,7 +41,7 @@ class ProfileScreen extends StatelessWidget {
         onNotice('Terms of Service UI is coming soon.');
         return;
       case ProfileMenuAction.deleteAccount:
-        _confirmDelete(context);
+        Navigator.of(context).pushNamed(AppRoutes.deleteAccount);
         return;
       case ProfileMenuAction.logout:
         onLogout();

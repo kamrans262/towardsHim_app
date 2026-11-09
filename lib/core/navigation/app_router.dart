@@ -18,6 +18,7 @@ import '../../features/listen/presentation/screens/audio_player_screen.dart';
 import '../../features/onboarding/presentation/screens/splash_screen.dart';
 import '../../features/onboarding/presentation/screens/welcome_screen.dart';
 import '../../features/profile/presentation/screens/about_toward_him_screen.dart';
+import '../../features/profile/presentation/screens/delete_account_screen.dart';
 
 abstract final class AppRoutes {
   static const splash = '/';
@@ -28,6 +29,7 @@ abstract final class AppRoutes {
   static const home = '/home';
   static const notifications = '/notifications';
   static const aboutTowardHim = '/about-toward-him';
+  static const deleteAccount = '/profile/delete-account';
   static const player = '/player';
   static const weeklyChallengeDetail = '/weekly-challenge-detail';
   static const dailyChallengeDetail = '/daily-challenge-detail';
@@ -75,6 +77,7 @@ abstract final class AppRouter {
           ),
         AppRoutes.home => const HomeShellScreen(),
         AppRoutes.aboutTowardHim => const AboutTowardHimScreen(),
+        AppRoutes.deleteAccount => const DeleteAccountScreen(),
         AppRoutes.notifications => settings.arguments is NotificationsController
             ? NotificationsScreen(
                 controller: settings.arguments! as NotificationsController,

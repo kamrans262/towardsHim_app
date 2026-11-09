@@ -10,11 +10,25 @@ class ProfileMenuCard extends StatelessWidget {
   const ProfileMenuCard({
     required this.item,
     required this.onPressed,
+    this.backgroundColor,
+    this.borderColor,
+    this.iconBackgroundColor,
+    this.iconColor,
+    this.titleStyle,
+    this.descriptionStyle,
+    this.leadingIcon,
     super.key,
   });
 
   final ProfileMenuItem item;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
+  final Color? backgroundColor;
+  final Color? borderColor;
+  final Color? iconBackgroundColor;
+  final Color? iconColor;
+  final TextStyle? titleStyle;
+  final TextStyle? descriptionStyle;
+  final IconData? leadingIcon;
 
   IconData get _icon => switch (item.action) {
         ProfileMenuAction.myProfile => Icons.manage_accounts_outlined,
@@ -35,6 +49,8 @@ class ProfileMenuCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(10),
       child: AppContentCard(
         padding: const EdgeInsets.all(20),
+        backgroundColor: backgroundColor ?? AppColors.outlinedButtonBackground,
+        borderColor: borderColor ?? AppColors.cardBorder,
         child: Row(
           children: [
             Container(
@@ -43,14 +59,14 @@ class ProfileMenuCard extends StatelessWidget {
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: danger ? const Color(0x14E92D2D) : AppColors.podcastTile,
+                color: iconBackgroundColor ??
+                    (danger ? const Color(0x14E92D2D) : AppColors.podcastTile),
               ),
               child: Icon(
-                _icon,
+                leadingIcon ?? _icon,
                 size: 24,
-                color: danger
-                    ? const Color(0xFFE32222)
-                    : AppColors.primaryOrange,
+                color: iconColor ??
+                    (danger ? const Color(0xFFE32222) : AppColors.primaryOrange),
               ),
             ),
             const SizedBox(width: 10),
@@ -60,13 +76,13 @@ class ProfileMenuCard extends StatelessWidget {
                 children: [
                   Text(
                     item.title,
-                    style: AppTypography.cardTitle.copyWith(height: 1),
+                    style: titleStyle ?? AppTypography.cardTitle.copyWith(height: 1),
                   ),
                   if (item.description != null) ...[
                     const SizedBox(height: 5),
                     Text(
                       item.description!,
-                      style: AppTypography.playerTime,
+                      style: descriptionStyle ?? AppTypography.playerTime,
                     ),
                   ],
                 ],
