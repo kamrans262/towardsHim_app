@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/navigation/app_router.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_main_screen_header.dart';
@@ -65,7 +66,7 @@ class ProfileScreen extends StatelessWidget {
         onNotice('My Profile details UI is coming soon.');
         return;
       case ProfileMenuAction.about:
-        onNotice('About toward HIM UI is coming soon.');
+        Navigator.of(context).pushNamed(AppRoutes.aboutTowardHim);
         return;
       case ProfileMenuAction.merchandise:
         onNotice('Merchandise Store URL is not configured yet.');

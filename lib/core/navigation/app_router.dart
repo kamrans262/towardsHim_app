@@ -17,6 +17,7 @@ import '../../features/weekly_challenges/presentation/screens/weekly_challenge_d
 import '../../features/listen/presentation/screens/audio_player_screen.dart';
 import '../../features/onboarding/presentation/screens/splash_screen.dart';
 import '../../features/onboarding/presentation/screens/welcome_screen.dart';
+import '../../features/profile/presentation/screens/about_toward_him_screen.dart';
 
 abstract final class AppRoutes {
   static const splash = '/';
@@ -26,6 +27,7 @@ abstract final class AppRoutes {
   static const forgotPassword = '/forgot-password';
   static const home = '/home';
   static const notifications = '/notifications';
+  static const aboutTowardHim = '/about-toward-him';
   static const player = '/player';
   static const weeklyChallengeDetail = '/weekly-challenge-detail';
   static const dailyChallengeDetail = '/daily-challenge-detail';
@@ -72,6 +74,7 @@ abstract final class AppRouter {
                 Navigator.of(context).pushNamed(AppRoutes.forgotPassword),
           ),
         AppRoutes.home => const HomeShellScreen(),
+        AppRoutes.aboutTowardHim => const AboutTowardHimScreen(),
         AppRoutes.notifications => settings.arguments is NotificationsController
             ? NotificationsScreen(
                 controller: settings.arguments! as NotificationsController,
