@@ -19,7 +19,7 @@ class AboutSectionCard extends StatelessWidget {
   IconData get _icon => switch (section.type) {
         AboutSectionType.mission => Icons.fact_check_outlined,
         AboutSectionType.vision => Icons.update_rounded,
-        AboutSectionType.values => Icons.favorite_border_rounded,
+        AboutSectionType.coreValues => Icons.favorite_border_rounded,
       };
 
   @override

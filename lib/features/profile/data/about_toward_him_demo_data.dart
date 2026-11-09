@@ -24,7 +24,7 @@ abstract final class AboutTowardHimDemoData {
       description: sectionDescription,
     ),
     AboutSection(
-      type: AboutSectionType.values,
+      type: AboutSectionType.coreValues,
       title: 'Our Values',
       description: sectionDescription,
     ),

@@ -1,4 +1,4 @@
-enum AboutSectionType { mission, vision, values }
+enum AboutSectionType { mission, vision, coreValues }
 
 class AboutSection {
   const AboutSection({
