@@ -1,7 +1,7 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_content_card.dart';
 import '../../../../core/widgets/app_user_avatar.dart';
@@ -46,28 +46,20 @@ class ProfileUserCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    TextButton.icon(
+                    IconButton(
                       key: const Key('profile_edit_button'),
+                      tooltip: 'Edit Profile',
                       onPressed: onEdit,
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppColors.primaryOrange,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 4,
-                          vertical: 8,
-                        ),
-                        minimumSize: const Size(0, 40),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints.tightFor(
+                        width: 44,
+                        height: 44,
                       ),
-                      icon: const Icon(
-                        Icons.edit_outlined,
-                        size: 16,
-                      ),
-                      label: Text(
-                        'Edit',
-                        style: AppTypography.homeAccent.copyWith(
-                          decoration: TextDecoration.underline,
-                          decorationColor: AppColors.primaryOrange,
-                        ),
+                      icon: SvgPicture.asset(
+                        'assets/icons/profile/edit_profile.svg',
+                        width: 24,
+                        height: 24,
+                        semanticsLabel: 'Edit Profile',
                       ),
                     ),
                   ],

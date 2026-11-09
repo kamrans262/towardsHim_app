@@ -4,7 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_spacing.dart';
 
-/// Reusable 48px icon action matching the authentication input borders.
+/// Reusable 48px-wide icon action, now matching the input's 56px height.
 class AppSendIconButton extends StatelessWidget {
   const AppSendIconButton({required this.onPressed, super.key});
 
@@ -14,7 +14,7 @@ class AppSendIconButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: AppSpacing.sendButtonSize,
-      height: AppSpacing.sendButtonSize,
+      height: AppSpacing.fieldHeight,
       child: Material(
         color: AppColors.background,
         shape: RoundedRectangleBorder(

@@ -49,7 +49,8 @@ void main() {
     final rowRect = tester.getRect(find.byKey(const Key('forgot_email_row')));
     final verifyRect = tester.getRect(find.text('Verify Your Account'));
     expect(sendRect.width, 48);
-    expect(sendRect.height, 48);
+    expect(sendRect.height, AppSpacing.fieldHeight);
+    expect(sendRect.height, emailRect.height);
     expect(sendRect.left - emailRect.right, closeTo(10, 0.1));
     expect(verifyRect.top - rowRect.bottom, closeTo(30, 0.1));
   });

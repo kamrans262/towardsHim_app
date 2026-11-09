@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_spacing.dart';
 import 'app_svg_icon_button.dart';
 
-/// Reuses the exact Home notification and profile icons across main tabs.
+/// Shared Home notification and profile icons. Adjacent 44px tap targets
+/// keep 28px SVGs 16px apart visually without stacking another 16px gap.
 class AppHeaderActions extends StatelessWidget {
   const AppHeaderActions({
     required this.onNotifications,
@@ -24,7 +24,6 @@ class AppHeaderActions extends StatelessWidget {
           label: 'Notifications',
           onPressed: onNotifications,
         ),
-        const SizedBox(width: AppSpacing.homeHeaderIconGap),
         AppSvgIconButton(
           asset: 'assets/icons/home/profile.svg',
           label: 'Profile',

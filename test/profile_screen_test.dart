@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import 'package:towards_him_app/core/navigation/app_router.dart';
 import 'package:towards_him_app/core/theme/app_colors.dart';
@@ -81,8 +82,15 @@ void main() {
       find.byKey(const Key('profile_edit_button')),
     );
     expect((nameRect.center.dy - editRect.center.dy).abs(), lessThan(12));
-    final edit = tester.widget<Text>(find.text('Edit'));
-    expect(edit.style!.decoration, TextDecoration.underline);
+    expect(find.text('Edit'), findsNothing);
+    final editIcon = tester.widget<SvgPicture>(
+      find.descendant(
+        of: find.byKey(const Key('profile_edit_button')),
+        matching: find.byType(SvgPicture),
+      ),
+    );
+    expect(editIcon.width, 24);
+    expect(editIcon.height, 24);
     expect(AppSpacing.homeHeaderIconGap, 16);
     final card = tester.widget<AppContentCard>(
       find.byType(AppContentCard).first,

@@ -26,8 +26,10 @@ class AppSvgIconButton extends StatelessWidget {
         tooltip: label,
         onPressed: onPressed,
         padding: EdgeInsets.zero,
+        constraints: const BoxConstraints.tightFor(width: 44, height: 44),
         icon: SvgPicture.asset(
           asset,
+          key: Key('header_svg_$label'),
           width: iconSize,
           height: iconSize,
           semanticsLabel: label,
