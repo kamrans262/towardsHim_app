@@ -7,7 +7,8 @@ import '../../../../core/theme/app_typography.dart';
 import '../../data/about_toward_him_demo_data.dart';
 import '../../domain/models/about_toward_him.dart';
 import '../widgets/about_contact_card.dart';
-import '../widgets/about_hero_header.dart';
+import '../../../../core/widgets/toward_him_logo.dart';
+import '../../../weekly_challenges/presentation/widgets/weekly_challenge_hero.dart';
 import '../widgets/about_section_card.dart';
 
 /// About Toward HIM, built from shared Flutter components and Figma copy.
@@ -61,8 +62,9 @@ class AboutTowardHimScreen extends StatelessWidget {
           key: const Key('about_toward_him_scroll'),
           slivers: [
             SliverToBoxAdapter(
-              child: AboutHeroHeader(
+              child: WeeklyChallengeHero(
                 onBack: () => Navigator.of(context).maybePop(),
+                centeredHeaderOverlay: const TowardHimLogo(),
                 child: Center(
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(
@@ -82,25 +84,26 @@ class AboutTowardHimScreen extends StatelessWidget {
                         children: [
                           Text(
                             AboutTowardHimDemoData.title,
-                            style: AppTypography.mainScreenTitle.copyWith(
+                            style: AppTypography.cardTitle.copyWith(
                               fontSize: 20,
+                              height: 1,
                             ),
                           ),
-                          const SizedBox(height: 10),
+                          const SizedBox(height: 5),
                           Text(
                             AboutTowardHimDemoData.subtitle,
                             style: AppTypography.homeSecondary,
                           ),
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 5),
                           Text(
                             AboutTowardHimDemoData.description,
                             style: AppTypography.homeSecondary,
                           ),
-                          const SizedBox(height: 25),
+                          const SizedBox(height: 20),
                           for (var index = 0;
                               index < AboutTowardHimDemoData.sections.length;
                               index++) ...[
-                            if (index != 0) const SizedBox(height: 15),
+                            if (index != 0) const SizedBox(height: 20),
                             AboutSectionCard(
                               key: ValueKey(
                                 AboutTowardHimDemoData.sections[index].type,
@@ -112,7 +115,7 @@ class AboutTowardHimScreen extends StatelessWidget {
                               ),
                             ),
                           ],
-                          const SizedBox(height: 15),
+                          const SizedBox(height: 20),
                           AboutContactCard(
                             onNotice: (message) => _notice(context, message),
                           ),

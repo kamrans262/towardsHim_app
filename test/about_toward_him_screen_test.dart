@@ -12,8 +12,9 @@ import 'package:towards_him_app/features/profile/data/about_toward_him_demo_data
 import 'package:towards_him_app/features/profile/presentation/screens/about_toward_him_screen.dart';
 import 'package:towards_him_app/features/profile/presentation/screens/profile_screen.dart';
 import 'package:towards_him_app/features/profile/presentation/widgets/about_contact_card.dart';
-import 'package:towards_him_app/features/profile/presentation/widgets/about_hero_header.dart';
+import 'package:towards_him_app/features/weekly_challenges/presentation/widgets/weekly_challenge_hero.dart';
 import 'package:towards_him_app/features/profile/presentation/widgets/about_section_card.dart';
+import 'package:towards_him_app/features/weekly_challenges/data/weekly_challenge_detail_demo_data.dart';
 
 void main() {
   Future<void> openAbout(WidgetTester tester) async {
@@ -33,6 +34,7 @@ void main() {
   }
 
   test('Approved About content and supplied social asset mapping', () {
+    expect(AboutTowardHimDemoData.primaryEmail, AboutTowardHimDemoData.secondaryEmail);
     expect(AboutTowardHimDemoData.title, 'About Toward HIM');
     expect(AboutTowardHimDemoData.sections.length, 3);
     expect(AboutTowardHimDemoData.sections.map((e) => e.title), [
@@ -40,7 +42,7 @@ void main() {
       'Our Vision',
       'Our Values',
     ]);
-    expect(AboutTowardHimDemoData.primaryEmail, 'Hello.towardhHIM@gmail.com');
+    expect(AboutTowardHimDemoData.primaryEmail, 'Hello.towardHIM@gmail.com');
     expect(AboutTowardHimDemoData.secondaryEmail, 'Hello.towardHIM@gmail.com');
     expect(AboutTowardHimDemoData.website, 'TowardHIM.com');
     expect(AboutTowardHimDemoData.socials.map((e) => e.name), [
@@ -63,8 +65,21 @@ void main() {
     expect(find.byType(AppBottomNavigation), findsNothing);
     expect(find.byType(AppBackButton), findsOneWidget);
     expect(find.byType(TowardHimLogo), findsOneWidget);
-    expect(find.byType(AboutHeroHeader), findsOneWidget);
-    expect(find.byKey(const Key('about_hero_image')), findsOneWidget);
+    expect(find.byType(WeeklyChallengeHero), findsOneWidget);
+    expect(find.byKey(const Key('weekly_detail_hero')), findsOneWidget);
+    final heroImage = tester.widget<Image>(
+      find.byKey(const Key('weekly_detail_hero')),
+    );
+    expect(
+      (heroImage.image as AssetImage).assetName,
+      WeeklyChallengeDetailDemoData.heroAsset,
+    );
+    expect(
+      tester.widget<WeeklyChallengeHero>(
+        find.byType(WeeklyChallengeHero),
+      ).centeredHeaderOverlay,
+      isA<TowardHimLogo>(),
+    );
     expect(find.byType(AboutSectionCard), findsNWidgets(3));
     expect(find.byType(AboutContactCard), findsOneWidget);
     expect(find.byType(AppContentCard), findsNWidgets(4));
@@ -82,9 +97,14 @@ void main() {
       (tester) async {
     await openAbout(tester);
     final container = tester.widget<Container>(
-      find.byKey(const Key('about_rounded_container')),
+      find.byKey(const Key('challenge_detail_rounded_container')),
     );
     expect(container.padding, const EdgeInsets.only(top: 20));
+    final backRect = tester.getRect(find.byType(AppBackButton));
+    final containerRect = tester.getRect(
+      find.byKey(const Key('challenge_detail_rounded_container')),
+    );
+    expect(containerRect.top - backRect.bottom, closeTo(80, 0.1));
     expect(
       (container.decoration! as BoxDecoration).borderRadius,
       const BorderRadius.vertical(top: Radius.circular(20)),

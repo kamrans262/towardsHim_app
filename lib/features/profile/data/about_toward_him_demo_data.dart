@@ -30,7 +30,7 @@ abstract final class AboutTowardHimDemoData {
     ),
   ];
 
-  static const primaryEmail = 'Hello.towardhHIM@gmail.com';
+  static const primaryEmail = 'Hello.towardHIM@gmail.com';
   static const secondaryEmail = 'Hello.towardHIM@gmail.com';
   static const address = '269 walker st., STE 211 Detroit, MI 48270';
   static const website = 'TowardHIM.com';

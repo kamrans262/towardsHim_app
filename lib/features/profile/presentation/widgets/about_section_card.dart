@@ -46,7 +46,7 @@ class AboutSectionCard extends StatelessWidget {
                 color: AppColors.primaryOrange,
               ),
             ),
-            const SizedBox(width: 15),
+            const SizedBox(width: 10),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

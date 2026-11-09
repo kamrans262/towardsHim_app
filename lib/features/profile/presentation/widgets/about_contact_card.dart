@@ -29,49 +29,55 @@ class AboutContactCard extends StatelessWidget {
         children: [
           const Text(
             'Get in Touch',
-            style: AppTypography.sectionHeading,
+            style: AppTypography.cardTitle,
           ),
-          const SizedBox(height: 15),
+          const SizedBox(height: 12),
           _contactRow(
             key: const Key('about_contact_primary_email'),
             icon: Icons.mail_outline_rounded,
+            iconAsset: 'assets/icons/wpf_message-outline.svg',
             value: AboutTowardHimDemoData.primaryEmail,
             onTap: () => _copy(AboutTowardHimDemoData.primaryEmail, 'Email'),
           ),
-          const SizedBox(height: 15),
+          const SizedBox(height: 12),
           _contactRow(
             key: const Key('about_contact_address'),
             icon: Icons.location_on_outlined,
             value: AboutTowardHimDemoData.address,
             onTap: () => _copy(AboutTowardHimDemoData.address, 'Address'),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 15),
           const Text(
             'Stay Connected',
-            style: AppTypography.sectionHeading,
+            style: AppTypography.cardTitle,
           ),
           const SizedBox(height: 15),
           Wrap(
-            spacing: 6,
-            runSpacing: 6,
+            spacing: 4,
+            runSpacing: 4,
             children: [
               for (final social in AboutTowardHimDemoData.socials)
                 _socialIcon(social),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 15),
           Text(
             AboutTowardHimDemoData.socialNames,
-            style: AppTypography.playerTime.copyWith(height: 1.35),
+            style: AppTypography.homeSecondary.copyWith(
+              fontWeight: FontWeight.w400,
+              fontVariations: const [FontVariation('wght', 400)],
+              height: 1.35,
+            ),
           ),
           const SizedBox(height: 15),
           _contactRow(
             key: const Key('about_contact_secondary_email'),
             icon: Icons.mail_outline_rounded,
+            iconAsset: 'assets/icons/wpf_message-outline.svg',
             value: AboutTowardHimDemoData.secondaryEmail,
             onTap: () => _copy(AboutTowardHimDemoData.secondaryEmail, 'Email'),
           ),
-          const SizedBox(height: 15),
+          const SizedBox(height: 12),
           _contactRow(
             key: const Key('about_contact_website'),
             icon: Icons.language_rounded,
@@ -87,6 +93,7 @@ class AboutContactCard extends StatelessWidget {
   Widget _contactRow({
     required Key key,
     required IconData icon,
+    String? iconAsset,
     required String value,
     required VoidCallback onTap,
     Color? valueColor,
@@ -98,17 +105,22 @@ class AboutContactCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(
-            icon,
-            size: 20,
-            color: AppColors.primaryOrange,
-          ),
+          if (iconAsset != null)
+            SvgPicture.asset(iconAsset, width: 16, height: 16)
+          else
+            Icon(
+              icon,
+              size: 16,
+              color: AppColors.primaryOrange,
+            ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               value,
               style: AppTypography.homeSecondary.copyWith(
-                color: valueColor,
+                color: valueColor ?? AppColors.secondaryText,
+                fontWeight: FontWeight.w400,
+                fontVariations: const [FontVariation('wght', 400)],
                 height: 1.3,
               ),
             ),

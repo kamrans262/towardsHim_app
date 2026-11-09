@@ -13,11 +13,13 @@ class WeeklyChallengeHero extends StatelessWidget {
   const WeeklyChallengeHero({
     required this.onBack,
     required this.child,
+    this.centeredHeaderOverlay,
     super.key,
   });
 
   final VoidCallback onBack;
   final Widget child;
+  final Widget? centeredHeaderOverlay;
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +56,16 @@ class WeeklyChallengeHero extends StatelessWidget {
                     left: AppSpacing.screenHorizontal,
                     child: AppBackButton(onPressed: onBack),
                   ),
+                  if (centeredHeaderOverlay != null)
+                    Positioned(
+                      top: MediaQuery.paddingOf(context).top +
+                          AppSpacing.screenTop,
+                      left: 0,
+                      right: 0,
+                      child: IgnorePointer(
+                        child: Center(child: centeredHeaderOverlay!),
+                      ),
+                    ),
                 ],
               ),
             ),
