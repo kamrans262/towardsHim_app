@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/toward_him_logo.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -40,7 +41,13 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      body: Center(child: TowardHimLogo()),
+      backgroundColor: AppColors.background,
+      body: Center(
+        child: TowardHimLogo(
+          width: 270,
+          height: 164,
+        ),
+      ),
     );
   }
 }
