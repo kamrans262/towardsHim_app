@@ -9,7 +9,7 @@
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>Choose a photo for your Toward HIM profile.</string>
 		<key>CFBundleDisplayName</key>
-		<string>Towards Him App</string>
+		<string>Towards Him</string>
 		<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>
 		<key>CFBundleIdentifier</key>
@@ -17,7 +17,7 @@
 		<key>CFBundleInfoDictionaryVersion</key>
 		<string>6.0</string>
 		<key>CFBundleName</key>
-		<string>towards_him_app</string>
+		<string>Towards Him</string>
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
 		<key>CFBundleShortVersionString</key>
