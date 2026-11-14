@@ -61,6 +61,7 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
     _navigation = HomeNavigationController()..select(widget.initialTab);
     _notifications = NotificationsController(repository: widget.notificationRepository);
     _profile = ProfileController();
+    unawaited(PlatformContentStore.instance.load());
     _challengeRepository = widget.challengeRepository ?? ChallengeRepository.instance;
     _challengeRepository.addListener(_refreshCurrentChallenge);
     _refreshCurrentChallenge();
@@ -169,7 +170,8 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
   }
 
   Future<void> _openStore() async {
-    await PlatformContentStore.instance.load();
+    // Keep the existing immediate placeholder behavior if no store URL is set.
+    // The public content loads separately in the shell and Welcome screen.
     if (!mounted) return;
     final raw = PlatformContentStore.instance.content.storeUrl;
     final url = raw == null ? null : Uri.tryParse(raw.trim());
