@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../data/auth_repository.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -10,10 +12,7 @@ import '../../../../core/widgets/app_otp_input.dart';
 import '../../../../core/widgets/app_send_icon_button.dart';
 import '../../../../core/widgets/app_text_field.dart';
 
-/// Forgot Password and Account Verification UI with no network requests.
-///
-/// The email and six-digit code live locally in text controllers. No code is
-/// sent or verified until a later backend milestone.
+/// Approved OTP screen connected to email recovery APIs.
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({
     this.onBack,
@@ -29,6 +28,7 @@ class ForgotPasswordScreen extends StatefulWidget {
 }
 
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+  bool _busy = false;
   static final RegExp _emailPattern =
       RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
 
@@ -70,16 +70,103 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     );
   }
 
-  void _sendCode() {
-    _showUiOnlyNotice(
-      'Sending verification codes will be available after the UI phase.',
-    );
+  Future<void> _sendCode() async {
+    if (_busy) return;
+    if (!_emailPattern.hasMatch(_emailController.text.trim())) {
+      _showUiOnlyNotice('Enter a valid email address.');
+      return;
+    }
+    setState(() => _busy = true);
+    try {
+      await AuthRepository.instance.sendRecoveryCode(_emailController.text);
+      if (mounted) {
+        _showUiOnlyNotice('If an account exists, a code has been sent to its email.');
+      }
+    } catch (error) {
+      if (mounted) _showUiOnlyNotice(error.toString());
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
-  void _verify() {
-    _showUiOnlyNotice(
-      'Code verification will be available after the UI phase.',
+  Future<void> _verify() async {
+    if (_busy || !_canVerify) return;
+    setState(() => _busy = true);
+    try {
+      final ticket = await AuthRepository.instance.verifyRecoveryCode(
+        _emailController.text,
+        _otpController.text,
+      );
+      if (!mounted) return;
+      final passwords = await _newPasswordDialog();
+      if (passwords == null) {
+        if (mounted) _showUiOnlyNotice('Request a new code when you are ready to reset your password.');
+        return;
+      }
+      await AuthRepository.instance.resetPassword(
+        email: _emailController.text,
+        ticket: ticket,
+        password: passwords[0],
+        confirmation: passwords[1],
+      );
+      if (mounted) {
+        _showUiOnlyNotice('Password updated. Please log in.');
+        _goBackToLogin();
+      }
+    } catch (error) {
+      if (mounted) _showUiOnlyNotice(error.toString());
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<List<String>?> _newPasswordDialog() async {
+    final password = TextEditingController();
+    final confirm = TextEditingController();
+    final result = await showDialog<List<String>>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+            backgroundColor: AppColors.outlinedButtonBackground,
+            title: const Text('Set a new password', style: AppTypography.sectionHeading),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: password,
+                  obscureText: true,
+                  decoration: const InputDecoration(labelText: 'New Password (8+ characters)'),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: confirm,
+                  obscureText: true,
+                  decoration: const InputDecoration(labelText: 'Confirm Password'),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () {
+                  if (password.text.length < 8 || password.text != confirm.text) {
+                    ScaffoldMessenger.of(dialogContext).showSnackBar(
+                      const SnackBar(content: Text('Passwords must match and contain at least 8 characters.')),
+                    );
+                    return;
+                  }
+                  Navigator.of(dialogContext).pop([password.text, confirm.text]);
+                },
+                child: const Text('Reset Password', style: TextStyle(color: AppColors.primaryOrange)),
+              ),
+            ],
+          ),
     );
+    password.dispose();
+    confirm.dispose();
+    return result;
   }
 
   void _goBack() {
@@ -182,7 +269,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             children: [
               AppButton(
                 label: 'Verify',
-                onPressed: _canVerify ? _verify : null,
+                onPressed: (_canVerify && !_busy) ? _verify : null,
               ),
               const SizedBox(height: AppSpacing.bottomSectionGap),
               Semantics(

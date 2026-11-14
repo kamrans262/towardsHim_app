@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../auth/data/auth_repository.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -10,11 +12,18 @@ import '../../data/delete_account_demo_data.dart';
 import '../widgets/profile_bullet_list.dart';
 import '../widgets/profile_menu_card.dart';
 
-/// Account deletion is UI-only. Confirmation never changes account data.
+/// Approved deletion screen with authenticated server-side confirmation.
 class DeleteAccountScreen extends StatelessWidget {
   const DeleteAccountScreen({super.key});
 
   Future<void> _confirmDelete(BuildContext context) async {
+    if (!AuthRepository.instance.isAuthenticated) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please sign in to delete your account.')),
+      );
+      return;
+    }
+    final password = TextEditingController();
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
@@ -23,9 +32,22 @@ class DeleteAccountScreen extends StatelessWidget {
           DeleteAccountDemoData.confirmationTitle,
           style: AppTypography.sectionHeading,
         ),
-        content: const Text(
-          DeleteAccountDemoData.confirmationDescription,
-          style: AppTypography.homeSecondary,
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              DeleteAccountDemoData.confirmationDescription,
+              style: AppTypography.homeSecondary,
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: password,
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: 'Confirm your password',
+              ),
+            ),
+          ],
         ),
         actions: [
           TextButton(
@@ -45,10 +67,20 @@ class DeleteAccountScreen extends StatelessWidget {
       ),
     );
     if (confirmed == true && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(DeleteAccountDemoData.demoNotice)),
-      );
+      try {
+        await AuthRepository.instance.deleteAccount(password.text);
+        if (context.mounted) {
+          Navigator.of(context).pushNamedAndRemoveUntil('/welcome', (_) => false);
+        }
+      } catch (error) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(error.toString())),
+          );
+        }
+      }
     }
+    password.dispose();
   }
 
   @override
