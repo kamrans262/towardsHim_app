@@ -6,6 +6,7 @@ import '../../features/auth/presentation/screens/create_account_screen.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/home/presentation/screens/home_shell_screen.dart';
+import '../../features/home/domain/models/home_models.dart';
 import '../../features/notifications/presentation/controllers/notifications_controller.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/community/presentation/models/community_replies_args.dart';
@@ -74,21 +75,30 @@ abstract final class AppRouter {
                 Navigator.of(context).pushNamed(AppRoutes.createAccount),
             onLogin: () => Navigator.of(context).pushNamed(AppRoutes.login),
             onContinueAsGuest: () =>
-                Navigator.of(context).pushReplacementNamed(AppRoutes.home),
+                Navigator.of(context).pushReplacementNamed(AppRoutes.home, arguments: 'guest'),
           ),
         AppRoutes.createAccount => CreateAccountScreen(
             onBack: () => Navigator.of(context).maybePop(),
             onLogin: () => Navigator.of(context).pushNamed(AppRoutes.login),
           ),
         AppRoutes.login => LoginScreen(
-            onLogin: () => Navigator.of(context).pushReplacementNamed(AppRoutes.home),
+            onLogin: () => Navigator.of(context).pushNamedAndRemoveUntil(
+              AppRoutes.home,
+              (_) => false,
+              arguments: settings.arguments is HomeTab ? settings.arguments : null,
+            ),
             onBack: () => Navigator.of(context).maybePop(),
             onCreateAccount: () =>
                 Navigator.of(context).pushNamed(AppRoutes.createAccount),
             onForgotPassword: () =>
                 Navigator.of(context).pushNamed(AppRoutes.forgotPassword),
           ),
-        AppRoutes.home => const HomeShellScreen(),
+        AppRoutes.home => HomeShellScreen(
+            guestMode: settings.arguments == 'guest',
+            initialTab: settings.arguments is HomeTab
+                ? settings.arguments! as HomeTab
+                : HomeTab.home,
+          ),
         AppRoutes.aboutTowardHim => const AboutTowardHimScreen(),
         AppRoutes.deleteAccount => const DeleteAccountScreen(),
         AppRoutes.privacyPolicy => const PrivacyPolicyScreen(),
