@@ -23,6 +23,7 @@ class DeleteAccountScreen extends StatelessWidget {
       );
       return;
     }
+    final provider = AuthRepository.instance.user?['auth_provider']?.toString() ?? 'email';
     final password = TextEditingController();
     final confirmed = await showDialog<bool>(
       context: context,
@@ -40,13 +41,19 @@ class DeleteAccountScreen extends StatelessWidget {
               style: AppTypography.homeSecondary,
             ),
             const SizedBox(height: 16),
-            TextField(
-              controller: password,
-              obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Confirm your password',
+            if (provider == 'email')
+              TextField(
+                controller: password,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: 'Confirm your password',
+                ),
+              )
+            else
+              Text(
+                'Confirm securely with ${provider == 'google' ? 'Google' : 'Apple'} to delete your account.',
+                style: AppTypography.homeSecondary,
               ),
-            ),
           ],
         ),
         actions: [
@@ -68,7 +75,11 @@ class DeleteAccountScreen extends StatelessWidget {
     );
     if (confirmed == true && context.mounted) {
       try {
-        await AuthRepository.instance.deleteAccount(password.text);
+        if (provider == 'google' || provider == 'apple') {
+          await AuthRepository.instance.deleteSocialAccount(provider);
+        } else {
+          await AuthRepository.instance.deleteAccount(password.text);
+        }
         if (context.mounted) {
           Navigator.of(context).pushNamedAndRemoveUntil('/welcome', (_) => false);
         }
