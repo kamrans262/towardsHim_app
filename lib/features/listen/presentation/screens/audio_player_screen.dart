@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart' as ja;
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -15,7 +16,7 @@ import '../widgets/player_playback_controls.dart';
 import '../widgets/player_secondary_action.dart';
 import '../widgets/player_time_row.dart';
 
-/// Full-screen, UI-only player for the audio episode selected on Listen.
+/// Preserves approved Player UI for both server audio and local TTS fixtures.
 class AudioPlayerScreen extends StatefulWidget {
   const AudioPlayerScreen({
     required this.episode,
@@ -33,12 +34,21 @@ class AudioPlayerScreen extends StatefulWidget {
 class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
   late final AudioPlayerUiController _player;
   NarrationEngine? _narration;
+  ja.AudioPlayer? _remotePlayer;
+  StreamSubscription<Duration>? _positionSubscription;
+  StreamSubscription<Duration?>? _durationSubscription;
+  StreamSubscription<ja.PlayerState>? _stateSubscription;
+  StreamSubscription<ja.PlayerException>? _errorSubscription;
 
   @override
   void initState() {
     super.initState();
     _player = AudioPlayerUiController(widget.episode);
-    final script = widget.episode.narrationText;
+    final mediaUrl = widget.episode.audioUrl;
+    if (mediaUrl != null && mediaUrl.isNotEmpty) {
+      unawaited(_openRemote(mediaUrl));
+    }
+    final script = mediaUrl == null ? widget.episode.narrationText : null;
     if (script != null && script.isNotEmpty) {
       _narration = widget.narrationEngine ?? DeviceNarrationEngine();
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -62,8 +72,55 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
     }
   }
 
+  Future<void> _openRemote(String url) async {
+    final player = ja.AudioPlayer();
+    _remotePlayer = player;
+    _positionSubscription = player.positionStream.listen((position) {
+      if (!mounted) return;
+      final duration = _player.durationSeconds;
+      if (duration > 0) {
+        _player.updateNarrationProgress(
+          position.inMilliseconds / (duration * 1000),
+        );
+      }
+    });
+    _durationSubscription = player.durationStream.listen((duration) {
+      if (mounted && duration != null) {
+        _player.setDurationSeconds(duration.inSeconds);
+      }
+    });
+    _stateSubscription = player.playerStateStream.listen((state) {
+      if (mounted && state.processingState == ja.ProcessingState.completed) {
+        _player.finishNarration();
+      }
+    });
+    _errorSubscription = player.errorStream.listen((error) {
+      if (mounted) {
+        _player.togglePlayPauseIfPlaying();
+        _showNotice('Audio playback is unavailable: ' + error.message);
+      }
+    });
+    try {
+      final duration = await player.setUrl(url);
+      if (!mounted) return;
+      if (duration != null) _player.setDurationSeconds(duration.inSeconds);
+      unawaited(player.play());
+    } catch (_) {
+      if (mounted) {
+        _player.togglePlayPauseIfPlaying();
+        _showNotice('Unable to load audio. Check your internet connection.');
+      }
+    }
+  }
+
   @override
   void dispose() {
+    _positionSubscription?.cancel();
+    _durationSubscription?.cancel();
+    _stateSubscription?.cancel();
+    _errorSubscription?.cancel();
+    final remote = _remotePlayer;
+    if (remote != null) unawaited(remote.dispose());
     final voice = _narration;
     if (voice != null) unawaited(voice.stop());
     _player.dispose();
@@ -74,6 +131,10 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
     _player.skipSeconds(seconds);
     final voice = _narration;
     if (voice != null) unawaited(voice.seek(_player.progress));
+    final remote = _remotePlayer;
+    if (remote != null) {
+      unawaited(remote.seek(Duration(seconds: _player.positionSeconds)));
+    }
   }
 
   void _showNotice(String message) {
@@ -121,6 +182,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                       _player.setSpeed(speed);
                       final voice = _narration;
                       if (voice != null) unawaited(voice.setSpeed(speed));
+                      final remote = _remotePlayer;
+                      if (remote != null) unawaited(remote.setSpeed(speed));
                       Navigator.of(sheetContext).pop();
                     },
                   ),
@@ -214,12 +277,25 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                       borderRadius: BorderRadius.circular(
                         AppSpacing.playerCoverRadius,
                       ),
-                      child: Image.asset(
-                        episode.coverAsset ?? episode.thumbnailAsset,
-                        key: const Key('player_cover_image'),
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                      ),
+                      child: episode.artworkUrl == null
+                          ? Image.asset(
+                              episode.coverAsset ?? episode.thumbnailAsset,
+                              key: const Key('player_cover_image'),
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            )
+                          : Image.network(
+                              episode.artworkUrl!,
+                              key: const Key('player_cover_image'),
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, trace) =>
+                                  Image.asset(
+                                episode.coverAsset ?? episode.thumbnailAsset,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
                     ),
                   ),
                   const SizedBox(height: AppSpacing.playerCoverToTag),
@@ -236,7 +312,9 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                   Text(
                     episode.narrationText != null
                       ? 'Spoken demo · about 1 min'
-                      : '${episode.durationMinutes} min',
+                      : episode.audioUrl != null && episode.durationMinutes == 0
+                          ? 'Audio'
+                          : '${episode.durationMinutes} min',
                     style: AppTypography.homeSecondary,
                   ),
                   const SizedBox(height: AppSpacing.playerDurationToDescription),
@@ -259,6 +337,12 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                               if (voice != null) {
                                 unawaited(voice.seek(fraction));
                               }
+                              final remote = _remotePlayer;
+                              if (remote != null) {
+                                unawaited(remote.seek(
+                                  Duration(seconds: _player.positionSeconds),
+                                ));
+                              }
                             },
                           ),
                           const SizedBox(height: AppSpacing.playerProgressToTimes),
@@ -272,11 +356,23 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                             onToggle: () {
                               _player.togglePlayPause();
                               final voice = _narration;
-                              if (voice == null) return;
-                              if (_player.isPlaying) {
-                                unawaited(voice.resume());
-                              } else {
-                                unawaited(voice.pause());
+                              if (voice != null) {
+                                if (_player.isPlaying) {
+                                  unawaited(voice.resume());
+                                } else {
+                                  unawaited(voice.pause());
+                                }
+                              }
+                              final remote = _remotePlayer;
+                              if (remote != null) {
+                                if (_player.isPlaying) {
+                                  if (remote.processingState == ja.ProcessingState.completed) {
+                                    unawaited(remote.seek(Duration.zero));
+                                  }
+                                  unawaited(remote.play());
+                                } else {
+                                  unawaited(remote.pause());
+                                }
                               }
                             },
                             onRewind: () => _skip(-10),

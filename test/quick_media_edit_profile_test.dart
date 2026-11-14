@@ -11,6 +11,7 @@ import 'package:towards_him_app/features/home/domain/models/home_models.dart';
 import 'package:towards_him_app/features/home/presentation/screens/home_shell_screen.dart';
 import 'package:towards_him_app/features/listen/data/spoken_demo_data.dart';
 import 'package:towards_him_app/features/listen/presentation/screens/audio_player_screen.dart';
+import 'package:towards_him_app/features/listen/presentation/screens/listen_screen.dart';
 import 'package:towards_him_app/features/listen/presentation/services/narration_engine.dart';
 import 'package:towards_him_app/features/profile/presentation/controllers/profile_controller.dart';
 import 'package:towards_him_app/features/profile/presentation/screens/edit_profile_screen.dart';
@@ -74,7 +75,7 @@ void main() {
     expect(media.map((e) => e.narrationText).toSet().length, 3);
   });
 
-  testWidgets('Quick Podcast opens related Player from Home', (tester) async {
+  testWidgets('Home audio shortcut opens existing Listen tab', (tester) async {
     await tester.pumpWidget(MaterialApp(
       home: const HomeShellScreen(),
       onGenerateRoute: AppRouter.onGenerateRoute,
@@ -83,34 +84,21 @@ void main() {
     await tester.ensureVisible(quick);
     await tester.pumpAndSettle();
     await tester.tap(quick);
-    await tester.pumpAndSettle();
-    final player = tester.widget<AudioPlayerScreen>(find.byType(AudioPlayerScreen));
-    expect(player.episode.id, SpokenDemoData.podcast.id);
-    expect(player.episode.narrationText, SpokenDemoData.podcastScript);
-    expect(tester.takeException(), isNull);
+    await tester.pump();
+    expect(find.byType(ListenScreen), findsOneWidget);
+    expect(find.byType(AudioPlayerScreen), findsNothing);
   });
 
-  testWidgets('Listen Meditation and Prayer shortcuts open related tracks',
-      (tester) async {
+  testWidgets('Listen category shortcuts retain Listen tab', (tester) async {
     await tester.pumpWidget(MaterialApp(
       home: const HomeShellScreen(),
       onGenerateRoute: AppRouter.onGenerateRoute,
     ));
     await tester.tap(find.byKey(const Key('nav_Listen')));
-    await tester.pumpAndSettle();
-    for (final type in [HomeQuickType.meditation, HomeQuickType.prayer]) {
-      final title = type == HomeQuickType.meditation ? 'Meditation' : 'Prayer';
-      await tester.tap(find.byKey(Key('quick_$title')));
-      await tester.pumpAndSettle();
-      final player = tester.widget<AudioPlayerScreen>(
-        find.byType(AudioPlayerScreen),
-      );
-      expect(player.episode.contentType, title);
-      expect(player.episode.narrationText, isNotEmpty);
-      await tester.pageBack();
-      await tester.pumpAndSettle();
-    }
-    expect(tester.takeException(), isNull);
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('quick_Meditation')));
+    await tester.pump();
+    expect(find.byType(ListenScreen), findsOneWidget);
   });
 
   testWidgets('Voice controller starts, pauses, resumes, seeks and stops',

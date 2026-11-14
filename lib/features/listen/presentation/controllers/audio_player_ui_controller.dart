@@ -18,12 +18,13 @@ class AudioPlayerUiController extends ChangeNotifier {
             .toInt();
 
   final ListenAudioEpisode episode;
+  int? _durationSecondsOverride;
   int _positionSeconds;
   bool _isPlaying = true;
   double _speed = 1.0;
 
   int get durationSeconds =>
-      episode.narrationDurationSeconds ??
+      _durationSecondsOverride ?? episode.narrationDurationSeconds ??
       episode.timelineDurationSeconds ??
       episode.durationMinutes * 60;
   int get positionSeconds => _positionSeconds;
@@ -39,6 +40,13 @@ class AudioPlayerUiController extends ChangeNotifier {
     final minutes = seconds ~/ 60;
     final remainder = seconds % 60;
     return '${minutes.toString().padLeft(2, '0')}:${remainder.toString().padLeft(2, '0')}';
+  }
+
+  void setDurationSeconds(int seconds) {
+    if (seconds <= 0 || seconds == durationSeconds) return;
+    _durationSecondsOverride = seconds;
+    _positionSeconds = _positionSeconds.clamp(0, seconds).toInt();
+    notifyListeners();
   }
 
   void finishNarration() {

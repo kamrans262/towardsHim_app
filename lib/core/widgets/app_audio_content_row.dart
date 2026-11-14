@@ -17,12 +17,14 @@ class AppAudioContentRow extends StatelessWidget {
     required this.onPlayPressed,
     this.progress,
     this.withThumbnailShadow = false,
+    this.imageUrl,
     super.key,
   });
 
   final String title;
   final String description;
   final String imageAsset;
+  final String? imageUrl;
   final double thumbnailSize;
   final bool isPlaying;
   final VoidCallback onPlayPressed;
@@ -35,6 +37,7 @@ class AppAudioContentRow extends StatelessWidget {
       children: [
         AppAudioThumbnail(
           imageAsset: imageAsset,
+          networkUrl: imageUrl,
           size: thumbnailSize,
           withShadow: withThumbnailShadow,
         ),

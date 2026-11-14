@@ -15,6 +15,8 @@ class ListenAudioEpisode {
     this.timelineDurationSeconds,
     this.narrationText,
     this.narrationDurationSeconds,
+    this.audioUrl,
+    this.artworkUrl,
   });
 
   final String id;
@@ -38,4 +40,32 @@ class ListenAudioEpisode {
   /// Original spoken demo script; null for visual-only content.
   final String? narrationText;
   final int? narrationDurationSeconds;
+  /// Server media URL; null for existing local/TTS fixtures.
+  final String? audioUrl;
+  final String? artworkUrl;
+
+  factory ListenAudioEpisode.fromApi(Map<String, dynamic> json) {
+    final category = json['category']?.toString() ?? 'podcast';
+    const names = {'podcast': 'Podcast', 'meditation': 'Meditation', 'prayer': 'Prayer'};
+    final rawSeconds = (json['duration_seconds'] as num?)?.toInt();
+    String? mediaUrl(dynamic value) {
+      if (value is! String || value.isEmpty) return null;
+      final parsed = Uri.tryParse(value);
+      return parsed?.hasScheme == true ? value : null;
+    }
+    return ListenAudioEpisode(
+      id: json['id'].toString(),
+      title: json['title']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
+      thumbnailAsset: 'assets/images/home/golden_hour_meditation.webp',
+      coverAsset: 'assets/images/player/golden_mountain_valleys_dusk.webp',
+      contentType: names[category] ?? 'Podcast',
+      durationMinutes: rawSeconds == null ? 0 : (rawSeconds / 60).ceil(),
+      timelineDurationSeconds: rawSeconds,
+      playbackProgress: 0,
+      isCompleted: false,
+      audioUrl: mediaUrl(json['audio_url']),
+      artworkUrl: mediaUrl(json['artwork_url']),
+    );
+  }
 }

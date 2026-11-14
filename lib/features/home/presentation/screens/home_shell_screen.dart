@@ -14,7 +14,6 @@ import '../../domain/models/home_models.dart';
 import '../controllers/home_navigation_controller.dart';
 import 'home_dashboard_screen.dart';
 import '../../../listen/presentation/screens/listen_screen.dart';
-import '../../../listen/data/spoken_demo_data.dart';
 import '../../../listen/domain/models/listen_audio_episode.dart';
 import '../../../weekly_challenges/presentation/screens/weekly_challenges_screen.dart';
 import '../../../weekly_challenges/domain/models/weekly_challenge.dart';
@@ -39,6 +38,7 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
   late final ProfileController _profile;
   late final Listenable _shellListeners;
   bool _showProfile = false;
+  HomeQuickType? _listenCategory;
 
   @override
   void initState() {
@@ -71,10 +71,11 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
   }
 
   void _openQuickMedia(HomeQuickType type) {
-    Navigator.of(context).pushNamed(
-      AppRoutes.player,
-      arguments: SpokenDemoData.forCategory(type),
-    );
+    setState(() {
+      _listenCategory = type;
+      _showProfile = false;
+    });
+    _navigation.select(HomeTab.listen);
   }
 
   void _openProfile() {
@@ -132,6 +133,7 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
                   onProfile: _openProfile,
                 ),
                 ListenScreen(
+                  selectedCategory: _listenCategory,
                   onNotice: _showNotice,
                   onNotifications: _openNotifications,
                   onProfile: _openProfile,

@@ -9,10 +9,12 @@ class AppAudioThumbnail extends StatelessWidget {
     required this.imageAsset,
     required this.size,
     this.withShadow = false,
+    this.networkUrl,
     super.key,
   });
 
   final String imageAsset;
+  final String? networkUrl;
   final double size;
   final bool withShadow;
 
@@ -35,12 +37,14 @@ class AppAudioThumbnail extends StatelessWidget {
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(AppSpacing.homeCardRadius),
-        child: Image.asset(
-          imageAsset,
-          width: size,
-          height: size,
-          fit: BoxFit.cover,
-        ),
+        child: networkUrl == null
+            ? Image.asset(imageAsset, width: size, height: size, fit: BoxFit.cover)
+            : Image.network(networkUrl!, width: size, height: size,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, trace) => Image.asset(
+                  imageAsset, width: size, height: size, fit: BoxFit.cover,
+                ),
+              ),
       ),
     );
   }

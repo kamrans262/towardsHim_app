@@ -26,6 +26,7 @@ class ListenAudioListItem extends StatelessWidget {
         title: episode.title,
         description: episode.description,
         imageAsset: episode.thumbnailAsset,
+        imageUrl: episode.artworkUrl,
         thumbnailSize: AppSpacing.listenThumbnailSize,
         isPlaying: isPlaying,
         onPlayPressed: onPlayPressed,
