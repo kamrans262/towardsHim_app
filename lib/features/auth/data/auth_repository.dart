@@ -147,7 +147,7 @@ class AuthRepository {
     await _storeLogin(result);
   }
 
-  Future<void> signInWithGoogle() async {
+  Future<String> _googleIdentityToken() async {
     final signIn = GoogleSignIn.instance;
     if (!_googleInitialized) {
       await signIn.initialize(
@@ -163,6 +163,11 @@ class AuthRepository {
     if (identityToken == null) {
       throw const AuthFailure('Google identity token unavailable. Check provider setup.');
     }
+    return identityToken;
+  }
+
+  Future<void> signInWithGoogle() async {
+    final identityToken = await _googleIdentityToken();
     final response = await _request(
       'POST',
       'auth/google',
@@ -171,7 +176,7 @@ class AuthRepository {
     await _storeLogin(response);
   }
 
-  Future<void> signInWithApple() async {
+  Future<String> _appleIdentityToken() async {
     final requiresWeb = defaultTargetPlatform == TargetPlatform.android;
     if (requiresWeb && (appleServiceId.isEmpty || appleRedirectUri.isEmpty)) {
       throw const AuthFailure('Apple sign-in setup is not connected yet.');
@@ -189,12 +194,30 @@ class AuthRepository {
     if (identityToken == null) {
       throw const AuthFailure('Apple identity token unavailable.');
     }
+    return identityToken;
+  }
+
+  Future<void> signInWithApple() async {
+    final identityToken = await _appleIdentityToken();
     final response = await _request(
       'POST',
       'auth/apple',
       body: {'identity_token': identityToken},
     );
     await _storeLogin(response);
+  }
+
+  Future<void> deleteSocialAccount(String provider) async {
+    if (!isAuthenticated) {
+      throw const AuthFailure('Sign in to delete your account.');
+    }
+    final identityToken = provider == 'google'
+        ? await _googleIdentityToken()
+        : await _appleIdentityToken();
+    await _request('POST', 'auth/account/revoke-social',
+        authorized: true,
+        body: {'provider': provider, 'identity_token': identityToken});
+    await _clearLocal();
   }
 
   Future<void> sendRecoveryCode(String email) async {
