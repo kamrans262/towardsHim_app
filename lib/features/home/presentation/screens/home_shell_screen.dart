@@ -22,9 +22,12 @@ import '../../../community/presentation/screens/community_screen.dart';
 import '../../../profile/presentation/screens/profile_screen.dart';
 import '../../../profile/presentation/controllers/profile_controller.dart';
 
-/// UI-only shell with a fixed bottom bar and preserved tab widget states.
+/// Existing main shell, preserving approved widgets and navigation.
 class HomeShellScreen extends StatefulWidget {
-  const HomeShellScreen({super.key});
+  const HomeShellScreen({this.guestMode = false, this.initialTab = HomeTab.home, super.key});
+
+  final bool guestMode;
+  final HomeTab initialTab;
 
   @override
   State<HomeShellScreen> createState() => _HomeShellScreenState();
@@ -40,7 +43,7 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
   @override
   void initState() {
     super.initState();
-    _navigation = HomeNavigationController();
+    _navigation = HomeNavigationController()..select(widget.initialTab);
     _notifications = NotificationsController();
     _profile = ProfileController();
     _shellListeners = Listenable.merge([_navigation, _profile]);
@@ -93,6 +96,11 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
   }
 
   void _select(HomeTab tab) {
+    if (widget.guestMode &&
+        (tab == HomeTab.towardHimThree || tab == HomeTab.community)) {
+      Navigator.of(context).pushNamed(AppRoutes.login, arguments: tab);
+      return;
+    }
     _navigation.select(tab);
     if (_showProfile) setState(() => _showProfile = false);
   }
