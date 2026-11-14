@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../data/auth_repository.dart';
+
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_auth_header.dart';
@@ -9,8 +11,7 @@ import '../../../../core/widgets/app_inline_link.dart';
 import '../../../../core/widgets/app_onboarding_layout.dart';
 import '../../../../core/widgets/app_text_field.dart';
 
-/// UI-only login screen. Controllers and focus nodes are local to this route.
-/// Authentication and account recovery are intentionally not integrated.
+/// Approved login screen; backend actions are provided by AuthRepository.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({
     this.onBack,
@@ -30,6 +31,49 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  bool _busy = false;
+
+  Future<void> _login() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    FocusScope.of(context).unfocus();
+    try {
+      await AuthRepository.instance.login(
+        email: _emailController.text,
+        password: _passwordController.text,
+      );
+      if (!mounted) return;
+      widget.onLogin?.call();
+    } catch (error) {
+      if (mounted) _notice(error.toString());
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _socialLogin(String provider) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      if (provider == 'google') {
+        await AuthRepository.instance.signInWithGoogle();
+      } else {
+        await AuthRepository.instance.signInWithApple();
+      }
+      if (mounted) widget.onLogin?.call();
+    } catch (error) {
+      if (mounted) _notice(error.toString());
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  void _notice(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
@@ -146,10 +190,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: AppSpacing.forgotToDivider),
                   AppAuthSocialSection(
-                    onGooglePressed: () =>
-                        _showUiOnlyNotice('Google sign-in'),
-                    onApplePressed: () =>
-                        _showUiOnlyNotice('Apple sign-in'),
+                    onGooglePressed: () => _socialLogin('google'),
+                    onApplePressed: () => _socialLogin('apple'),
                   ),
                 ],
               ),
@@ -169,7 +211,7 @@ class _LoginScreenState extends State<LoginScreen> {
             children: [
               AppButton(
                 label: 'Login',
-                onPressed: widget.onLogin ?? () => _showUiOnlyNotice('Login'),
+                onPressed: _busy ? null : _login,
               ),
               const SizedBox(height: AppSpacing.bottomSectionGap),
               AppInlineLink(

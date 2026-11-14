@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../features/auth/data/auth_repository.dart';
+
 import '../../features/auth/presentation/screens/create_account_screen.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
@@ -58,17 +60,21 @@ abstract final class AppRouter {
       settings: settings,
       builder: (context) => switch (settings.name) {
         AppRoutes.splash => SplashScreen(
-            onFinished: () => Navigator.of(context)
-                .pushReplacementNamed(AppRoutes.welcome),
+            onFinished: () async {
+              final signedIn = await AuthRepository.instance.restoreSession();
+              if (context.mounted) {
+                Navigator.of(context).pushReplacementNamed(
+                  signedIn ? AppRoutes.home : AppRoutes.welcome,
+                );
+              }
+            },
           ),
         AppRoutes.welcome => WelcomeScreen(
             onCreateAccount: () =>
                 Navigator.of(context).pushNamed(AppRoutes.createAccount),
             onLogin: () => Navigator.of(context).pushNamed(AppRoutes.login),
-            onContinueAsGuest: () => _notifyFutureModule(
-              context,
-              'Guest Home',
-            ),
+            onContinueAsGuest: () =>
+                Navigator.of(context).pushReplacementNamed(AppRoutes.home),
           ),
         AppRoutes.createAccount => CreateAccountScreen(
             onBack: () => Navigator.of(context).maybePop(),

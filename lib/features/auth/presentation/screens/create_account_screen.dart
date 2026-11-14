@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../data/auth_repository.dart';
+
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_auth_header.dart';
@@ -9,8 +11,7 @@ import '../../../../core/widgets/app_inline_link.dart';
 import '../../../../core/widgets/app_onboarding_layout.dart';
 import '../../../../core/widgets/app_text_field.dart';
 
-/// UI-only form. Local field state is disposed when the screen is removed.
-/// Authentication will be connected only in a later development phase.
+/// Approved registration UI connected to the member authentication API.
 class CreateAccountScreen extends StatefulWidget {
   const CreateAccountScreen({
     this.onBack,
@@ -26,6 +27,54 @@ class CreateAccountScreen extends StatefulWidget {
 }
 
 class _CreateAccountScreenState extends State<CreateAccountScreen> {
+  bool _busy = false;
+
+  Future<void> _register() async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    FocusScope.of(context).unfocus();
+    try {
+      await AuthRepository.instance.register(
+        name: _nameController.text,
+        email: _emailController.text,
+        password: _passwordController.text,
+        confirmPassword: _confirmPasswordController.text,
+      );
+      if (mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil('/home', (_) => false);
+      }
+    } catch (error) {
+      if (mounted) _notice(error.toString());
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _socialLogin(String provider) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      if (provider == 'google') {
+        await AuthRepository.instance.signInWithGoogle();
+      } else {
+        await AuthRepository.instance.signInWithApple();
+      }
+      if (mounted) {
+        Navigator.of(context).pushNamedAndRemoveUntil('/home', (_) => false);
+      }
+    } catch (error) {
+      if (mounted) _notice(error.toString());
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  void _notice(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -146,10 +195,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                   ),
                   const SizedBox(height: AppSpacing.formToDivider),
                   AppAuthSocialSection(
-                    onGooglePressed: () =>
-                        _showUiOnlyNotice('Google sign-in'),
-                    onApplePressed: () =>
-                        _showUiOnlyNotice('Apple sign-in'),
+                    onGooglePressed: () => _socialLogin('google'),
+                    onApplePressed: () => _socialLogin('apple'),
                   ),
                 ],
               ),
@@ -169,7 +216,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
             children: [
               AppButton(
                 label: 'Create Account',
-                onPressed: () => _showUiOnlyNotice('Account creation'),
+                onPressed: _busy ? null : _register,
               ),
               const SizedBox(height: AppSpacing.bottomSectionGap),
               AppInlineLink(
