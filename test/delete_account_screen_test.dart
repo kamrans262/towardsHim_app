@@ -105,31 +105,15 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Confirmation is UI-only; dismissing leaves user on page',
+  testWidgets('Guest deletion requires sign in without changing the layout',
       (tester) async {
     await openDelete(tester);
     await tester.ensureVisible(find.byKey(const Key('delete_account_button')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('delete_account_button')));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Delete Account?'), findsOneWidget);
-    expect(
-      find.text(DeleteAccountDemoData.confirmationDescription),
-      findsOneWidget,
-    );
-    await tester.tap(find.byKey(const Key('delete_dialog_cancel')));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    expect(find.text('Please sign in to delete your account.'), findsOneWidget);
     expect(find.byType(DeleteAccountScreen), findsOneWidget);
-
-    await tester.tap(find.byKey(const Key('delete_account_button')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('delete_dialog_confirm')));
-    await tester.pumpAndSettle();
-    expect(find.byType(DeleteAccountScreen), findsOneWidget);
-    expect(find.text(DeleteAccountDemoData.demoNotice), findsOneWidget);
-    expect(ProfileDemoData.user.fullName, 'Sarah Johnson');
-    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Cancel returns to Profile without losing five-tab navigation',

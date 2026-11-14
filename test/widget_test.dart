@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:towards_him_app/app/toward_him_app.dart';
 import 'package:towards_him_app/core/theme/app_colors.dart';
 import 'package:towards_him_app/core/theme/app_spacing.dart';
@@ -11,6 +12,7 @@ import 'package:towards_him_app/features/onboarding/presentation/screens/splash_
 import 'package:towards_him_app/features/onboarding/presentation/screens/welcome_screen.dart';
 
 void main() {
+  setUp(() => FlutterSecureStorage.setMockInitialValues({}));
   testWidgets('Splash shows the exact centered 110×67 logo', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: SplashScreen()));
     expect(find.byType(TowardHimLogo), findsOneWidget);

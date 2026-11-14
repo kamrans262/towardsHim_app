@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -22,6 +23,7 @@ import 'package:towards_him_app/features/profile/presentation/widgets/profile_me
 import 'package:towards_him_app/features/profile/presentation/widgets/profile_user_card.dart';
 
 void main() {
+  setUp(() => FlutterSecureStorage.setMockInitialValues({}));
   Future<void> openProfile(WidgetTester tester, {String tab = 'Home'}) async {
     await tester.pumpWidget(
       MaterialApp(

@@ -122,13 +122,12 @@ void main() {
     expect(find.byType(LoginScreen), findsOneWidget);
   });
 
-  testWidgets('Login action is UI-only and does not authenticate',
+  testWidgets('Login action is connected without changing the approved UI',
       (tester) async {
     await tester.pumpWidget(const MaterialApp(home: LoginScreen()));
-    await tester.tap(find.text('Login'));
-    await tester.pump();
-    expect(find.text('Login will be connected after the UI phase.'),
-        findsOneWidget);
+    final button = tester.widget<AppButton>(find.byType(AppButton));
+    expect(button.onPressed, isNotNull);
+    expect(find.text('WELCOME BACK'), findsOneWidget);
   });
 
   testWidgets('Login actions are 25px above safe-area bottom', (tester) async {

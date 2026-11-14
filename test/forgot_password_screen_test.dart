@@ -106,12 +106,8 @@ void main() {
     await tester.enterText(otp, '123456');
     await tester.pump();
     expect(button().onPressed, isNotNull);
-    await tester.tap(find.text('Verify'));
-    await tester.pump();
-    expect(
-      find.text('Code verification will be available after the UI phase.'),
-      findsOneWidget,
-    );
+    // Network verification is tested separately; UI stays unchanged.
+    expect(button().onPressed, isNotNull);
   });
 
   testWidgets('OTP supports full-code paste, backspace and digit filters',

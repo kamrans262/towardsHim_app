@@ -139,12 +139,12 @@ void main() {
     expect(voice.stops, 1);
   });
 
-  test('ProfileController updates text and photo without a backend', () {
+  test('ProfileController retains the guest preview behavior', () async {
     final controller = ProfileController();
     addTearDown(controller.dispose);
     final oldId = controller.user.id;
     final bytes = Uint8List.fromList([1, 2, 3]);
-    controller.update(
+    await controller.update(
       fullName: ' Grace Lane ',
       email: ' grace@example.com ',
       bio: '  Growing in faith  ',
