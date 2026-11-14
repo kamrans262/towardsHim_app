@@ -1,3 +1,4 @@
+import 'support/fake_community_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:towards_him_app/core/navigation/app_router.dart';
@@ -11,33 +12,32 @@ import 'package:towards_him_app/features/community/presentation/widgets/communit
 import 'package:towards_him_app/features/home/presentation/screens/home_shell_screen.dart';
 
 void main() {
-  test('Model-backed 5-reply heading seeds 3 visible replies', () {
-    final controller = CommunityController();
+  test('Thread loads replies, saves a reply and updates the count', () async {
+    final controller = CommunityController(
+      repository: FakeCommunityRepository(),
+      currentUserId: 'sarah-johnson',
+    );
     addTearDown(controller.dispose);
     const postId = 'community-001';
+    await controller.loadPosts();
+    await controller.loadThread(postId);
     expect(controller.postById(postId)!.replyCount, 3);
-    expect(controller.totalRepliesFor(postId), 5);
+    expect(controller.totalRepliesFor(postId), 3);
     expect(controller.repliesFor(postId).length, 3);
     expect(controller.repliesFor(postId).first.authorName, 'Claudia johns');
-    expect(
-      controller.repliesFor(postId).first.body,
-      'This is such a great reminder. he truly knows what’s best for us',
-    );
-    expect(controller.submitReply(postId, '     '), isFalse);
-    expect(controller.totalRepliesFor(postId), 5);
-    expect(controller.submitReply(postId, '  Amen and thank you  '), isTrue);
-    expect(controller.totalRepliesFor(postId), 6);
-    expect(controller.repliesFor(postId).length, 4);
+    expect(await controller.submitReply(postId, '   '), isFalse);
+    expect(await controller.submitReply(postId, '  Amen and thank you  '), isTrue);
+    expect(controller.totalRepliesFor(postId), 4);
     expect(controller.repliesFor(postId).last.body, 'Amen and thank you');
     expect(controller.postById(postId)!.replyCount, 4);
-    controller.hideReply(postId, controller.repliesFor(postId).last.id);
-    expect(controller.totalRepliesFor(postId), 5);
+    await controller.hideReply(postId, controller.repliesFor(postId).last.id);
+    expect(controller.totalRepliesFor(postId), 3);
     expect(controller.postById(postId)!.replyCount, 3);
   });
 
   Future<void> openReplies(WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-      home: const HomeShellScreen(),
+      home: HomeShellScreen(communityRepository: FakeCommunityRepository()),
       onGenerateRoute: AppRouter.onGenerateRoute,
     ));
     await tester.tap(find.byKey(const Key('nav_Community')));
@@ -56,7 +56,7 @@ void main() {
       tester.widget<AppDetailPageHeader>(find.byType(AppDetailPageHeader)).title,
       'Post Replies',
     );
-    expect(find.text('5 Replies'), findsOneWidget);
+    expect(find.text('3 Replies'), findsOneWidget);
     expect(find.byType(CommunityPostCard), findsNWidgets(4));
     final cards = tester.widgetList<CommunityPostCard>(
       find.byType(CommunityPostCard),
@@ -102,7 +102,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('community_submit_reply_button')));
     await tester.pumpAndSettle();
-    expect(find.text('6 Replies'), findsOneWidget);
+    expect(find.text('4 Replies'), findsOneWidget);
     expect(find.text('Thank you for sharing'), findsOneWidget);
     expect(tester.widget<TextField>(input).controller!.text, isEmpty);
     await tester.binding.handlePopRoute();

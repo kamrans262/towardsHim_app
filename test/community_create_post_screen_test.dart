@@ -1,3 +1,4 @@
+import 'support/fake_community_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:towards_him_app/core/navigation/app_router.dart';
@@ -13,7 +14,7 @@ void main() {
   Future<void> openCreate(WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: const HomeShellScreen(),
+        home: HomeShellScreen(communityRepository: FakeCommunityRepository()),
         onGenerateRoute: AppRouter.onGenerateRoute,
       ),
     );
@@ -75,7 +76,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Cancel and back discard drafts; Publish adds a post', (tester) async {
+  testWidgets('Cancel and back discard drafts; Publish saves a post', (tester) async {
     await openCreate(tester);
     await tester.enterText(
       find.byKey(const Key('community_post_input')), 'Unsaved message',

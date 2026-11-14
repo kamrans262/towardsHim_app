@@ -11,6 +11,7 @@ class CommunityReply {
     required this.body,
     required this.createdAt,
     required this.timeLabel,
+    this.avatarUrl,
   });
 
   final String id;
@@ -21,6 +22,23 @@ class CommunityReply {
   final String body;
   final DateTime createdAt;
   final String timeLabel;
+  final String? avatarUrl;
+
+  factory CommunityReply.fromApi(Map<String, dynamic> json) {
+    final stamp = DateTime.tryParse(json['created_at']?.toString() ?? '')?.toLocal()
+        ?? DateTime.now();
+    return CommunityReply(
+      id: json['id'].toString(),
+      postId: json['post_id'].toString(),
+      authorId: json['author_id'].toString(),
+      authorName: json['author_name']?.toString() ?? 'Member',
+      avatarAsset: 'assets/images/community/community_profile_portrait.jpg',
+      avatarUrl: json['author_avatar_url']?.toString(),
+      body: json['body']?.toString() ?? '',
+      createdAt: stamp,
+      timeLabel: CommunityTimeLabel.fromDate(stamp),
+    );
+  }
 
   CommunityPost asPostCardData() => CommunityPost(
         id: id,
@@ -31,5 +49,6 @@ class CommunityReply {
         createdAt: createdAt,
         timeLabel: timeLabel,
         replyCount: 0,
+        avatarUrl: avatarUrl,
       );
 }

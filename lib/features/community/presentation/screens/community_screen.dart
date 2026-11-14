@@ -5,8 +5,10 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_main_screen_header.dart';
 import '../../data/community_demo_data.dart';
+import '../../data/community_repository.dart';
 import '../controllers/community_controller.dart';
 import '../models/community_replies_args.dart';
+import '../models/community_create_post_args.dart';
 import '../../../../core/navigation/app_router.dart';
 
 import '../widgets/community_post_card.dart';
@@ -16,11 +18,15 @@ import '../widgets/community_segmented_tabs.dart';
 class CommunityScreen extends StatefulWidget {
   const CommunityScreen({required this.onNotice,
     this.onNotifications,
-    this.onProfile, super.key});
+    this.onProfile, this.repository, this.currentUserId,
+    this.active = true, super.key});
 
   final ValueChanged<String> onNotice;
   final VoidCallback? onNotifications;
   final VoidCallback? onProfile;
+  final CommunityRepository? repository;
+  final String? currentUserId;
+  final bool active;
 
   @override
   State<CommunityScreen> createState() => _CommunityScreenState();
@@ -32,7 +38,17 @@ class _CommunityScreenState extends State<CommunityScreen> {
   @override
   void initState() {
     super.initState();
-    _controller = CommunityController();
+    _controller = CommunityController(
+      repository: widget.repository,
+      currentUserId: widget.currentUserId,
+    );
+    if (widget.active) _controller.loadPosts();
+  }
+
+  @override
+  void didUpdateWidget(covariant CommunityScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!oldWidget.active && widget.active) _controller.loadPosts();
   }
 
   @override
@@ -42,11 +58,22 @@ class _CommunityScreenState extends State<CommunityScreen> {
   }
 
   Future<void> _createPost() async {
-    final text = await Navigator.of(context).pushNamed<String>(
+    await Navigator.of(context).pushNamed<String>(
       AppRoutes.communityCreatePost,
+      arguments: CommunityCreatePostArgs(
+        onPublish: (text) async {
+          await _controller.createPost(text);
+        },
+      ),
     );
-    if (!mounted || text == null || text.trim().isEmpty) return;
-    _controller.createPost(text);
+  }
+
+  Future<void> _hidePost(String id) async {
+    try {
+      await _controller.hidePost(id);
+    } catch (error) {
+      if (mounted) widget.onNotice('Could not remove post: ' + error.toString());
+    }
   }
 
   @override
@@ -103,7 +130,20 @@ class _CommunityScreenState extends State<CommunityScreen> {
                                 onChanged: _controller.selectTab,
                               ),
                               const SizedBox(height: 25),
-                              if (posts.isEmpty)
+                              if (_controller.loadingPosts)
+                                const Center(child: CircularProgressIndicator())
+                              else if (_controller.feedError != null)
+                                Column(
+                                  children: [
+                                    Text(_controller.feedError!,
+                                        style: AppTypography.homeSecondary),
+                                    TextButton(
+                                      onPressed: _controller.loadPosts,
+                                      child: const Text('Retry'),
+                                    ),
+                                  ],
+                                )
+                              else if (posts.isEmpty)
                                 const Padding(
                                   padding: EdgeInsets.symmetric(vertical: 30),
                                   child: Text(
@@ -112,12 +152,14 @@ class _CommunityScreenState extends State<CommunityScreen> {
                                     style: AppTypography.homeSecondary,
                                   ),
                                 ),
+                              if (!_controller.loadingPosts && _controller.feedError == null)
                               for (var i = 0; i < posts.length; i++) ...[
                                 if (i != 0) const SizedBox(height: 15),
                                 CommunityPostCard(
                                   key: ValueKey(posts[i].id),
                                   post: posts[i],
-                                  onHide: _controller.hidePost,
+                                  currentUserId: _controller.currentUserId,
+                                  onHide: _hidePost,
                                   onOpenReplies: () => Navigator.of(context).pushNamed(
                                     AppRoutes.communityPostReplies,
                                     arguments: CommunityRepliesArgs(

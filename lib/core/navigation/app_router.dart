@@ -10,6 +10,7 @@ import '../../features/home/domain/models/home_models.dart';
 import '../../features/notifications/presentation/controllers/notifications_controller.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/community/presentation/models/community_replies_args.dart';
+import '../../features/community/presentation/models/community_create_post_args.dart';
 import '../../features/community/presentation/screens/community_post_replies_screen.dart';
 import '../../features/community/presentation/screens/community_create_post_screen.dart';
 import '../../features/listen/domain/models/listen_audio_episode.dart';
@@ -66,7 +67,11 @@ abstract final class AppRouter {
     if (settings.name == AppRoutes.communityCreatePost) {
       return MaterialPageRoute<String>(
         settings: settings,
-        builder: (_) => const CommunityCreatePostScreen(),
+        builder: (_) => CommunityCreatePostScreen(
+          onPublish: settings.arguments is CommunityCreatePostArgs
+              ? (settings.arguments! as CommunityCreatePostArgs).onPublish
+              : null,
+        ),
       );
     }
     return MaterialPageRoute<void>(

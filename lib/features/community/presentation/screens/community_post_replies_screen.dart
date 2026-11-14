@@ -10,8 +10,8 @@ import '../../../../core/widgets/app_text_field.dart';
 import '../models/community_replies_args.dart';
 import '../widgets/community_post_card.dart';
 
-/// UI-only replies for the selected community post. It uses the same
-/// CommunityController that owns the feed so updates survive Back navigation.
+/// The approved replies UI shows the selected server discussion.
+/// Shared controller updates the feed after a successful reply.
 class CommunityPostRepliesScreen extends StatefulWidget {
   const CommunityPostRepliesScreen({required this.args, super.key});
 
@@ -26,6 +26,34 @@ class _CommunityPostRepliesScreenState extends State<CommunityPostRepliesScreen>
   final TextEditingController _textController = TextEditingController();
   final FocusNode _replyFocus = FocusNode();
   final ScrollController _scrollController = ScrollController();
+  bool _submitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.args.controller.loadThread(widget.args.postId);
+  }
+
+  Future<void> _hidePost(String id) async {
+    try {
+      await widget.args.controller.hidePost(id);
+      if (mounted) Navigator.of(context).maybePop();
+    } catch (error) {
+      if (mounted) _notice('Unable to remove post: ' + error.toString());
+    }
+  }
+
+  Future<void> _hideReply(String postId, String replyId) async {
+    try {
+      await widget.args.controller.hideReply(postId, replyId);
+    } catch (error) {
+      if (mounted) _notice('Unable to remove reply: ' + error.toString());
+    }
+  }
+
+  void _notice(String value) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(value)));
+  }
 
   @override
   void dispose() {
@@ -35,29 +63,32 @@ class _CommunityPostRepliesScreenState extends State<CommunityPostRepliesScreen>
     super.dispose();
   }
 
-  void _submitReply() {
+  Future<void> _submitReply() async {
+    if (_submitting) return;
     final body = _textController.text.trim();
     if (body.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please write a reply.')),
-      );
+      _notice('Please write a reply.');
       return;
     }
-    final didSubmit = widget.args.controller.submitReply(
-      widget.args.postId,
-      body,
-    );
-    if (!didSubmit) return;
-    _textController.clear();
-    _replyFocus.unfocus();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || !_scrollController.hasClients) return;
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 220),
-        curve: Curves.easeOut,
-      );
-    });
+    setState(() => _submitting = true);
+    try {
+      final saved = await widget.args.controller.submitReply(widget.args.postId, body);
+      if (!saved || !mounted) return;
+      _textController.clear();
+      _replyFocus.unfocus();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted || !_scrollController.hasClients) return;
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOut,
+        );
+      });
+    } catch (error) {
+      if (mounted) _notice('Unable to submit reply: ' + error.toString());
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
   }
 
   @override
@@ -112,10 +143,8 @@ class _CommunityPostRepliesScreenState extends State<CommunityPostRepliesScreen>
                               CommunityPostCard(
                                 key: Key('replies_original_${post.id}'),
                                 post: post,
-                                onHide: (id) {
-                                  widget.args.controller.hidePost(id);
-                                  Navigator.of(context).maybePop();
-                                },
+                                currentUserId: widget.args.controller.currentUserId,
+                                onHide: _hidePost,
                               ),
                               const SizedBox(height: 20),
                               Text(
@@ -124,14 +153,28 @@ class _CommunityPostRepliesScreenState extends State<CommunityPostRepliesScreen>
                                 style: AppTypography.sectionHeading,
                               ),
                               const SizedBox(height: 15),
+                              if (widget.args.controller.loadingThread)
+                                const Center(child: CircularProgressIndicator())
+                              else if (widget.args.controller.threadError != null)
+                                Column(
+                                  children: [
+                                    Text(widget.args.controller.threadError!,
+                                      style: AppTypography.homeSecondary),
+                                    TextButton(
+                                      onPressed: () => widget.args.controller.loadThread(post.id),
+                                      child: const Text('Retry'),
+                                    ),
+                                  ],
+                                )
+                              else
                               for (var i = 0; i < replies.length; i++) ...[
                                 if (i != 0) const SizedBox(height: 15),
                                 CommunityPostCard(
                                   key: Key('reply_card_${replies[i].id}'),
                                   post: replies[i].asPostCardData(),
                                   showRepliesIndicator: false,
-                                  onHide: (id) =>
-                                      widget.args.controller.hideReply(post.id, id),
+                                  currentUserId: widget.args.controller.currentUserId,
+                                  onHide: (id) => _hideReply(post.id, id),
                                 ),
                               ],
                               const SizedBox(height: 15),
@@ -143,7 +186,7 @@ class _CommunityPostRepliesScreenState extends State<CommunityPostRepliesScreen>
                                 focusNode: _replyFocus,
                                 keyboardType: TextInputType.text,
                                 textInputAction: TextInputAction.send,
-                                onSubmitted: (_) => _submitReply(),
+                                onSubmitted: (_) { _submitReply(); },
                                 height: 58,
                                 backgroundColor: AppColors.outlinedButtonBackground,
                                 borderColor: AppColors.cardBorder,
@@ -152,7 +195,7 @@ class _CommunityPostRepliesScreenState extends State<CommunityPostRepliesScreen>
                               AppButton(
                                 key: const Key('community_submit_reply_button'),
                                 label: 'Submit Reply',
-                                onPressed: _submitReply,
+                                onPressed: _submitting ? null : _submitReply,
                               ),
                             ],
                           ),

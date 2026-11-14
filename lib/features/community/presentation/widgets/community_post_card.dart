@@ -6,7 +6,6 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_content_card.dart';
 import '../../../../core/widgets/app_user_avatar.dart';
-import '../../data/community_demo_data.dart';
 import '../../domain/models/community_post.dart';
 
 /// One global-style card for both demo and newly created community posts.
@@ -14,6 +13,7 @@ class CommunityPostCard extends StatelessWidget {
   const CommunityPostCard({
     required this.post,
     required this.onHide,
+    this.currentUserId,
     this.onOpenReplies,
     this.showRepliesIndicator = true,
     super.key,
@@ -21,6 +21,7 @@ class CommunityPostCard extends StatelessWidget {
 
   final CommunityPost post;
   final ValueChanged<String> onHide;
+  final String? currentUserId;
   final VoidCallback? onOpenReplies;
   final bool showRepliesIndicator;
 
@@ -37,6 +38,7 @@ class CommunityPostCard extends StatelessWidget {
               AppUserAvatar(
                 key: Key('community_avatar_${post.id}'),
                 asset: post.avatarAsset,
+                networkUrl: post.avatarUrl,
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -87,7 +89,7 @@ class CommunityPostCard extends StatelessWidget {
                   PopupMenuItem<String>(
                     value: 'hide',
                     child: Text(
-                      post.authorId == CommunityDemoData.currentUserId
+                      currentUserId != null && post.authorId == currentUserId
                           ? 'Remove post'
                           : 'Hide post',
                     ),

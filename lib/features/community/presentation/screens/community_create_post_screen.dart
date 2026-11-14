@@ -8,10 +8,11 @@ import '../../../../core/widgets/app_detail_page_header.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_content_card.dart';
 
-/// Full-screen, UI-only Create a Post page. Returns its text to the
-/// Community tab, which owns the local in-memory post collection.
+/// Approved Create Post layout. Saves to Laravel before closing.
 class CommunityCreatePostScreen extends StatefulWidget {
-  const CommunityCreatePostScreen({super.key});
+  const CommunityCreatePostScreen({this.onPublish, super.key});
+
+  final Future<void> Function(String body)? onPublish;
 
   @override
   State<CommunityCreatePostScreen> createState() =>
@@ -21,6 +22,7 @@ class CommunityCreatePostScreen extends StatefulWidget {
 class _CommunityCreatePostScreenState extends State<CommunityCreatePostScreen> {
   static const int _maxCharacters = 100;
   final TextEditingController _textController = TextEditingController();
+  bool _publishing = false;
 
   @override
   void dispose() {
@@ -28,7 +30,8 @@ class _CommunityCreatePostScreenState extends State<CommunityCreatePostScreen> {
     super.dispose();
   }
 
-  void _publish() {
+  Future<void> _publish() async {
+    if (_publishing) return;
     final body = _textController.text.trim();
     if (body.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -36,7 +39,20 @@ class _CommunityCreatePostScreenState extends State<CommunityCreatePostScreen> {
       );
       return;
     }
-    Navigator.of(context).pop(body);
+    setState(() => _publishing = true);
+    try {
+      final action = widget.onPublish;
+      if (action != null) await action(body);
+      if (mounted) Navigator.of(context).pop(body);
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not publish post: ' + error.toString())),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _publishing = false);
+    }
   }
 
   @override
@@ -148,7 +164,7 @@ class _CommunityCreatePostScreenState extends State<CommunityCreatePostScreen> {
                               AppButton(
                                 key: const Key('community_publish_button'),
                                 label: 'Publish Post',
-                                onPressed: _publish,
+                                onPressed: _publishing ? null : _publish,
                               ),
                               const SizedBox(height: 20),
                               AppButton(

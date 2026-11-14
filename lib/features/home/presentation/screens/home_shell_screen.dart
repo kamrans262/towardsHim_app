@@ -19,17 +19,19 @@ import '../../../weekly_challenges/presentation/screens/weekly_challenges_screen
 import '../../../weekly_challenges/data/challenge_repository.dart';
 import '../../../weekly_challenges/domain/models/weekly_challenge.dart';
 import '../../../community/presentation/screens/community_screen.dart';
+import '../../../community/data/community_repository.dart';
 import '../../../profile/presentation/screens/profile_screen.dart';
 import '../../../profile/presentation/controllers/profile_controller.dart';
 
 /// Existing main shell, preserving approved widgets and navigation.
 class HomeShellScreen extends StatefulWidget {
   const HomeShellScreen({this.guestMode = false, this.initialTab = HomeTab.home,
-    this.challengeRepository, super.key});
+    this.challengeRepository, this.communityRepository, super.key});
 
   final bool guestMode;
   final HomeTab initialTab;
   final ChallengeRepository? challengeRepository;
+  final CommunityRepository? communityRepository;
 
   @override
   State<HomeShellScreen> createState() => _HomeShellScreenState();
@@ -194,6 +196,8 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
                   onOpenChallenge: _openChallenge,
                 ),
                 CommunityScreen(
+                  repository: widget.communityRepository,
+                  active: selected == HomeTab.community,
                   onNotice: _showNotice,
                   onNotifications: _openNotifications,
                   onProfile: _openProfile,

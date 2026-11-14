@@ -1,3 +1,4 @@
+import 'support/fake_community_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:towards_him_app/core/navigation/app_router.dart';
@@ -30,25 +31,32 @@ void main() {
     }
   });
 
-  test('All/My Posts filtering and local post creation', () {
-    final controller = CommunityController();
+  test('All/My Posts filter the member API and posts persist', () async {
+    final repository = FakeCommunityRepository();
+    final controller = CommunityController(
+      repository: repository,
+      currentUserId: CommunityDemoData.currentUserId,
+    );
     addTearDown(controller.dispose);
+    await controller.loadPosts();
     expect(controller.visiblePosts.length, 3);
     controller.selectTab(CommunityFeedTab.myPosts);
     expect(controller.visiblePosts.length, 2);
-    controller.createPost('  Sharing faith together  ');
+    expect(await controller.createPost('  Sharing faith together  '), isTrue);
     expect(controller.visiblePosts.length, 3);
     expect(controller.visiblePosts.first.body, 'Sharing faith together');
     expect(controller.visiblePosts.first.timeLabel, 'Just now');
-    controller.hidePost(controller.visiblePosts.first.id);
+    await controller.hidePost(controller.visiblePosts.first.id);
     expect(controller.visiblePosts.length, 2);
     controller.selectTab(CommunityFeedTab.allPosts);
+    expect(controller.visiblePosts.length, 3);
+    await controller.loadPosts();
     expect(controller.visiblePosts.length, 3);
   });
 
   Future<void> openCommunity(WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(home: const HomeShellScreen(), onGenerateRoute: AppRouter.onGenerateRoute),
+      MaterialApp(home: HomeShellScreen(communityRepository: FakeCommunityRepository()), onGenerateRoute: AppRouter.onGenerateRoute),
     );
     await tester.tap(find.byKey(const Key('nav_Community')));
     await tester.pumpAndSettle();
@@ -98,7 +106,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Create Post page adds an in-memory post to My Posts',
+  testWidgets('Create Post page saves a post and returns to My Posts',
       (tester) async {
     await openCommunity(tester);
     await tester.tap(find.byKey(const Key('community_add_post')));
