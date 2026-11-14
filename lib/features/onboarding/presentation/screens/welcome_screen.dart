@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../profile/data/platform_content_store.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -7,7 +9,7 @@ import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_onboarding_layout.dart';
 import '../../../../core/widgets/toward_him_logo.dart';
 
-class WelcomeScreen extends StatelessWidget {
+class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({
     this.onCreateAccount,
     this.onLogin,
@@ -24,15 +26,28 @@ class WelcomeScreen extends StatelessWidget {
       'you grow closer to HIM';
 
   @override
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    PlatformContentStore.instance.load(refresh: true);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return AppOnboardingLayout(
+    return AnimatedBuilder(
+      animation: PlatformContentStore.instance,
+      builder: (context, _) => AppOnboardingLayout(
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const Center(child: TowardHimLogo()),
           const SizedBox(height: AppSpacing.logoToHeading),
-          const Text(
-            'Welcome to Toward HIM',
+          Text(
+            PlatformContentStore.instance.content.welcomeHeading,
             style: AppTypography.heading,
             textAlign: TextAlign.center,
           ),
@@ -42,8 +57,8 @@ class WelcomeScreen extends StatelessWidget {
               constraints: BoxConstraints(
                 maxWidth: AppSpacing.descriptionMaxWidth,
               ),
-              child: const Text(
-                description,
+              child: Text(
+                PlatformContentStore.instance.content.introductionText,
                 style: AppTypography.description,
                 textAlign: TextAlign.center,
               ),
@@ -64,19 +79,20 @@ class WelcomeScreen extends StatelessWidget {
               AppButton(
                 label: 'Create Account',
                 variant: AppButtonVariant.outlined,
-                onPressed: onCreateAccount,
+                onPressed: widget.onCreateAccount,
               ),
               const SizedBox(height: AppSpacing.buttonsGap),
               AppButton(
                 label: 'Login',
-                onPressed: onLogin,
+                onPressed: widget.onLogin,
               ),
               const SizedBox(height: AppSpacing.loginToGuest),
-              _GuestAction(onPressed: onContinueAsGuest),
+              _GuestAction(onPressed: widget.onContinueAsGuest),
             ],
           ),
         ),
       ),
+    ),
     );
   }
 }

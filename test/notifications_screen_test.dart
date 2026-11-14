@@ -1,3 +1,6 @@
+import 'support/fake_notification_repository.dart';
+import 'support/fake_challenge_repository.dart';
+import 'support/fake_community_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -13,8 +16,9 @@ import 'package:towards_him_app/features/notifications/presentation/widgets/noti
 import 'package:towards_him_app/features/notifications/presentation/widgets/notification_swipe_card.dart';
 
 void main() {
-  test('Five notification models, local deletion, open-state and read status', () {
-    final controller = NotificationsController();
+  test('Five notifications, server-backed deletion, open-state and read status', () async {
+    final controller = NotificationsController(repository: FakeNotificationRepository());
+    await controller.load();
     addTearDown(controller.dispose);
     expect(controller.notifications.length, 5);
     expect(controller.notifications.map((n) => n.id).toSet().length, 5);
@@ -31,9 +35,9 @@ void main() {
     expect(controller.openId, isNull);
 
     expect(controller.notifications.first.isRead, isFalse);
-    controller.markRead('notification-1');
+    await controller.markRead('notification-1');
     expect(controller.notifications.first.isRead, isTrue);
-    controller.delete('notification-2');
+    await controller.delete('notification-2');
     expect(controller.notifications.length, 4);
     expect(
       controller.notifications.map((item) => item.id),
@@ -44,7 +48,11 @@ void main() {
   Future<void> showNotifications(WidgetTester tester, {String tab = 'Home'}) async {
     await tester.pumpWidget(
       MaterialApp(
-        home: const HomeShellScreen(),
+        home: HomeShellScreen(
+          notificationRepository: FakeNotificationRepository(),
+          challengeRepository: FakeChallengeRepository(),
+          communityRepository: FakeCommunityRepository(),
+        ),
         onGenerateRoute: AppRouter.onGenerateRoute,
       ),
     );

@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../data/about_toward_him_demo_data.dart';
+import '../../data/platform_content_store.dart';
 import '../../domain/models/about_toward_him.dart';
 import '../widgets/about_contact_card.dart';
 import '../../../weekly_challenges/presentation/widgets/weekly_challenge_hero.dart';
@@ -12,8 +13,19 @@ import '../widgets/about_section_card.dart';
 
 /// About Toward HIM, built from shared Flutter components and Figma copy.
 /// Deliberately separate from the app shell: no bottom bar on this detail page.
-class AboutTowardHimScreen extends StatelessWidget {
+class AboutTowardHimScreen extends StatefulWidget {
   const AboutTowardHimScreen({super.key});
+
+  @override
+  State<AboutTowardHimScreen> createState() => _AboutTowardHimScreenState();
+}
+
+class _AboutTowardHimScreenState extends State<AboutTowardHimScreen> {
+  @override
+  void initState() {
+    super.initState();
+    PlatformContentStore.instance.load(refresh: true);
+  }
 
   void _notice(BuildContext context, String text) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -52,7 +64,9 @@ class AboutTowardHimScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnnotatedRegion<SystemUiOverlayStyle>(
+    return AnimatedBuilder(
+      animation: PlatformContentStore.instance,
+      builder: (context, _) => AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.dark,
       child: Scaffold(
         key: const Key('about_toward_him_scaffold'),
@@ -102,7 +116,7 @@ class AboutTowardHimScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 5),
                           Text(
-                            AboutTowardHimDemoData.description,
+                            PlatformContentStore.instance.content.aboutInformation,
                             style: AppTypography.homeSecondary,
                           ),
                           const SizedBox(height: 20),
@@ -135,6 +149,7 @@ class AboutTowardHimScreen extends StatelessWidget {
           ],
         ),
       ),
+    ),
     );
   }
 }

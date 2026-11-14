@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_content_card.dart';
 import '../../../../core/widgets/app_audio_thumbnail.dart';
@@ -26,6 +27,9 @@ class NotificationCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(AppSpacing.homeCardRadius),
       child: AppContentCard(
         padding: const EdgeInsets.all(AppSpacing.homeCardPadding),
+        borderColor: notification.isRead
+            ? AppColors.cardBorder
+            : AppColors.primaryOrange.withValues(alpha: 0.35),
         child: LayoutBuilder(
           builder: (context, constraints) {
             // Keep the 100px image on small phones without squeezing the title.
@@ -109,6 +113,7 @@ class NotificationCard extends StatelessWidget {
   Widget _thumbnail() => AppAudioThumbnail(
         key: Key('notification_image_${notification.id}'),
         imageAsset: notification.imageAsset,
+        networkUrl: notification.artworkUrl,
         size: 100,
       );
 }

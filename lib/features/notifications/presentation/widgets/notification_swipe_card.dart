@@ -13,6 +13,7 @@ class NotificationSwipeCard extends StatefulWidget {
     required this.onOpen,
     required this.onClose,
     required this.onDelete,
+    this.onDeleteAsync,
     required this.child,
     super.key,
   });
@@ -22,6 +23,7 @@ class NotificationSwipeCard extends StatefulWidget {
   final VoidCallback onOpen;
   final VoidCallback onClose;
   final VoidCallback onDelete;
+  final Future<bool> Function()? onDeleteAsync;
   final Widget child;
 
   @override
@@ -33,6 +35,7 @@ class _NotificationSwipeCardState extends State<NotificationSwipeCard> {
   static const Duration _duration = Duration(milliseconds: 220);
   double? _dragOffset;
   bool _deleting = false;
+  bool _pending = false;
 
   void _start(DragStartDetails details) {
     setState(() => _dragOffset = widget.isOpen ? -_actionWidth : 0);
@@ -62,8 +65,23 @@ class _NotificationSwipeCardState extends State<NotificationSwipeCard> {
     }
   }
 
-  void _delete() {
-    if (_deleting) return;
+  Future<void> _delete() async {
+    if (_deleting || _pending) return;
+    _pending = true;
+    if (widget.onDeleteAsync != null) {
+      var accepted = false;
+      try {
+        accepted = await widget.onDeleteAsync!();
+      } catch (_) {
+        accepted = false;
+      }
+      if (!mounted) return;
+      if (!accepted) {
+        _pending = false;
+        return;
+      }
+    }
+    if (!mounted) return;
     setState(() => _deleting = true);
     // Keep the row in the list long enough to animate away.
     Future<void>.delayed(_duration, () {

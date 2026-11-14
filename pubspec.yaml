@@ -18,6 +18,9 @@ dependencies:
   google_sign_in: ^7.2.0
   sign_in_with_apple: ^8.2.0
   just_audio: ^0.10.6
+  firebase_core: ^4.15.2
+  firebase_messaging: ^16.7.1
+  url_launcher: ^6.3.2
 
 dev_dependencies:
   flutter_test:
