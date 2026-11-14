@@ -14,6 +14,7 @@ import '../../features/community/presentation/screens/community_post_replies_scr
 import '../../features/community/presentation/screens/community_create_post_screen.dart';
 import '../../features/listen/domain/models/listen_audio_episode.dart';
 import '../../features/weekly_challenges/domain/models/weekly_challenge.dart';
+import '../../features/weekly_challenges/data/challenge_repository.dart';
 import '../../features/weekly_challenges/domain/models/daily_challenge.dart';
 import '../../features/weekly_challenges/presentation/screens/daily_challenge_screen.dart';
 import '../../features/weekly_challenges/presentation/screens/weekly_challenge_detail_screen.dart';
@@ -26,6 +27,17 @@ import '../../features/profile/presentation/screens/edit_profile_screen.dart';
 import '../../features/profile/presentation/screens/privacy_policy_screen.dart';
 import '../../features/profile/presentation/screens/terms_of_service_screen.dart';
 import '../../features/profile/presentation/controllers/profile_controller.dart';
+
+/// Carries the selected challenge into the already approved detail screen.
+class WeeklyChallengeNavigationArgs {
+  const WeeklyChallengeNavigationArgs({
+    required this.challenge,
+    this.repository,
+  });
+
+  final WeeklyChallenge challenge;
+  final ChallengeRepository? repository;
+}
 
 abstract final class AppRoutes {
   static const splash = '/';
@@ -123,11 +135,17 @@ abstract final class AppRouter {
                 challenge: settings.arguments! as DailyChallenge,
               )
             : const WelcomeScreen(),
-        AppRoutes.weeklyChallengeDetail => settings.arguments is WeeklyChallenge
-            ? WeeklyChallengeDetailScreen(
-                challenge: settings.arguments! as WeeklyChallenge,
-              )
-            : const WelcomeScreen(),
+        AppRoutes.weeklyChallengeDetail =>
+            settings.arguments is WeeklyChallengeNavigationArgs
+                ? WeeklyChallengeDetailScreen(
+                    challenge: (settings.arguments! as WeeklyChallengeNavigationArgs).challenge,
+                    repository: (settings.arguments! as WeeklyChallengeNavigationArgs).repository,
+                  )
+                : settings.arguments is WeeklyChallenge
+                    ? WeeklyChallengeDetailScreen(
+                        challenge: settings.arguments! as WeeklyChallenge,
+                      )
+                    : const WelcomeScreen(),
         AppRoutes.player => settings.arguments is ListenAudioEpisode
             ? AudioPlayerScreen(
                 episode: settings.arguments! as ListenAudioEpisode,

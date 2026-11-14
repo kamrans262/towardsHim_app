@@ -5,6 +5,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_section_heading.dart';
 import '../../data/home_demo_data.dart';
 import '../../domain/models/home_models.dart';
+import '../../../weekly_challenges/domain/models/weekly_challenge.dart';
 import '../widgets/home_continue_listening_card.dart';
 import '../widgets/home_featured_card.dart';
 import '../widgets/home_hero_header.dart';
@@ -16,6 +17,8 @@ class HomeDashboardScreen extends StatefulWidget {
   const HomeDashboardScreen({
     required this.onSelectTab,
     this.firstName,
+    this.currentChallenge,
+    this.onOpenChallenge,
     required this.onNotice,
     this.onNotifications,
     this.onProfile,
@@ -25,6 +28,8 @@ class HomeDashboardScreen extends StatefulWidget {
 
   final ValueChanged<HomeTab> onSelectTab;
   final String? firstName;
+  final WeeklyChallenge? currentChallenge;
+  final ValueChanged<WeeklyChallenge>? onOpenChallenge;
   final ValueChanged<String> onNotice;
   final VoidCallback? onNotifications;
   final VoidCallback? onProfile;
@@ -159,10 +164,26 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                     horizontal: AppSpacing.screenHorizontal,
                   ),
                   child: HomeFeaturedCard(
-                    content: HomeDemoData.featured,
-                    onPressed: () => widget.onNotice(
-                      'Featured content UI is coming soon.',
-                    ),
+                    content: widget.currentChallenge == null
+                        ? HomeDemoData.featured
+                        : HomeFeaturedContent(
+                            id: widget.currentChallenge!.id,
+                            category: 'Weekly Toward HIM 3',
+                            title: widget.currentChallenge!.title,
+                            description:
+                                widget.currentChallenge!.completedDays.toString() +
+                                ' of 7 days completed · ' +
+                                widget.currentChallenge!.description,
+                            imageAsset: HomeDemoData.featured.imageAsset,
+                          ),
+                    onPressed: () {
+                      final challenge = widget.currentChallenge;
+                      if (challenge != null && widget.onOpenChallenge != null) {
+                        widget.onOpenChallenge!(challenge);
+                      } else {
+                        widget.onNotice('Featured content UI is coming soon.');
+                      }
+                    },
                   ),
                 ),
               ),

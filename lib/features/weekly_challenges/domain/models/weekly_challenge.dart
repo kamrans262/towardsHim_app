@@ -13,6 +13,7 @@ class WeeklyChallenge {
     required this.completedDays,
     required this.totalDays,
     required this.category,
+    this.days = const [],
   }) : assert(totalDays > 0),
        assert(completedDays >= 0),
        assert(completedDays <= totalDays);
@@ -27,6 +28,44 @@ class WeeklyChallenge {
   final int completedDays;
   final int totalDays;
   final WeeklyChallengeCategory category;
+  final List<WeeklyChallengeDay> days;
+
+  Set<int> get completedDayNumbers => days
+      .where((day) => day.completed)
+      .map((day) => day.day)
+      .toSet();
+
+  factory WeeklyChallenge.fromApi(Map<String, dynamic> json) {
+    final completed = (json['completed_days'] as num?)?.toInt() ?? 0;
+    final total = (json['total_days'] as num?)?.toInt() ?? 7;
+    final rawDays = json['days'];
+    final days = rawDays is List
+        ? rawDays.map((item) => WeeklyChallengeDay.fromApi(
+            Map<String, dynamic>.from(item as Map),
+          )).toList(growable: false)
+        : <WeeklyChallengeDay>[];
+    final isCurrent = json['is_current'] == true;
+    final start = DateTime.tryParse(json['start_date']?.toString() ?? '');
+    final end = DateTime.tryParse(json['end_date']?.toString() ?? '');
+
+    return WeeklyChallenge(
+      id: json['id'].toString(),
+      title: json['title']?.toString() ?? '',
+      description: json['instructions']?.toString() ?? '',
+      imageAsset: 'assets/images/home/golden_hour_meditation.webp',
+      startDate: start ?? DateTime(2000),
+      endDate: end ?? start?.add(const Duration(days: 6)) ?? DateTime(2000),
+      status: completed == total
+          ? WeeklyChallengeStatus.completed
+          : WeeklyChallengeStatus.current,
+      completedDays: completed,
+      totalDays: total,
+      category: isCurrent
+          ? WeeklyChallengeCategory.featured
+          : WeeklyChallengeCategory.previous,
+      days: days,
+    );
+  }
 
   double get progress => (completedDays / totalDays).clamp(0.0, 1.0).toDouble();
   String get progressLabel => 'Day $completedDays of $totalDays';
@@ -40,4 +79,23 @@ class WeeklyChallenge {
     final end = months[endDate.month - 1] + ' ' + endDate.day.toString();
     return start + ' – ' + end;
   }
+}
+
+class WeeklyChallengeDay {
+  const WeeklyChallengeDay({
+    required this.day,
+    required this.text,
+    required this.completed,
+  });
+
+  final int day;
+  final String text;
+  final bool completed;
+
+  factory WeeklyChallengeDay.fromApi(Map<String, dynamic> json) =>
+      WeeklyChallengeDay(
+        day: (json['day'] as num).toInt(),
+        text: json['text']?.toString() ?? '',
+        completed: json['completed'] == true,
+      );
 }

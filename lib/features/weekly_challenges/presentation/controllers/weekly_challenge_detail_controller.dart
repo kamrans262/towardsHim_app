@@ -17,6 +17,13 @@ class WeeklyChallengeDetailController extends ChangeNotifier {
 
   bool isCompleted(int day) => _completedDays.contains(day);
 
+  void replaceCompleted(Set<int> days) {
+    _completedDays
+      ..clear()
+      ..addAll(days.where((day) => day >= 1 && day <= totalDays));
+    notifyListeners();
+  }
+
   void toggle(int day) {
     if (day < 1 || day > totalDays) return;
     if (!_completedDays.add(day)) _completedDays.remove(day);

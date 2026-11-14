@@ -76,6 +76,7 @@ class AuthRepository {
       final Future<http.Response> pending = switch (method) {
         'POST' => http.post(uri, headers: headers, body: encoded),
         'PATCH' => http.patch(uri, headers: headers, body: encoded),
+        'PUT' => http.put(uri, headers: headers, body: encoded),
         'DELETE' => http.delete(uri, headers: headers, body: encoded),
         _ => http.get(uri, headers: headers),
       };
@@ -109,6 +110,16 @@ class AuthRepository {
     } catch (_) {
       throw const AuthFailure('Unable to connect. Check your internet connection.');
     }
+  }
+
+  /// Shared authenticated requests for member features.
+  Future<Map<String, dynamic>> memberRequest(
+    String method, String path, {Map<String, dynamic>? body}
+  ) {
+    if (!isAuthenticated) {
+      throw const AuthFailure('Please sign in to use this feature.');
+    }
+    return _request(method, path, body: body, authorized: true);
   }
 
   Future<void> _storeLogin(Map<String, dynamic> payload) async {

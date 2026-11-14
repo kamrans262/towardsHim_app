@@ -1,3 +1,4 @@
+import 'support/fake_challenge_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:towards_him_app/core/theme/app_spacing.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,7 +13,7 @@ import 'package:towards_him_app/features/weekly_challenges/presentation/widgets/
 void main() {
   Future<void> openDaily(WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-      home: const HomeShellScreen(),
+      home: HomeShellScreen(challengeRepository: FakeChallengeRepository()),
       onGenerateRoute: AppRouter.onGenerateRoute,
     ));
     await tester.tap(find.byKey(const Key('nav_Towards HIM 3')));
@@ -39,8 +40,8 @@ void main() {
     await openDaily(tester);
     expect(find.byType(DailyChallengeScreen), findsOneWidget);
     expect(find.byType(AppBottomNavigation), findsNothing);
-    expect(find.text('October 8 – Daily Challenge'), findsOneWidget);
-    expect(find.text('Taste, See or Share'), findsOneWidget);
+    expect(find.text('Day 3 – Daily Challenge'), findsOneWidget);
+    expect(find.text('Toward HIM 3'), findsOneWidget);
     final rounded = tester.widget<Container>(
       find.byKey(const Key('challenge_detail_rounded_container')),
     );

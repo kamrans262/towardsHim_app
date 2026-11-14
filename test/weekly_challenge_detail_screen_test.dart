@@ -1,3 +1,4 @@
+import 'support/fake_challenge_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:towards_him_app/core/theme/app_spacing.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -10,7 +11,7 @@ import 'package:towards_him_app/core/navigation/app_router.dart';
 void main() {
   Future<void> openDetail(WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-      home: const HomeShellScreen(),
+      home: HomeShellScreen(challengeRepository: FakeChallengeRepository()),
       onGenerateRoute: AppRouter.onGenerateRoute,
     ));
     await tester.tap(find.byKey(const Key('nav_Towards HIM 3')));
@@ -51,7 +52,7 @@ void main() {
     expect(find.byType(WeeklyChallengeDetailScreen), findsNothing);
   });
 
-  testWidgets('Toggle updates local progress without backend', (tester) async {
+  testWidgets('Toggle saves and updates member progress', (tester) async {
     await openDetail(tester);
     await tester.drag(find.byKey(const Key('weekly_detail_scroll')), const Offset(0, -180));
     await tester.pumpAndSettle();

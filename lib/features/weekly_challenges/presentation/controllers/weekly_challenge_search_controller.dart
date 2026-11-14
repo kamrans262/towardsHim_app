@@ -4,7 +4,12 @@ import '../../domain/models/weekly_challenge.dart';
 /// State controller for local challenge filtering.
 class WeeklyChallengeSearchController extends ChangeNotifier {
   WeeklyChallengeSearchController(this._challenges);
-  final List<WeeklyChallenge> _challenges;
+  List<WeeklyChallenge> _challenges;
+
+  void replaceChallenges(List<WeeklyChallenge> challenges) {
+    _challenges = challenges;
+    notifyListeners();
+  }
   String _query = '';
   String get query => _query;
 

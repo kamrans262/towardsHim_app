@@ -38,16 +38,15 @@ void main() {
     expect(updates, 1);
   });
 
-  testWidgets('Login demo opens Home without authentication', (tester) async {
+  testWidgets('Login keeps approved UI and no longer bypasses authentication', (tester) async {
     await tester.pumpWidget(MaterialApp(
       initialRoute: AppRoutes.login,
       onGenerateRoute: AppRouter.onGenerateRoute,
     ));
     expect(find.byType(LoginScreen), findsOneWidget);
-    await tester.tap(find.text('Login'));
-    await tester.pumpAndSettle();
-    expect(find.byType(HomeShellScreen), findsOneWidget);
-    expect(find.text('Continue Where You Left Off'), findsOneWidget);
+    // Navigation is performed only after the real member API succeeds.
+    expect(find.byType(HomeShellScreen), findsNothing);
+    expect(find.text('Login'), findsOneWidget);
   });
 
   testWidgets('430px Home hero is full bleed, card overlaps and no logo',

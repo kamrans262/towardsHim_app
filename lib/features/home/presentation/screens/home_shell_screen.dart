@@ -16,6 +16,7 @@ import 'home_dashboard_screen.dart';
 import '../../../listen/presentation/screens/listen_screen.dart';
 import '../../../listen/domain/models/listen_audio_episode.dart';
 import '../../../weekly_challenges/presentation/screens/weekly_challenges_screen.dart';
+import '../../../weekly_challenges/data/challenge_repository.dart';
 import '../../../weekly_challenges/domain/models/weekly_challenge.dart';
 import '../../../community/presentation/screens/community_screen.dart';
 import '../../../profile/presentation/screens/profile_screen.dart';
@@ -23,10 +24,12 @@ import '../../../profile/presentation/controllers/profile_controller.dart';
 
 /// Existing main shell, preserving approved widgets and navigation.
 class HomeShellScreen extends StatefulWidget {
-  const HomeShellScreen({this.guestMode = false, this.initialTab = HomeTab.home, super.key});
+  const HomeShellScreen({this.guestMode = false, this.initialTab = HomeTab.home,
+    this.challengeRepository, super.key});
 
   final bool guestMode;
   final HomeTab initialTab;
+  final ChallengeRepository? challengeRepository;
 
   @override
   State<HomeShellScreen> createState() => _HomeShellScreenState();
@@ -39,6 +42,8 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
   late final Listenable _shellListeners;
   bool _showProfile = false;
   HomeQuickType? _listenCategory;
+  late final ChallengeRepository _challengeRepository;
+  WeeklyChallenge? _currentChallenge;
 
   @override
   void initState() {
@@ -46,6 +51,9 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
     _navigation = HomeNavigationController()..select(widget.initialTab);
     _notifications = NotificationsController();
     _profile = ProfileController();
+    _challengeRepository = widget.challengeRepository ?? ChallengeRepository.instance;
+    _challengeRepository.addListener(_refreshCurrentChallenge);
+    _refreshCurrentChallenge();
     _shellListeners = Listenable.merge([_navigation, _profile]);
   }
 
@@ -54,7 +62,37 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
     _navigation.dispose();
     _notifications.dispose();
     _profile.dispose();
+    _challengeRepository.removeListener(_refreshCurrentChallenge);
     super.dispose();
+  }
+
+  Future<void> _refreshCurrentChallenge() async {
+    if (widget.guestMode || !AuthRepository.instance.isAuthenticated) return;
+    try {
+      final items = await _challengeRepository.list();
+      if (!mounted) return;
+      setState(() {
+        for (final item in items) {
+          if (item.category == WeeklyChallengeCategory.featured) {
+            _currentChallenge = item;
+            return;
+          }
+        }
+        _currentChallenge = null;
+      });
+    } catch (_) {
+      // The home remains usable when the challenge service is unavailable.
+    }
+  }
+
+  void _openChallenge(WeeklyChallenge challenge) {
+    Navigator.of(context).pushNamed(
+      AppRoutes.weeklyChallengeDetail,
+      arguments: WeeklyChallengeNavigationArgs(
+        challenge: challenge,
+        repository: widget.challengeRepository,
+      ),
+    );
   }
 
   void _showNotice(String message) {
@@ -126,6 +164,8 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
               children: [
                 HomeDashboardScreen(
                   firstName: _profile.user.fullName.trim().split(RegExp(r'\s+')).first,
+                  currentChallenge: _currentChallenge,
+                  onOpenChallenge: _openChallenge,
                   onSelectTab: _select,
                   onOpenQuickMedia: _openQuickMedia,
                   onNotice: _showNotice,
@@ -146,15 +186,12 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
                   },
                 ),
                 WeeklyChallengesScreen(
+                  active: selected == HomeTab.towardHimThree,
+                  repository: widget.challengeRepository,
                   onNotice: _showNotice,
                   onNotifications: _openNotifications,
                   onProfile: _openProfile,
-                  onOpenChallenge: (WeeklyChallenge challenge) {
-                    Navigator.of(context).pushNamed(
-                      AppRoutes.weeklyChallengeDetail,
-                      arguments: challenge,
-                    );
-                  },
+                  onOpenChallenge: _openChallenge,
                 ),
                 CommunityScreen(
                   onNotice: _showNotice,

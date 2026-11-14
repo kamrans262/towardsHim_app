@@ -8,19 +8,23 @@ import '../../../../core/navigation/app_router.dart';
 import '../../../../core/widgets/app_content_card.dart';
 import '../../../../core/widgets/app_progress_bar.dart';
 import '../../data/weekly_challenge_detail_demo_data.dart';
+import '../../data/challenge_repository.dart';
 import '../../data/daily_challenge_demo_data.dart';
 import '../../domain/models/weekly_challenge.dart';
+import '../../domain/models/daily_challenge.dart';
 import '../controllers/weekly_challenge_detail_controller.dart';
 import '../widgets/weekly_challenge_hero.dart';
 
-/// UI-only weekly detail; the main five-tab navigation stays on the list.
+/// Existing Weekly detail UI with server-saved personal activity progress.
 class WeeklyChallengeDetailScreen extends StatefulWidget {
   const WeeklyChallengeDetailScreen({
     required this.challenge,
+    this.repository,
     super.key,
   });
 
   final WeeklyChallenge challenge;
+  final ChallengeRepository? repository;
 
   @override
   State<WeeklyChallengeDetailScreen> createState() =>
@@ -30,16 +34,78 @@ class WeeklyChallengeDetailScreen extends StatefulWidget {
 class _WeeklyChallengeDetailScreenState
     extends State<WeeklyChallengeDetailScreen> {
   late final WeeklyChallengeDetailController _controller;
+  late final ChallengeRepository _repository;
+  late WeeklyChallenge _challenge;
+  List<WeeklyChallengeDay> _days = const [];
+  bool _loading = false;
+  String? _error;
+  final Set<int> _saving = {};
 
   @override
   void initState() {
     super.initState();
+    _repository = widget.repository ?? ChallengeRepository.instance;
+    _challenge = widget.challenge;
+    _days = _challenge.days;
     _controller = WeeklyChallengeDetailController(
-      totalDays: widget.challenge.totalDays,
-      initiallyCompleted: widget.challenge.status ==
-              WeeklyChallengeStatus.completed
-          ? {for (var day = 1; day <= widget.challenge.totalDays; day++) day}
-          : WeeklyChallengeDetailDemoData.initiallyCompletedDays,
+      totalDays: _challenge.totalDays,
+      initiallyCompleted: _challenge.completedDayNumbers,
+    );
+    if (_days.isEmpty) _load();
+  }
+
+  Future<void> _load() async {
+    if (_loading) return;
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final challenge = await _repository.detail(widget.challenge.id);
+      if (!mounted) return;
+      _controller.replaceCompleted(challenge.completedDayNumbers);
+      setState(() {
+        _challenge = challenge;
+        _days = challenge.days;
+      });
+    } catch (error) {
+      if (mounted) setState(() => _error = error.toString());
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _toggle(int day) async {
+    if (_saving.contains(day) || _loading) return;
+    final next = !_controller.isCompleted(day);
+    _saving.add(day);
+    _controller.toggle(day);
+    try {
+      await _repository.setCompleted(_challenge.id, day, next);
+    } catch (error) {
+      if (!mounted) return;
+      _controller.toggle(day);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not save progress: $error')),
+      );
+    } finally {
+      _saving.remove(day);
+    }
+  }
+
+  void _openDay(WeeklyChallengeDay day) {
+    // The approved daily page's three choice cards remain presentation-only.
+    // The weekly checkbox is the authoritative completion state.
+    Navigator.of(context).pushNamed(
+      AppRoutes.dailyChallengeDetail,
+      arguments: DailyChallenge(
+        id: 'challenge-' + _challenge.id + '-day-' + day.day.toString(),
+        subtitle: 'Day ' + day.day.toString() + ' – Daily Challenge',
+        title: _challenge.title,
+        description: day.text,
+        initialSelectedOptionId: 'share',
+        options: DailyChallengeDemoData.october8.options,
+      ),
     );
   }
 
@@ -91,7 +157,7 @@ class _WeeklyChallengeDetailScreenState
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                widget.challenge.title,
+                                _challenge.title,
                                 style: AppTypography.cardTitle.copyWith(
                                   fontSize: 20,
                                   fontWeight: FontWeight.w600,
@@ -99,12 +165,12 @@ class _WeeklyChallengeDetailScreenState
                               ),
                               const SizedBox(height: 5),
                               Text(
-                                WeeklyChallengeDetailDemoData.dates,
+                                _challenge.datesLabel,
                                 style: AppTypography.homeSecondary,
                               ),
                               const SizedBox(height: 5),
-                              const Text(
-                                WeeklyChallengeDetailDemoData.description,
+                              Text(
+                                _challenge.description,
                                 style: AppTypography.homeSecondary,
                               ),
                               const SizedBox(height: 20),
@@ -115,26 +181,28 @@ class _WeeklyChallengeDetailScreenState
                                 style: AppTypography.sectionHeading,
                               ),
                               const SizedBox(height: 15),
-                              for (var index = 0;
-                                  index < WeeklyChallengeDetailDemoData.activities.length;
-                                  index++) ...[
-                                if (index != 0) const SizedBox(height: 20),
-                                _DailyActivityCard(
-                                  activity: WeeklyChallengeDetailDemoData.activities[index],
-                                  completed: _controller.isCompleted(
-                                    WeeklyChallengeDetailDemoData.activities[index].day,
-                                  ),
-                                  onToggle: () => _controller.toggle(
-                                    WeeklyChallengeDetailDemoData.activities[index].day,
-                                  ),
-                                  onOpen: () => Navigator.of(context).pushNamed(
-                                    AppRoutes.dailyChallengeDetail,
-                                    arguments: DailyChallengeDemoData.forDay(
-                                      WeeklyChallengeDetailDemoData.activities[index].day,
+                              if (_loading)
+                                const Center(child: CircularProgressIndicator())
+                              else if (_error != null)
+                                Column(
+                                  children: [
+                                    Text(_error!, style: AppTypography.homeSecondary),
+                                    TextButton(onPressed: _load, child: const Text('Retry')),
+                                  ],
+                                )
+                              else
+                                for (var index = 0; index < _days.length; index++) ...[
+                                  if (index != 0) const SizedBox(height: 20),
+                                  _DailyActivityCard(
+                                    activity: WeeklyDailyActivity(
+                                      day: _days[index].day,
+                                      text: _days[index].text,
                                     ),
+                                    completed: _controller.isCompleted(_days[index].day),
+                                    onToggle: () => _toggle(_days[index].day),
+                                    onOpen: () => _openDay(_days[index]),
                                   ),
-                                ),
-                              ],
+                                ],
                             ],
                           ),
                         ),
