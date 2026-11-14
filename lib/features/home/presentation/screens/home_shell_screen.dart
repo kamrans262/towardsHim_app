@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../auth/data/auth_repository.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -77,7 +79,13 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
     setState(() => _showProfile = true);
   }
 
-  void _logout() {
+  Future<void> _logout() async {
+    try {
+      await AuthRepository.instance.logout();
+    } catch (_) {
+      // Local token is cleared even when the network is unavailable.
+    }
+    if (!mounted) return;
     Navigator.of(context).pushNamedAndRemoveUntil(
       AppRoutes.welcome,
       (route) => false,

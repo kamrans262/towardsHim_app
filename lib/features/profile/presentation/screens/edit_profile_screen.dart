@@ -38,6 +38,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final FocusNode _emailFocus = FocusNode();
   Uint8List? _pendingPhoto;
   bool _isPicking = false;
+  bool _isSaving = false;
 
   @override
   void initState() {
@@ -84,7 +85,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
-  void _save() {
+  Future<void> _save() async {
+    if (_isSaving) return;
     final name = _name.text.trim();
     final email = _email.text.trim();
     if (name.isEmpty) {
@@ -95,13 +97,20 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       _notice('Please enter a valid email address.');
       return;
     }
-    widget.controller.update(
-      fullName: name,
-      email: email,
-      bio: _bio.text,
-      photoBytes: _pendingPhoto,
-    );
-    Navigator.of(context).pop();
+    setState(() => _isSaving = true);
+    try {
+      await widget.controller.update(
+        fullName: name,
+        email: email,
+        bio: _bio.text,
+        photoBytes: _pendingPhoto,
+      );
+      if (mounted) Navigator.of(context).pop();
+    } catch (error) {
+      if (mounted) _notice(error.toString());
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
   }
 
   void _notice(String message) {
@@ -165,6 +174,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                           key: const Key('edit_profile_avatar'),
                                           asset: user.avatarAsset,
                                           bytes: _pendingPhoto ?? user.avatarBytes,
+                                          networkUrl: user.avatarUrl,
                                           size: 100,
                                         ),
                                         Positioned(
@@ -267,7 +277,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               ),
                               const SizedBox(height: 10),
                               const Text(
-                                'Changes are saved locally for this app session.',
+                                'Your changes are saved to your account.',
                                 style: AppTypography.playerTime,
                               ),
                             ],
@@ -279,7 +289,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               AppButton(
                                 key: const Key('edit_profile_save'),
                                 label: 'Save Changes',
-                                onPressed: _save,
+                                onPressed: _isSaving ? null : _save,
                               ),
                               const SizedBox(height: 20),
                               AppButton(

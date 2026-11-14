@@ -28,6 +28,7 @@ class ProfileUserCard extends StatelessWidget {
             key: const Key('profile_user_avatar'),
             asset: user.avatarAsset,
             bytes: user.avatarBytes,
+            networkUrl: user.avatarUrl,
           ),
           const SizedBox(width: 10),
           Expanded(

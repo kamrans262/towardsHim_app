@@ -9,12 +9,14 @@ class AppUserAvatar extends StatelessWidget {
   const AppUserAvatar({
     required this.asset,
     this.bytes,
+    this.networkUrl,
     this.size = 48,
     super.key,
   });
 
   final String asset;
   final Uint8List? bytes;
+  final String? networkUrl;
   final double size;
 
   @override
@@ -32,7 +34,15 @@ class AppUserAvatar extends StatelessWidget {
                 errorBuilder: (context, error, stackTrace) =>
                     _fallback(),
               )
-            : Image.asset(
+            : (networkUrl != null && networkUrl!.isNotEmpty)
+                ? Image.network(
+                    networkUrl!,
+                    width: size,
+                    height: size,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => _fallback(),
+                  )
+                : Image.asset(
                 asset,
                 width: size,
                 height: size,

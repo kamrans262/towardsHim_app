@@ -10,6 +10,7 @@ class ProfileUser {
     this.phone,
     this.about,
     this.avatarBytes,
+    this.avatarUrl,
   });
 
   final String id;
@@ -19,12 +20,14 @@ class ProfileUser {
   final String? phone;
   final String? about;
   final Uint8List? avatarBytes;
+  final String? avatarUrl;
 
   ProfileUser copyWith({
     String? fullName,
     String? email,
     String? about,
     Uint8List? avatarBytes,
+    String? avatarUrl,
   }) => ProfileUser(
         id: id,
         fullName: fullName ?? this.fullName,
@@ -33,6 +36,7 @@ class ProfileUser {
         phone: phone,
         about: about ?? this.about,
         avatarBytes: avatarBytes ?? this.avatarBytes,
+        avatarUrl: avatarUrl ?? this.avatarUrl,
       );
 }
 
