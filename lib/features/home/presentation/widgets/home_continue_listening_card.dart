@@ -22,8 +22,9 @@ class HomeContinueListeningCard extends StatelessWidget {
     return AppContentCard(
       child: AppAudioContentRow(
         title: audio.title,
-        description: '${audio.type} · ${audio.minutesRemaining} min left',
+        description: '${audio.type} · ${audio.minutesRemaining} min',
         imageAsset: audio.imageAsset,
+        imageUrl: audio.imageUrl,
         thumbnailSize: AppSpacing.homeContinueThumb,
         isPlaying: isPlaying,
         onPlayPressed: onPlayPressed,

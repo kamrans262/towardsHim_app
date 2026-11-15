@@ -21,6 +21,7 @@ import '../controllers/home_navigation_controller.dart';
 import 'home_dashboard_screen.dart';
 import '../../../listen/presentation/screens/listen_screen.dart';
 import '../../../listen/domain/models/listen_audio_episode.dart';
+import '../../../listen/data/audio_catalog_repository.dart';
 import '../../../weekly_challenges/presentation/screens/weekly_challenges_screen.dart';
 import '../../../weekly_challenges/data/challenge_repository.dart';
 import '../../../weekly_challenges/domain/models/weekly_challenge.dart';
@@ -33,13 +34,14 @@ import '../../../profile/presentation/controllers/profile_controller.dart';
 class HomeShellScreen extends StatefulWidget {
   const HomeShellScreen({this.guestMode = false, this.initialTab = HomeTab.home,
     this.challengeRepository, this.communityRepository,
-    this.notificationRepository, super.key});
+    this.notificationRepository, this.audioRepository, super.key});
 
   final bool guestMode;
   final HomeTab initialTab;
   final ChallengeRepository? challengeRepository;
   final CommunityRepository? communityRepository;
   final NotificationRepository? notificationRepository;
+  final AudioCatalogRepository? audioRepository;
 
   @override
   State<HomeShellScreen> createState() => _HomeShellScreenState();
@@ -54,6 +56,9 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
   HomeQuickType? _listenCategory;
   late final ChallengeRepository _challengeRepository;
   WeeklyChallenge? _currentChallenge;
+  List<ListenAudioEpisode> _publishedAudio = const [];
+  bool _homeAudioLoading = true;
+  String? _homeAudioError;
 
   @override
   void initState() {
@@ -62,6 +67,7 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
     _notifications = NotificationsController(repository: widget.notificationRepository);
     _profile = ProfileController();
     unawaited(PlatformContentStore.instance.load());
+    unawaited(_refreshHomeAudio());
     _challengeRepository = widget.challengeRepository ?? ChallengeRepository.instance;
     _challengeRepository.addListener(_refreshCurrentChallenge);
     _refreshCurrentChallenge();
@@ -83,6 +89,32 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
     _challengeRepository.removeListener(_refreshCurrentChallenge);
     unawaited(PushRegistrationService.instance.stop(unregister: false));
     super.dispose();
+  }
+
+  Future<void> _refreshHomeAudio() async {
+    try {
+      final items = await (widget.audioRepository ??
+          const AudioCatalogRepository()).fetchPublished();
+      if (!mounted) return;
+      setState(() {
+        _publishedAudio = items;
+        _homeAudioError = null;
+        _homeAudioLoading = false;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _homeAudioError = error.toString();
+        _homeAudioLoading = false;
+      });
+    }
+  }
+
+  void _openAudio(ListenAudioEpisode episode) {
+    Navigator.of(context).pushNamed(
+      AppRoutes.player,
+      arguments: episode,
+    );
   }
 
   Future<void> _refreshCurrentChallenge() async {
@@ -198,6 +230,7 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
       return;
     }
     _navigation.select(tab);
+    if (tab == HomeTab.home) unawaited(_refreshHomeAudio());
     if (_showProfile) setState(() => _showProfile = false);
   }
 
@@ -220,8 +253,19 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
                     index: selected.index,
               children: [
                 HomeDashboardScreen(
-                  firstName: _profile.user.fullName.trim().split(RegExp(r'\s+')).first,
+                  firstName: widget.guestMode || !AuthRepository.instance.isAuthenticated
+                      ? 'Friend'
+                      : _profile.user.fullName.trim().split(RegExp(r'\s+')).first,
+                  guestMode: widget.guestMode || !AuthRepository.instance.isAuthenticated,
                   currentChallenge: _currentChallenge,
+                  publishedAudio: _publishedAudio,
+                  audioLoading: _homeAudioLoading,
+                  audioError: _homeAudioError,
+                  onRefreshAudio: () => unawaited(_refreshHomeAudio()),
+                  onOpenAudio: _openAudio,
+                  onLoginRequired: () => Navigator.of(context).pushNamed(
+                    AppRoutes.login, arguments: HomeTab.towardHimThree,
+                  ),
                   onOpenChallenge: _openChallenge,
                   onSelectTab: _select,
                   onOpenQuickMedia: _openQuickMedia,

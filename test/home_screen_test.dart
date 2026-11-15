@@ -4,6 +4,9 @@ import 'package:towards_him_app/core/navigation/app_router.dart';
 import 'package:towards_him_app/core/theme/app_spacing.dart';
 import 'package:towards_him_app/core/theme/app_typography.dart';
 import 'package:towards_him_app/core/widgets/app_audio_progress_bar.dart';
+import 'package:towards_him_app/features/listen/data/audio_catalog_repository.dart';
+import 'package:towards_him_app/features/listen/domain/models/listen_audio_episode.dart';
+import 'package:towards_him_app/features/listen/presentation/screens/audio_player_screen.dart';
 import 'package:towards_him_app/core/widgets/app_bottom_navigation.dart';
 import 'package:towards_him_app/core/widgets/app_circular_play_button.dart';
 import 'package:towards_him_app/core/widgets/toward_him_logo.dart';
@@ -14,6 +17,47 @@ import 'package:towards_him_app/features/home/presentation/controllers/home_navi
 import 'package:towards_him_app/features/home/presentation/screens/home_shell_screen.dart';
 import 'package:towards_him_app/features/home/presentation/widgets/home_quick_access_card.dart';
 import 'package:towards_him_app/features/home/presentation/widgets/home_recent_activity_card.dart';
+
+class FakeAudioCatalogRepository extends AudioCatalogRepository {
+  const FakeAudioCatalogRepository(this.episodes);
+  final List<ListenAudioEpisode> episodes;
+
+  @override
+  Future<List<ListenAudioEpisode>> fetchPublished() async => episodes;
+}
+
+const publishedEpisodes = [
+  ListenAudioEpisode(
+    id: '101',
+    title: 'A Real Podcast',
+    description: 'Published by the administrator',
+    thumbnailAsset: 'assets/images/home/golden_hour_meditation.webp',
+    contentType: 'Podcast',
+    durationMinutes: 12,
+    playbackProgress: 0,
+    isCompleted: false,
+  ),
+  ListenAudioEpisode(
+    id: '102',
+    title: 'A Real Meditation',
+    description: 'New meditation',
+    thumbnailAsset: 'assets/images/home/golden_hour_meditation.webp',
+    contentType: 'Meditation',
+    durationMinutes: 8,
+    playbackProgress: 0,
+    isCompleted: false,
+  ),
+  ListenAudioEpisode(
+    id: '103',
+    title: 'A Real Prayer',
+    description: 'New prayer',
+    thumbnailAsset: 'assets/images/home/golden_hour_meditation.webp',
+    contentType: 'Prayer',
+    durationMinutes: 6,
+    playbackProgress: 0,
+    isCompleted: false,
+  ),
+];
 
 void main() {
   test('Demo models and order of five tabs match Figma', () {
@@ -55,7 +99,9 @@ void main() {
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
-    await tester.pumpWidget(const MaterialApp(home: HomeShellScreen()));
+    await tester.pumpWidget(const MaterialApp(home: HomeShellScreen(
+      audioRepository: FakeAudioCatalogRepository(publishedEpisodes),
+    )));
     await tester.pumpAndSettle();
     final hero = tester.getRect(find.byKey(const Key('home_hero_image')));
     expect(hero.left, 0);
@@ -67,54 +113,73 @@ void main() {
     expect(card.top, closeTo(AppSpacing.homeHeroCardTop, 1));
     expect(card.top, lessThan(hero.bottom));
     expect(find.byType(TowardHimLogo), findsNothing);
-    expect(find.text('Finding Peace in His Presence'), findsOneWidget);
+    expect(find.text('Start Your Weekly Journey'), findsOneWidget);
   });
 
   testWidgets('Greeting uses demo name with separate Playfair weights',
       (tester) async {
-    await tester.pumpWidget(const MaterialApp(home: HomeShellScreen()));
+    await tester.pumpWidget(const MaterialApp(home: HomeShellScreen(
+      audioRepository: FakeAudioCatalogRepository(publishedEpisodes),
+    )));
     await tester.pumpAndSettle();
     final greeting = tester.widget<Text>(
       find.byKey(const Key('home_greeting')),
     );
     final spans = (greeting.textSpan! as TextSpan).children!;
     expect((spans.first as TextSpan).text, 'Good Morning\n');
-    expect((spans.last as TextSpan).text, 'Sarah');
+    expect((spans.last as TextSpan).text, 'Friend');
     expect((spans.first as TextSpan).style, AppTypography.homeGreeting);
     expect((spans.last as TextSpan).style, AppTypography.homeGreetingName);
     expect(find.textContaining('Psalm 46:10'), findsOneWidget);
   });
 
-  testWidgets('Cards, local play state and fixed five-tab bar', (tester) async {
-    await tester.pumpWidget(const MaterialApp(home: HomeShellScreen()));
+  testWidgets('Home displays real published audio and opens Player',
+      (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: const HomeShellScreen(
+        audioRepository: FakeAudioCatalogRepository(publishedEpisodes),
+      ),
+      onGenerateRoute: AppRouter.onGenerateRoute,
+    ));
     await tester.pumpAndSettle();
     expect(find.byType(HomeQuickAccessCard), findsNWidgets(3));
     expect(find.byType(HomeRecentActivityCard), findsNWidgets(2));
     expect(find.byType(AppAudioProgressBar), findsOneWidget);
-    expect(find.text('Building a grateful heart'), findsOneWidget);
+    expect(find.text('A Real Podcast'), findsOneWidget);
+    expect(find.text('A Real Meditation'), findsOneWidget);
+    expect(find.text('Recently Published'), findsOneWidget);
     expect(tester.widget<AppCircularPlayButton>(
       find.byType(AppCircularPlayButton),
     ).isPlaying, isFalse);
     await tester.tap(find.byType(AppCircularPlayButton));
-    await tester.pump();
-    expect(tester.widget<AppCircularPlayButton>(
-      find.byType(AppCircularPlayButton),
-    ).isPlaying, isTrue);
+    await tester.pumpAndSettle();
+    expect(find.byType(AudioPlayerScreen), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
     final nav = find.byType(AppBottomNavigation);
     expect(tester.widget<AppBottomNavigation>(nav).items.length, 5);
-    expect(tester.widget<AppBottomNavigation>(nav).selectedIndex, 0);
     await tester.tap(find.byKey(const Key('nav_Listen')));
     await tester.pumpAndSettle();
     expect(tester.widget<AppBottomNavigation>(nav).selectedIndex, 1);
-    await tester.tap(find.byKey(const Key('nav_Home')));
+  });
+
+  testWidgets('Home with no published audio never shows demo episodes',
+      (tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: HomeShellScreen(
+        audioRepository: FakeAudioCatalogRepository([]),
+      ),
+    ));
     await tester.pumpAndSettle();
-    expect(tester.widget<AppCircularPlayButton>(
-      find.byType(AppCircularPlayButton),
-    ).isPlaying, isTrue);
+    expect(find.text('No audio published yet.'), findsOneWidget);
+    expect(find.text('Building a grateful heart'), findsNothing);
+    expect(find.text('Recently Published'), findsNothing);
   });
 
   testWidgets('Store shows local placeholder without URL', (tester) async {
-    await tester.pumpWidget(const MaterialApp(home: HomeShellScreen()));
+    await tester.pumpWidget(const MaterialApp(home: HomeShellScreen(
+      audioRepository: FakeAudioCatalogRepository(publishedEpisodes),
+    )));
     await tester.tap(find.byKey(const Key('nav_Store')));
     await tester.pumpAndSettle();
     expect(find.text('Merchandise Store URL has not been configured.'),
@@ -133,7 +198,9 @@ void main() {
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
-      await tester.pumpWidget(const MaterialApp(home: HomeShellScreen()));
+      await tester.pumpWidget(const MaterialApp(home: HomeShellScreen(
+      audioRepository: FakeAudioCatalogRepository(publishedEpisodes),
+    )));
       await tester.pumpAndSettle();
       expect(tester.takeException(), isNull);
       expect(find.byType(CustomScrollView), findsOneWidget);
@@ -143,7 +210,7 @@ void main() {
         const Offset(0, -450),
       );
       await tester.pumpAndSettle();
-      expect(find.text('Recent Activity'), findsOneWidget);
+      expect(find.text('Recently Published'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
   }

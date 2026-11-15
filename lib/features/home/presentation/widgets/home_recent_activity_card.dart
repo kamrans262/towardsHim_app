@@ -27,12 +27,25 @@ class HomeRecentActivityCard extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
-              child: Image.asset(
-                activity.imageAsset,
-                width: AppSpacing.homeActivityThumb,
-                height: AppSpacing.homeActivityThumb,
-                fit: BoxFit.cover,
-              ),
+              child: activity.imageUrl == null
+                  ? Image.asset(
+                      activity.imageAsset,
+                      width: AppSpacing.homeActivityThumb,
+                      height: AppSpacing.homeActivityThumb,
+                      fit: BoxFit.cover,
+                    )
+                  : Image.network(
+                      activity.imageUrl!,
+                      width: AppSpacing.homeActivityThumb,
+                      height: AppSpacing.homeActivityThumb,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, trace) => Image.asset(
+                        activity.imageAsset,
+                        width: AppSpacing.homeActivityThumb,
+                        height: AppSpacing.homeActivityThumb,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
             ),
             const SizedBox(width: 10),
             Expanded(

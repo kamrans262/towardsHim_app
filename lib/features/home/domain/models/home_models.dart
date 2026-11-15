@@ -40,6 +40,7 @@ class HomeListeningProgress {
     required this.minutesRemaining,
     required this.progress,
     required this.imageAsset,
+    this.imageUrl,
   });
 
   final String id;
@@ -48,6 +49,7 @@ class HomeListeningProgress {
   final int minutesRemaining;
   final double progress;
   final String imageAsset;
+  final String? imageUrl;
 }
 
 class HomeQuickAccess {
@@ -70,6 +72,7 @@ class HomeRecentActivity {
     required this.status,
     required this.imageAsset,
     required this.showCompletedIcon,
+    this.imageUrl,
   });
 
   final String id;
@@ -78,6 +81,7 @@ class HomeRecentActivity {
   final String status;
   final String imageAsset;
   final bool showCompletedIcon;
+  final String? imageUrl;
 }
 
 class HomeNavigationItem {
