@@ -82,7 +82,7 @@ class CommunityPostCard extends StatelessWidget {
                   }
                 },
                 itemBuilder: (context) => [
-                  const PopupMenuItem<String>(
+                  PopupMenuItem<String>(
                     value: 'copy',
                     child: Text(showRepliesIndicator ? 'Copy post' : 'Copy reply'),
                   ),

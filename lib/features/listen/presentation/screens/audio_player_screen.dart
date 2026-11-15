@@ -97,7 +97,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
     _errorSubscription = player.errorStream.listen((error) {
       if (mounted) {
         _player.togglePlayPauseIfPlaying();
-        _showNotice('Audio playback is unavailable: ' + error.message);
+        _showNotice('Audio playback is unavailable: ${error.message ?? 'Unknown error'}');
       }
     });
     try {

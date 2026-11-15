@@ -85,7 +85,7 @@ class _ListenScreenState extends State<ListenScreen> {
       _loading = true;
       _loadError = null;
     });
-    _loadingTask = _loadAudio();
+    _loadAudio();
   }
 
   List<ListenAudioEpisode> get _visibleEpisodes {
