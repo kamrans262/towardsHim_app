@@ -183,7 +183,6 @@ class _HomeDashboardScreenState extends State<HomeDashboardScreen> {
                         ),
                       ],
                     ],
-                    ],
                   ],
                 ),
               ),
