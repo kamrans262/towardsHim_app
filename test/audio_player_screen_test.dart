@@ -10,6 +10,8 @@ import 'package:towards_him_app/core/widgets/app_bottom_navigation.dart';
 import 'package:towards_him_app/core/widgets/app_circular_play_button.dart';
 import 'package:towards_him_app/core/widgets/app_content_type_tag.dart';
 import 'package:towards_him_app/features/listen/data/listen_demo_data.dart';
+import 'package:towards_him_app/features/listen/data/audio_catalog_repository.dart';
+import 'package:towards_him_app/features/listen/domain/models/listen_audio_episode.dart';
 import 'package:towards_him_app/features/home/presentation/screens/home_shell_screen.dart';
 import 'package:towards_him_app/features/listen/presentation/controllers/audio_player_ui_controller.dart';
 import 'package:towards_him_app/features/listen/presentation/screens/audio_player_screen.dart';
@@ -18,6 +20,13 @@ import 'package:towards_him_app/features/listen/presentation/widgets/player_play
 import 'package:towards_him_app/features/listen/presentation/widgets/player_secondary_action.dart';
 import 'package:towards_him_app/features/listen/presentation/widgets/player_skip_button.dart';
 import 'package:towards_him_app/features/listen/presentation/widgets/player_time_row.dart';
+
+class FakePublishedAudio extends AudioCatalogRepository {
+  const FakePublishedAudio(this.episodes);
+  final List<ListenAudioEpisode> episodes;
+  @override
+  Future<List<ListenAudioEpisode>> fetchPublished() async => episodes;
+}
 
 class FakeNarrationEngine implements NarrationEngine {
   int starts = 0;
@@ -213,11 +222,14 @@ void main() {
   testWidgets('Selected Listen episode opens Player and back restores Listen',
       (tester) async {
     await tester.pumpWidget(MaterialApp(
-      home: const HomeShellScreen(),
+      home: HomeShellScreen(
+        audioRepository: FakePublishedAudio([demoEpisode]),
+      ),
       onGenerateRoute: AppRouter.onGenerateRoute,
     ));
     await tester.tap(find.byKey(const Key('nav_Listen')));
     await tester.pumpAndSettle();
+    expect(find.byType(AppCircularPlayButton), findsOneWidget);
     await tester.tap(find.byType(AppCircularPlayButton).first);
     await tester.pumpAndSettle();
     final player = tester.widget<AudioPlayerScreen>(

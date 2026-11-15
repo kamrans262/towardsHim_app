@@ -4,6 +4,7 @@ import 'package:towards_him_app/core/navigation/app_router.dart';
 import 'package:towards_him_app/core/theme/app_spacing.dart';
 import 'package:towards_him_app/core/theme/app_typography.dart';
 import 'package:towards_him_app/core/widgets/app_audio_progress_bar.dart';
+import 'package:towards_him_app/core/widgets/app_back_button.dart';
 import 'package:towards_him_app/features/listen/data/audio_catalog_repository.dart';
 import 'package:towards_him_app/features/listen/domain/models/listen_audio_episode.dart';
 import 'package:towards_him_app/features/listen/presentation/screens/audio_player_screen.dart';
@@ -154,7 +155,7 @@ void main() {
     await tester.tap(find.byType(AppCircularPlayButton));
     await tester.pumpAndSettle();
     expect(find.byType(AudioPlayerScreen), findsOneWidget);
-    await tester.pageBack();
+    await tester.tap(find.byType(AppBackButton));
     await tester.pumpAndSettle();
     final nav = find.byType(AppBottomNavigation);
     expect(tester.widget<AppBottomNavigation>(nav).items.length, 5);

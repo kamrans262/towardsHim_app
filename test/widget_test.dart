@@ -13,7 +13,7 @@ import 'package:towards_him_app/features/onboarding/presentation/screens/welcome
 
 void main() {
   setUp(() => FlutterSecureStorage.setMockInitialValues({}));
-  testWidgets('Splash shows the exact centered 110×67 logo', (tester) async {
+  testWidgets('Splash retains the approved enlarged, centered logo', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: SplashScreen()));
     expect(find.byType(TowardHimLogo), findsOneWidget);
     final center = tester.getCenter(find.byType(TowardHimLogo));
@@ -21,8 +21,8 @@ void main() {
     expect(center.dx, closeTo(screenCenter.dx, 0.01));
     expect(center.dy, closeTo(screenCenter.dy, 0.01));
     final svg = tester.widget<SvgPicture>(find.byType(SvgPicture));
-    expect(svg.width, 110);
-    expect(svg.height, 67);
+    expect(svg.width, 270);
+    expect(svg.height, 164);
   });
 
   testWidgets('Splash moves to Welcome and does not show counter UI',

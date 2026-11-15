@@ -274,6 +274,7 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
                   onProfile: _openProfile,
                 ),
                 ListenScreen(
+                  repository: widget.audioRepository,
                   selectedCategory: _listenCategory,
                   onNotice: _showNotice,
                   onNotifications: _openNotifications,

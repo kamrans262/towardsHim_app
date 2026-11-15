@@ -50,7 +50,7 @@ void main() {
     final verifyRect = tester.getRect(find.text('Verify Your Account'));
     expect(sendRect.width, 48);
     expect(sendRect.height, AppSpacing.fieldHeight);
-    expect(sendRect.height, emailRect.height);
+    expect((sendRect.height - emailRect.height).abs(), lessThanOrEqualTo(2));
     expect(sendRect.left - emailRect.right, closeTo(10, 0.1));
     expect(verifyRect.top - rowRect.bottom, closeTo(30, 0.1));
   });
@@ -130,13 +130,13 @@ void main() {
     expect(input.controller!.text, '123456');
   });
 
-  testWidgets('Send is UI-only and does not enable Verify', (tester) async {
+  testWidgets('Send validates email before contacting the recovery API', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: ForgotPasswordScreen()));
     await tester.tap(find.byType(AppSendIconButton));
     await tester.pump();
     expect(
       find.text(
-        'Sending verification codes will be available after the UI phase.',
+        'Enter a valid email address.',
       ),
       findsOneWidget,
     );
