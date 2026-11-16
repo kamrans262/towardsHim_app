@@ -1,3 +1,5 @@
+import '../../../../core/models/content_media.dart';
+
 enum DailyChallengeOptionType { taste, see, share }
 
 class DailyChallengeOption {
@@ -22,6 +24,7 @@ class DailyChallenge {
     required this.description,
     required this.options,
     required this.initialSelectedOptionId,
+    this.media = const [],
   });
 
   final String id;
@@ -30,4 +33,5 @@ class DailyChallenge {
   final String description;
   final List<DailyChallengeOption> options;
   final String initialSelectedOptionId;
+  final List<ContentMedia> media;
 }

@@ -1,3 +1,5 @@
+import '../../../../core/models/content_media.dart';
+
 enum WeeklyChallengeStatus { current, completed }
 enum WeeklyChallengeCategory { featured, previous }
 
@@ -14,6 +16,7 @@ class WeeklyChallenge {
     required this.totalDays,
     required this.category,
     this.days = const [],
+    this.media = const [],
   }) : assert(totalDays > 0),
        assert(completedDays >= 0),
        assert(completedDays <= totalDays);
@@ -29,6 +32,7 @@ class WeeklyChallenge {
   final int totalDays;
   final WeeklyChallengeCategory category;
   final List<WeeklyChallengeDay> days;
+  final List<ContentMedia> media;
 
   Set<int> get completedDayNumbers => days
       .where((day) => day.completed)
@@ -64,6 +68,7 @@ class WeeklyChallenge {
           ? WeeklyChallengeCategory.featured
           : WeeklyChallengeCategory.previous,
       days: days,
+      media: ContentMedia.parseList(json['media']),
     );
   }
 
@@ -86,16 +91,19 @@ class WeeklyChallengeDay {
     required this.day,
     required this.text,
     required this.completed,
+    this.media = const [],
   });
 
   final int day;
   final String text;
   final bool completed;
+  final List<ContentMedia> media;
 
   factory WeeklyChallengeDay.fromApi(Map<String, dynamic> json) =>
       WeeklyChallengeDay(
         day: (json['day'] as num).toInt(),
         text: json['text']?.toString() ?? '',
         completed: json['completed'] == true,
+        media: ContentMedia.parseList(json['media']),
       );
 }

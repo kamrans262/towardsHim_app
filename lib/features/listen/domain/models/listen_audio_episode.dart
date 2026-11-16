@@ -1,4 +1,6 @@
-/// Local Listen audio episode model, prepared for a future data repository.
+import '../../../../core/models/content_media.dart';
+
+/// Listen content may include ordered text, image, audio, and video blocks.
 class ListenAudioEpisode {
   const ListenAudioEpisode({
     required this.id,
@@ -17,6 +19,7 @@ class ListenAudioEpisode {
     this.narrationDurationSeconds,
     this.audioUrl,
     this.artworkUrl,
+    this.media = const [],
   });
 
   final String id;
@@ -43,11 +46,19 @@ class ListenAudioEpisode {
   /// Server media URL; null for existing local/TTS fixtures.
   final String? audioUrl;
   final String? artworkUrl;
+  final List<ContentMedia> media;
 
   factory ListenAudioEpisode.fromApi(Map<String, dynamic> json) {
     final category = json['category']?.toString() ?? 'podcast';
     const names = {'podcast': 'Podcast', 'meditation': 'Meditation', 'prayer': 'Prayer'};
     final rawSeconds = (json['duration_seconds'] as num?)?.toInt();
+    final media = ContentMedia.parseList(json['media']);
+    String? firstMediaUrl(ContentMediaType type) {
+      for (final block in media) {
+        if (block.type == type && block.hasPlayableFile) return block.url;
+      }
+      return null;
+    }
     String? mediaUrl(dynamic value) {
       if (value is! String || value.isEmpty) return null;
       final parsed = Uri.tryParse(value);
@@ -64,8 +75,9 @@ class ListenAudioEpisode {
       timelineDurationSeconds: rawSeconds,
       playbackProgress: 0,
       isCompleted: false,
-      audioUrl: mediaUrl(json['audio_url']),
-      artworkUrl: mediaUrl(json['artwork_url']),
+      audioUrl: mediaUrl(json['audio_url']) ?? firstMediaUrl(ContentMediaType.audio),
+      artworkUrl: mediaUrl(json['artwork_url']) ?? firstMediaUrl(ContentMediaType.image),
+      media: media,
     );
   }
 }

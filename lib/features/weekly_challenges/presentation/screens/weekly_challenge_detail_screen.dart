@@ -7,9 +7,9 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/navigation/app_router.dart';
 import '../../../../core/widgets/app_content_card.dart';
 import '../../../../core/widgets/app_progress_bar.dart';
+import '../../../../core/widgets/app_content_media_view.dart';
 import '../../data/weekly_challenge_detail_demo_data.dart';
 import '../../data/challenge_repository.dart';
-import '../../data/daily_challenge_demo_data.dart';
 import '../../domain/models/weekly_challenge.dart';
 import '../../domain/models/daily_challenge.dart';
 import '../controllers/weekly_challenge_detail_controller.dart';
@@ -104,7 +104,8 @@ class _WeeklyChallengeDetailScreenState
         title: _challenge.title,
         description: day.text,
         initialSelectedOptionId: 'share',
-        options: DailyChallengeDemoData.october8.options,
+        options: const [],
+        media: day.media,
       ),
     );
   }
@@ -173,6 +174,10 @@ class _WeeklyChallengeDetailScreenState
                                 _challenge.description,
                                 style: AppTypography.homeSecondary,
                               ),
+                              if (_challenge.media.isNotEmpty) ...[
+                                const SizedBox(height: 20),
+                                AppContentMediaView(items: _challenge.media),
+                              ],
                               const SizedBox(height: 20),
                               _ProgressCard(controller: _controller),
                               const SizedBox(height: 20),

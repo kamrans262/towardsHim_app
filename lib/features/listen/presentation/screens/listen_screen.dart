@@ -179,7 +179,7 @@ class _ListenScreenState extends State<ListenScreen> {
                       else if (_visibleEpisodes.isEmpty)
                         Column(
                           children: [
-                            const Text('No audio published yet.', style: AppTypography.homeSecondary),
+                            const Text('No content published yet.', style: AppTypography.homeSecondary),
                             TextButton(onPressed: _refreshAudio, child: const Text('Refresh')),
                           ],
                         )

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/app_content_media_view.dart';
 import '../../domain/models/daily_challenge.dart';
 import '../controllers/daily_challenge_selection_controller.dart';
 import '../widgets/daily_challenge_option_card.dart';
@@ -90,6 +91,10 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
                               widget.challenge.description,
                               style: AppTypography.homeSecondary,
                             ),
+                            if (widget.challenge.media.isNotEmpty) ...[
+                              const SizedBox(height: 20),
+                              AppContentMediaView(items: widget.challenge.media),
+                            ],
                             const SizedBox(height: 20),
                             for (var i = 0;
                                 i < widget.challenge.options.length;

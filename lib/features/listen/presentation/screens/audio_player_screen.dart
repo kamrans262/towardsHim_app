@@ -9,6 +9,8 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_audio_seek_bar.dart';
 import '../../../../core/widgets/app_back_button.dart';
 import '../../../../core/widgets/app_content_type_tag.dart';
+import '../../../../core/widgets/app_content_media_view.dart';
+import '../../../../core/models/content_media.dart';
 import '../../domain/models/listen_audio_episode.dart';
 import '../controllers/audio_player_ui_controller.dart';
 import '../services/narration_engine.dart';
@@ -311,10 +313,12 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                   const SizedBox(height: AppSpacing.playerTitleToDuration),
                   Text(
                     episode.narrationText != null
-                      ? 'Spoken demo · about 1 min'
-                      : episode.audioUrl != null && episode.durationMinutes == 0
-                          ? 'Audio'
-                          : '${episode.durationMinutes} min',
+                        ? 'Spoken demo · about 1 min'
+                        : episode.audioUrl == null
+                            ? 'Multimedia content'
+                            : episode.durationMinutes == 0
+                                ? 'Audio'
+                                : '${episode.durationMinutes} min',
                     style: AppTypography.homeSecondary,
                   ),
                   const SizedBox(height: AppSpacing.playerDurationToDescription),
@@ -322,6 +326,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                     episode.playerDescription ?? episode.description,
                     style: AppTypography.homeSecondary,
                   ),
+                  if (episode.audioUrl != null ||
+                      episode.narrationText != null) ...[
                   const SizedBox(height: AppSpacing.playerDescriptionToProgress),
                   AnimatedBuilder(
                     animation: _player,
@@ -410,6 +416,18 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                       ),
                     ],
                   ),
+                  ],
+                  if (episode.media.isNotEmpty) ...[
+                    const SizedBox(height: 20),
+                    AppContentMediaView(
+                      items: episode.media.where((block) =>
+                        !((block.type == ContentMediaType.audio &&
+                            block.url == episode.audioUrl) ||
+                          (block.type == ContentMediaType.image &&
+                            block.url == episode.artworkUrl)),
+                      ).toList(),
+                    ),
+                  ],
                 ],
               ),
             ),
