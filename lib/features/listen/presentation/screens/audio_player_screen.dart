@@ -420,6 +420,13 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                   if (episode.media.isNotEmpty) ...[
                     const SizedBox(height: 20),
                     AppContentMediaView(
+                      onVideoPlay: () {
+                        final remote = _remotePlayer;
+                        if (remote != null) unawaited(remote.pause());
+                        final narration = _narration;
+                        if (narration != null) unawaited(narration.pause());
+                        _player.togglePlayPauseIfPlaying();
+                      },
                       items: episode.media.where((block) =>
                         !((block.type == ContentMediaType.audio &&
                             block.url == episode.audioUrl) ||

@@ -11,9 +11,15 @@ import 'app_content_card.dart';
 
 /// Reuses the approved Toward HIM card style for inline content.
 class AppContentMediaView extends StatelessWidget {
-  const AppContentMediaView({required this.items, super.key});
+  const AppContentMediaView({
+    required this.items,
+    this.onVideoPlay,
+    super.key,
+  });
 
   final List<ContentMedia> items;
+  /// Pauses the parent audio player before a video starts.
+  final VoidCallback? onVideoPlay;
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +30,11 @@ class AppContentMediaView extends StatelessWidget {
       children: [
         for (var index = 0; index < items.length; index++) ...[
           if (index != 0) const SizedBox(height: 15),
-          _MediaBlock(key: ValueKey('content_block_$index'), item: items[index]),
+          _MediaBlock(
+            key: ValueKey('content_block_$index'),
+            item: items[index],
+            onVideoPlay: onVideoPlay,
+          ),
         ],
       ],
     );
@@ -32,8 +42,9 @@ class AppContentMediaView extends StatelessWidget {
 }
 
 class _MediaBlock extends StatelessWidget {
-  const _MediaBlock({required this.item, super.key});
+  const _MediaBlock({required this.item, this.onVideoPlay, super.key});
   final ContentMedia item;
+  final VoidCallback? onVideoPlay;
 
   @override
   Widget build(BuildContext context) {
@@ -68,7 +79,11 @@ class _MediaBlock extends StatelessWidget {
       case ContentMediaType.audio:
         return _InlineAudioPlayer(url: item.url, caption: item.text);
       case ContentMediaType.video:
-        return _InlineVideoPlayer(url: item.url, caption: item.text);
+        return _InlineVideoPlayer(
+          url: item.url,
+          caption: item.text,
+          onVideoPlay: onVideoPlay,
+        );
     }
   }
 }
@@ -185,9 +200,10 @@ class _InlineAudioPlayerState extends State<_InlineAudioPlayer> {
 }
 
 class _InlineVideoPlayer extends StatefulWidget {
-  const _InlineVideoPlayer({required this.url, this.caption});
+  const _InlineVideoPlayer({required this.url, this.caption, this.onVideoPlay});
   final String? url;
   final String? caption;
+  final VoidCallback? onVideoPlay;
 
   @override
   State<_InlineVideoPlayer> createState() => _InlineVideoPlayerState();
@@ -257,6 +273,7 @@ class _InlineVideoPlayerState extends State<_InlineVideoPlayer> {
                               if (player.value.isPlaying) {
                                 unawaited(player.pause());
                               } else {
+                                widget.onVideoPlay?.call();
                                 unawaited(player.play());
                               }
                               setState(() {});
