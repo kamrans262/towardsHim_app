@@ -10,6 +10,7 @@ import '../../../../core/widgets/app_audio_seek_bar.dart';
 import '../../../../core/widgets/app_back_button.dart';
 import '../../../../core/widgets/app_content_type_tag.dart';
 import '../../../../core/widgets/app_content_media_view.dart';
+import '../widgets/listen_media_carousel.dart';
 import '../../../../core/models/content_media.dart';
 import '../../domain/models/listen_audio_episode.dart';
 import '../controllers/audio_player_ui_controller.dart';
@@ -41,6 +42,46 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
   StreamSubscription<Duration?>? _durationSubscription;
   StreamSubscription<ja.PlayerState>? _stateSubscription;
   StreamSubscription<ja.PlayerException>? _errorSubscription;
+  final GlobalKey<ListenMediaCarouselState> _coverKey =
+      GlobalKey<ListenMediaCarouselState>();
+  bool _audioMayAutoplay = true;
+
+  void _pauseAudioForVideo() {
+    // A delayed network audio initialization must not resume after video starts.
+    _audioMayAutoplay = false;
+    _player.togglePlayPauseIfPlaying();
+    final remote = _remotePlayer;
+    if (remote != null) unawaited(remote.pause());
+    final narration = _narration;
+    if (narration != null) unawaited(narration.pause());
+  }
+
+  void _toggleAudioPlayback() {
+    // The swipeable cover and existing playback controls share this action.
+    _coverKey.currentState?.pauseVideos();
+    _player.togglePlayPause();
+    _audioMayAutoplay = _player.isPlaying;
+
+    final narration = _narration;
+    if (narration != null) {
+      if (_player.isPlaying) {
+        unawaited(narration.resume());
+      } else {
+        unawaited(narration.pause());
+      }
+    }
+    final remote = _remotePlayer;
+    if (remote != null) {
+      if (_player.isPlaying) {
+        if (remote.processingState == ja.ProcessingState.completed) {
+          unawaited(remote.seek(Duration.zero));
+        }
+        unawaited(remote.play());
+      } else {
+        unawaited(remote.pause());
+      }
+    }
+  }
 
   @override
   void initState() {
@@ -54,7 +95,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
     if (script != null && script.isNotEmpty) {
       _narration = widget.narrationEngine ?? DeviceNarrationEngine();
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
+        if (!mounted || !_audioMayAutoplay) return;
         unawaited(_narration!.start(
           script,
           onProgress: (fraction) {
@@ -106,7 +147,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
       final duration = await player.setUrl(url);
       if (!mounted) return;
       if (duration != null) _player.setDurationSeconds(duration.inSeconds);
-      unawaited(player.play());
+      if (_audioMayAutoplay) unawaited(player.play());
     } catch (_) {
       if (mounted) {
         _player.togglePlayPauseIfPlaying();
@@ -279,25 +320,14 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                       borderRadius: BorderRadius.circular(
                         AppSpacing.playerCoverRadius,
                       ),
-                      child: episode.artworkUrl == null
-                          ? Image.asset(
-                              episode.coverAsset ?? episode.thumbnailAsset,
-                              key: const Key('player_cover_image'),
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                            )
-                          : Image.network(
-                              episode.artworkUrl!,
-                              key: const Key('player_cover_image'),
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, trace) =>
-                                  Image.asset(
-                                episode.coverAsset ?? episode.thumbnailAsset,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
+                      child: ListenMediaCarousel(
+                        key: _coverKey,
+                        episode: episode,
+                        audioState: _player,
+                        isAudioPlaying: () => _player.isPlaying,
+                        onToggleAudio: _toggleAudioPlayback,
+                        onVideoPlay: _pauseAudioForVideo,
+                      ),
                     ),
                   ),
                   const SizedBox(height: AppSpacing.playerCoverToTag),
@@ -359,28 +389,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                           const SizedBox(height: AppSpacing.playerTimesToControls),
                           PlayerPlaybackControls(
                             isPlaying: _player.isPlaying,
-                            onToggle: () {
-                              _player.togglePlayPause();
-                              final voice = _narration;
-                              if (voice != null) {
-                                if (_player.isPlaying) {
-                                  unawaited(voice.resume());
-                                } else {
-                                  unawaited(voice.pause());
-                                }
-                              }
-                              final remote = _remotePlayer;
-                              if (remote != null) {
-                                if (_player.isPlaying) {
-                                  if (remote.processingState == ja.ProcessingState.completed) {
-                                    unawaited(remote.seek(Duration.zero));
-                                  }
-                                  unawaited(remote.play());
-                                } else {
-                                  unawaited(remote.pause());
-                                }
-                              }
-                            },
+                            onToggle: _toggleAudioPlayback,
                             onRewind: () => _skip(-10),
                             onForward: () => _skip(10),
                           ),
@@ -417,22 +426,16 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                     ],
                   ),
                   ],
-                  if (episode.media.isNotEmpty) ...[
+                  // Rich text remains below the audio controls. All images,
+                  // videos and audio are shown in the top swipeable media area.
+                  if (episode.media.any(
+                    (block) => block.type == ContentMediaType.text,
+                  )) ...[
                     const SizedBox(height: 20),
                     AppContentMediaView(
-                      onVideoPlay: () {
-                        final remote = _remotePlayer;
-                        if (remote != null) unawaited(remote.pause());
-                        final narration = _narration;
-                        if (narration != null) unawaited(narration.pause());
-                        _player.togglePlayPauseIfPlaying();
-                      },
-                      items: episode.media.where((block) =>
-                        !((block.type == ContentMediaType.audio &&
-                            block.url == episode.audioUrl) ||
-                          (block.type == ContentMediaType.image &&
-                            block.url == episode.artworkUrl)),
-                      ).toList(),
+                      items: episode.media
+                          .where((block) => block.type == ContentMediaType.text)
+                          .toList(),
                     ),
                   ],
                 ],
