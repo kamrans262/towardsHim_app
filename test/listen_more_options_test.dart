@@ -120,4 +120,37 @@ void main() {
     expect(find.text('Details copied.'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+  testWidgets('Text-only Listen items expose Share without audio controls',
+      (tester) async {
+    final episode = ListenAudioEpisode.fromApi({
+      'id': 7,
+      'category': 'meditation',
+      'title': 'Reading Reflection',
+      'description': 'Be mindful and pray.',
+      'media': const [
+        {'id': 20, 'type': 'text', 'text': 'A quiet moment'},
+      ],
+    });
+    String? shared;
+    await tester.pumpWidget(MaterialApp(
+      home: AudioPlayerScreen(
+        episode: episode,
+        shareAction: (text, position) async {
+          shared = text;
+        },
+      ),
+    ));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('player_action_more')), findsOneWidget);
+    expect(find.byKey(const Key('player_primary_play')), findsNothing);
+    await tester.ensureVisible(find.byKey(const Key('player_action_more')));
+    await tester.tap(find.byKey(const Key('player_action_more')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('player_more_share')));
+    await tester.pumpAndSettle();
+    expect(shared, contains('Reading Reflection'));
+    expect(shared, contains('Be mindful and pray.'));
+    expect(tester.takeException(), isNull);
+  });
+
 }

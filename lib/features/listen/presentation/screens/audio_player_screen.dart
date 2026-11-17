@@ -499,6 +499,23 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                     ],
                   ),
                   ],
+                  // Visual-only and written items still offer real sharing.
+                  // Audio-only speed/seek controls are not added to them.
+                  if (episode.audioUrl == null &&
+                      episode.narrationText == null) ...[
+                    const SizedBox(height: 24),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: SizedBox(
+                        width: 100,
+                        child: PlayerSecondaryAction(
+                          label: 'More',
+                          svgAsset: 'assets/icons/player/more.svg',
+                          onPressed: _showMoreOptions,
+                        ),
+                      ),
+                    ),
+                  ],
                   // Rich text remains below the audio controls. All images,
                   // videos and audio are shown in the top swipeable media area.
                   if (episode.media.any(
