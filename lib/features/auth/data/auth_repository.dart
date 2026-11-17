@@ -6,6 +6,35 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
+/// A pending email code check. This is deliberately not a signed-in session.
+class LoginOtpChallenge {
+  const LoginOtpChallenge({
+    required this.challenge,
+    required this.email,
+    required this.expiresInSeconds,
+    required this.resendAfterSeconds,
+  });
+
+  final String challenge;
+  final String email;
+  final int expiresInSeconds;
+  final int resendAfterSeconds;
+
+  factory LoginOtpChallenge.fromApi(Map<String, dynamic> data) {
+    final challenge = data['challenge'];
+    final email = data['email'];
+    if (challenge is! String || challenge.length != 64 || email is! String) {
+      throw const AuthFailure('Incomplete verification response.');
+    }
+    return LoginOtpChallenge(
+      challenge: challenge,
+      email: email,
+      expiresInSeconds: (data['expires_in_seconds'] as num?)?.toInt() ?? 600,
+      resendAfterSeconds: (data['resend_after_seconds'] as num?)?.toInt() ?? 60,
+    );
+  }
+}
+
 /// A shared authentication gateway; no networking or token handling in widgets.
 class AuthFailure implements Exception {
   const AuthFailure(this.message);
@@ -150,12 +179,37 @@ class AuthRepository {
     await _storeLogin(result);
   }
 
-  Future<void> login({required String email, required String password}) async {
+  Future<LoginOtpChallenge> login({
+    required String email,
+    required String password,
+  }) async {
     final result = await _request('POST', 'auth/login', body: {
       'email': email.trim(),
       'password': password,
     });
+    // The password step must not store a token; only OTP verify issues one.
+    return LoginOtpChallenge.fromApi(
+      Map<String, dynamic>.from(result['data'] as Map),
+    );
+  }
+
+  Future<void> verifyLoginOtp({
+    required String challenge,
+    required String code,
+  }) async {
+    final result = await _request('POST', 'auth/login/verify', body: {
+      'challenge': challenge,
+      'code': code.trim(),
+    });
     await _storeLogin(result);
+  }
+
+  Future<int> resendLoginOtp({required String challenge}) async {
+    final result = await _request('POST', 'auth/login/resend', body: {
+      'challenge': challenge,
+    });
+    final data = Map<String, dynamic>.from(result['data'] as Map);
+    return (data['resend_after_seconds'] as num?)?.toInt() ?? 60;
   }
 
   Future<String> _googleIdentityToken() async {

@@ -1,10 +1,13 @@
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../../core/navigation/app_router.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_main_screen_header.dart';
+import '../../../../core/widgets/app_merchandise_sheet.dart';
 import '../../data/profile_demo_data.dart';
 import '../../domain/models/profile_models.dart';
 import '../widgets/profile_user_card.dart';
@@ -35,7 +38,7 @@ class ProfileScreen extends StatelessWidget {
         Navigator.of(context).pushNamed(AppRoutes.aboutTowardHim);
         return;
       case ProfileMenuAction.merchandise:
-        onNotice('Merchandise Store URL is not configured yet.');
+        unawaited(showMerchandiseStoreSheet(context));
         return;
       case ProfileMenuAction.privacy:
         Navigator.of(context).pushNamed(AppRoutes.privacyPolicy);

@@ -18,6 +18,7 @@ class LoginScreen extends StatefulWidget {
     this.onCreateAccount,
     this.onForgotPassword,
     this.onLogin,
+    this.onOtpRequired,
     super.key,
   });
 
@@ -25,6 +26,7 @@ class LoginScreen extends StatefulWidget {
   final VoidCallback? onCreateAccount;
   final VoidCallback? onForgotPassword;
   final VoidCallback? onLogin;
+  final ValueChanged<LoginOtpChallenge>? onOtpRequired;
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -38,12 +40,16 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _busy = true);
     FocusScope.of(context).unfocus();
     try {
-      await AuthRepository.instance.login(
+      final pending = await AuthRepository.instance.login(
         email: _emailController.text,
         password: _passwordController.text,
       );
       if (!mounted) return;
-      widget.onLogin?.call();
+      if (widget.onOtpRequired != null) {
+        widget.onOtpRequired!(pending);
+      } else {
+        Navigator.of(context).pushNamed('/login-otp', arguments: pending);
+      }
     } catch (error) {
       if (mounted) _notice(error.toString());
     } finally {

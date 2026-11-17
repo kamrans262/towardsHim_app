@@ -5,6 +5,7 @@ import '../../features/auth/data/auth_repository.dart';
 import '../../features/auth/presentation/screens/create_account_screen.dart';
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/presentation/screens/login_otp_screen.dart';
 import '../../features/home/presentation/screens/home_shell_screen.dart';
 import '../../features/home/domain/models/home_models.dart';
 import '../../features/notifications/presentation/controllers/notifications_controller.dart';
@@ -40,11 +41,18 @@ class WeeklyChallengeNavigationArgs {
   final ChallengeRepository? repository;
 }
 
+class LoginOtpRouteArgs {
+  const LoginOtpRouteArgs({required this.challenge, this.initialTab});
+  final LoginOtpChallenge challenge;
+  final HomeTab? initialTab;
+}
+
 abstract final class AppRoutes {
   static const splash = '/';
   static const welcome = '/welcome';
   static const createAccount = '/create-account';
   static const login = '/login';
+  static const loginOtp = '/login-otp';
   static const forgotPassword = '/forgot-password';
   static const home = '/home';
   static const notifications = '/notifications';
@@ -109,7 +117,30 @@ abstract final class AppRouter {
                 Navigator.of(context).pushNamed(AppRoutes.createAccount),
             onForgotPassword: () =>
                 Navigator.of(context).pushNamed(AppRoutes.forgotPassword),
+            onOtpRequired: (pending) => Navigator.of(context).pushNamed(
+              AppRoutes.loginOtp,
+              arguments: LoginOtpRouteArgs(
+                challenge: pending,
+                initialTab: settings.arguments is HomeTab
+                    ? settings.arguments as HomeTab
+                    : null,
+              ),
+            ),
           ),
+        AppRoutes.loginOtp => settings.arguments is LoginOtpRouteArgs
+            ? LoginOtpScreen(
+                challenge: (settings.arguments! as LoginOtpRouteArgs).challenge,
+                onVerified: () => Navigator.of(context).pushNamedAndRemoveUntil(
+                  AppRoutes.home,
+                  (_) => false,
+                  arguments: (settings.arguments! as LoginOtpRouteArgs).initialTab,
+                ),
+              )
+            : settings.arguments is LoginOtpChallenge
+                ? LoginOtpScreen(
+                    challenge: settings.arguments! as LoginOtpChallenge,
+                  )
+                : const WelcomeScreen(),
         AppRoutes.home => HomeShellScreen(
             guestMode: settings.arguments == 'guest',
             initialTab: settings.arguments is HomeTab

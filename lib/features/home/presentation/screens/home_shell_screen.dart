@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../auth/data/auth_repository.dart';
 import '../../../profile/data/platform_content_store.dart';
@@ -11,6 +10,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_bottom_navigation.dart';
+import '../../../../core/widgets/app_merchandise_sheet.dart';
 import '../../../../core/navigation/app_router.dart';
 import '../../../notifications/presentation/controllers/notifications_controller.dart';
 import '../../../notifications/data/notification_repository.dart';
@@ -201,23 +201,7 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
     );
   }
 
-  Future<void> _openStore() async {
-    // Keep the existing immediate placeholder behavior if no store URL is set.
-    // The public content loads separately in the shell and Welcome screen.
-    if (!mounted) return;
-    final raw = PlatformContentStore.instance.content.storeUrl;
-    final url = raw == null ? null : Uri.tryParse(raw.trim());
-    if (url == null || url.scheme != 'https' || url.host.isEmpty) {
-      _showNotice('Merchandise Store URL has not been configured.');
-      return;
-    }
-    try {
-      final opened = await launchUrl(url, mode: LaunchMode.externalApplication);
-      if (!opened && mounted) _showNotice('Unable to open the store.');
-    } catch (_) {
-      if (mounted) _showNotice('Unable to open the store.');
-    }
-  }
+  Future<void> _openStore() => showMerchandiseStoreSheet(context);
 
   void _select(HomeTab tab) {
     if (tab == HomeTab.store) {
@@ -304,7 +288,7 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
                 ),
                 const _UpcomingTab(
                   title: 'Store',
-                  message: 'Merchandise Store URL has not been configured.',
+                  message: 'Explore our official merchandise store.',
                 ),
                   ],
                 ),
@@ -329,8 +313,6 @@ class _HomeShellScreenState extends State<HomeShellScreen> {
               selectedIndex: selected.index,
               onSelected: (index) {
                 final tab = HomeDemoData.navigation[index].tab;
-                // No external store URL was supplied; a local placeholder
-                // is shown instead of inventing an outbound destination.
                 _select(tab);
               },
             ),
