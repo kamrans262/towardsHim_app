@@ -18,6 +18,7 @@ class AppAudioContentRow extends StatelessWidget {
     this.progress,
     this.withThumbnailShadow = false,
     this.imageUrl,
+    this.descriptionMaxLines,
     super.key,
   });
 
@@ -30,6 +31,8 @@ class AppAudioContentRow extends StatelessWidget {
   final VoidCallback onPlayPressed;
   final double? progress;
   final bool withThumbnailShadow;
+  /// Optional caller-specific truncation. Home keeps its existing behavior.
+  final int? descriptionMaxLines;
 
   @override
   Widget build(BuildContext context) {
@@ -59,10 +62,10 @@ class AppAudioContentRow extends StatelessWidget {
               Text(
                 description,
                 style: AppTypography.homeSecondary,
-                maxLines: progress == null ? null : 1,
-                overflow: progress == null
-                    ? TextOverflow.clip
-                    : TextOverflow.ellipsis,
+                maxLines: descriptionMaxLines ?? (progress == null ? null : 1),
+                overflow: descriptionMaxLines != null || progress != null
+                    ? TextOverflow.ellipsis
+                    : TextOverflow.clip,
               ),
               if (progress != null) ...[
                 const SizedBox(height: 5),

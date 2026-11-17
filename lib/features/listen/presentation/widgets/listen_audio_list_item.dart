@@ -30,6 +30,7 @@ class ListenAudioListItem extends StatelessWidget {
         thumbnailSize: AppSpacing.listenThumbnailSize,
         isPlaying: isPlaying,
         onPlayPressed: onPlayPressed,
+        descriptionMaxLines: 3,
       ),
     );
   }

@@ -19,6 +19,7 @@ class ListenAudioEpisode {
     this.narrationDurationSeconds,
     this.audioUrl,
     this.artworkUrl,
+    this.videoUrl,
     this.media = const [],
   });
 
@@ -46,6 +47,8 @@ class ListenAudioEpisode {
   /// Server media URL; null for existing local/TTS fixtures.
   final String? audioUrl;
   final String? artworkUrl;
+  /// Dedicated admin video, separate from the optional audio recording.
+  final String? videoUrl;
   final List<ContentMedia> media;
 
   factory ListenAudioEpisode.fromApi(Map<String, dynamic> json) {
@@ -64,6 +67,18 @@ class ListenAudioEpisode {
       final parsed = Uri.tryParse(value);
       return parsed?.hasScheme == true ? value : null;
     }
+    final videoUrl = mediaUrl(json['video_url']);
+    final mixedMedia = <ContentMedia>[
+      ...media,
+      if (videoUrl != null &&
+          !media.any((block) =>
+              block.type == ContentMediaType.video && block.url == videoUrl))
+        ContentMedia(
+          id: 'video_${json['id']}',
+          type: ContentMediaType.video,
+          url: videoUrl,
+        ),
+    ];
     return ListenAudioEpisode(
       id: json['id'].toString(),
       title: json['title']?.toString() ?? '',
@@ -77,7 +92,8 @@ class ListenAudioEpisode {
       isCompleted: false,
       audioUrl: mediaUrl(json['audio_url']) ?? firstMediaUrl(ContentMediaType.audio),
       artworkUrl: mediaUrl(json['artwork_url']) ?? firstMediaUrl(ContentMediaType.image),
-      media: media,
+      videoUrl: videoUrl,
+      media: mixedMedia,
     );
   }
 }
