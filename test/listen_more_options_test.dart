@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:towards_him_app/core/models/content_media.dart';
 import 'package:towards_him_app/features/listen/data/listen_demo_data.dart';
@@ -104,7 +105,19 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('More can copy episode details without a media URL', (tester) async {
+  testWidgets('More copies actual episode details without a media URL', (tester) async {
+    String? copied;
+    final messenger = TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger;
+    messenger.setMockMethodCallHandler(SystemChannels.platform, (call) async {
+      if (call.method == 'Clipboard.setData') {
+        copied = (call.arguments as Map)['text']?.toString();
+      }
+      return null;
+    });
+    addTearDown(() {
+      messenger.setMockMethodCallHandler(SystemChannels.platform, null);
+    });
+
     await tester.pumpWidget(MaterialApp(
       home: AudioPlayerScreen(
         episode: ListenDemoData.episodes.first,
@@ -116,8 +129,10 @@ void main() {
     await tester.tap(find.byKey(const Key('player_action_more')));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('player_more_copy')));
-    await tester.pumpAndSettle();
-    expect(find.text('Details copied.'), findsOneWidget);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 350));
+    expect(copied, contains(ListenDemoData.episodes.first.playerTitle));
+    expect(copied, contains('Toward HIM'));
     expect(tester.takeException(), isNull);
   });
   testWidgets('Text-only Listen items expose Share without audio controls',
