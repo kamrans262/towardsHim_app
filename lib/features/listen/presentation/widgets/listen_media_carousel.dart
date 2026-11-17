@@ -6,7 +6,6 @@ import 'package:video_player/video_player.dart';
 import '../../../../core/models/content_media.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_circular_play_button.dart';
 import '../../domain/models/listen_audio_episode.dart';
 
@@ -82,17 +81,11 @@ class ListenMediaSlide {
 class ListenMediaCarousel extends StatefulWidget {
   const ListenMediaCarousel({
     required this.episode,
-    required this.audioState,
-    required this.isAudioPlaying,
-    required this.onToggleAudio,
     required this.onVideoPlay,
     super.key,
   });
 
   final ListenAudioEpisode episode;
-  final Listenable audioState;
-  final bool Function() isAudioPlaying;
-  final VoidCallback onToggleAudio;
   final VoidCallback onVideoPlay;
 
   @override
@@ -161,31 +154,16 @@ class ListenMediaCarouselState extends State<ListenMediaCarousel> {
   }
 
   Widget _audio() {
-    return ColoredBox(
+    // The cover is decorative for audio: the existing playback controls
+    // below remain the only audio play/pause action.
+    return const ColoredBox(
       color: AppColors.outlinedButtonBackground,
       child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.headphones_rounded,
-              color: AppColors.primaryOrange,
-              size: 30,
-            ),
-            const SizedBox(height: 12),
-            AnimatedBuilder(
-              animation: widget.audioState,
-              builder: (context, _) => AppCircularPlayButton(
-                key: const Key('player_cover_audio_action'),
-                isPlaying: widget.isAudioPlaying(),
-                diameter: AppSpacing.playerMainPlayDiameter,
-                iconSize: AppSpacing.playerMainPlayIcon,
-                onPressed: widget.onToggleAudio,
-              ),
-            ),
-            const SizedBox(height: 10),
-            const Text('Audio', style: AppTypography.quickAccessLabel),
-          ],
+        child: Icon(
+          Icons.headphones_rounded,
+          key: Key('player_cover_headphones'),
+          color: AppColors.primaryOrange,
+          size: 72,
         ),
       ),
     );

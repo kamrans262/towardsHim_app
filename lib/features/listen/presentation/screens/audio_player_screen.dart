@@ -323,9 +323,6 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                       child: ListenMediaCarousel(
                         key: _coverKey,
                         episode: episode,
-                        audioState: _player,
-                        isAudioPlaying: () => _player.isPlaying,
-                        onToggleAudio: _toggleAudioPlayback,
                         onVideoPlay: _pauseAudioForVideo,
                       ),
                     ),

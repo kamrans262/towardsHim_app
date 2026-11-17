@@ -88,15 +88,13 @@ void main() {
         ListenMediaKind.artwork);
   });
 
-  testWidgets('Swiping cover changes media and audio slide uses existing action',
+  testWidgets('Swiping cover shows headphones only on the audio page',
       (tester) async {
     tester.view.physicalSize = const Size(430, 932);
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
-    final status = ValueNotifier<bool>(false);
-    addTearDown(status.dispose);
     var videoStarted = 0;
 
     await tester.pumpWidget(MaterialApp(
@@ -114,9 +112,6 @@ void main() {
                     video: 'https://example.test/video.mp4',
                     narration: 'Example spoken demo narration',
                   ),
-                  audioState: status,
-                  isAudioPlaying: () => status.value,
-                  onToggleAudio: () => status.value = !status.value,
                   onVideoPlay: () => videoStarted++,
                 ),
               ),
@@ -142,11 +137,30 @@ void main() {
     await tester.drag(find.byKey(const Key('player_media_pager')), const Offset(-355, 0));
     await tester.pumpAndSettle();
     expect(tester.getSize(find.byKey(const Key('player_media_dot_2'))).width, 24);
-    expect(find.byKey(const Key('player_cover_audio_action')), findsOneWidget);
+    expect(find.byKey(const Key('player_cover_headphones')), findsOneWidget);
+    expect(find.byKey(const Key('player_cover_audio_action')), findsNothing);
+    expect(find.text('Audio'), findsNothing);
+    expect(find.byType(IconButton), findsNothing);
+  });
 
-    await tester.tap(find.byKey(const Key('player_cover_audio_action')));
-    await tester.pump();
-    expect(status.value, true);
+  testWidgets('Audio-only player cover displays only a centered headphone icon',
+      (tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: SizedBox(
+          height: 280,
+          child: ListenMediaCarousel(
+            episode: sample(audio: 'https://example.test/clip.mp3'),
+            onVideoPlay: () {},
+          ),
+        ),
+      ),
+    ));
+    expect(find.byKey(const Key('player_cover_headphones')), findsOneWidget);
+    expect(find.text('Audio'), findsNothing);
+    expect(find.byKey(const Key('player_cover_audio_action')), findsNothing);
+    expect(find.byKey(const Key('player_media_pager')), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('Video no longer renders in an extra card below the player',
