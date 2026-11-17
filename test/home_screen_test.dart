@@ -177,14 +177,19 @@ void main() {
     expect(find.text('Recently Published'), findsNothing);
   });
 
-  testWidgets('Store shows local placeholder without URL', (tester) async {
+  testWidgets('Store opens the approved merchandise bottom sheet', (tester) async {
     await tester.pumpWidget(const MaterialApp(home: HomeShellScreen(
       audioRepository: FakeAudioCatalogRepository(publishedEpisodes),
     )));
     await tester.tap(find.byKey(const Key('nav_Store')));
     await tester.pumpAndSettle();
-    expect(find.text('Merchandise Store URL has not been configured.'),
+    expect(find.text('Merchandise Store'), findsOneWidget);
+    expect(find.text('Visit Store'), findsOneWidget);
+    expect(find.text('Explore Toward HIM merchandise in our official online store.'),
         findsOneWidget);
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(find.text('Merchandise Store'), findsNothing);
   });
 
   for (final size in <Size>[
