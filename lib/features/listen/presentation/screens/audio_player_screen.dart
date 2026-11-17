@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:just_audio/just_audio.dart' as ja;
 
 import '../../../../core/theme/app_colors.dart';
@@ -13,6 +15,7 @@ import '../../../../core/widgets/app_content_media_view.dart';
 import '../widgets/listen_media_carousel.dart';
 import '../../../../core/models/content_media.dart';
 import '../../domain/models/listen_audio_episode.dart';
+import '../../domain/models/listen_share_content.dart';
 import '../controllers/audio_player_ui_controller.dart';
 import '../services/narration_engine.dart';
 import '../widgets/player_playback_controls.dart';
@@ -24,11 +27,14 @@ class AudioPlayerScreen extends StatefulWidget {
   const AudioPlayerScreen({
     required this.episode,
     this.narrationEngine,
+    this.shareAction,
     super.key,
   });
 
   final ListenAudioEpisode episode;
   final NarrationEngine? narrationEngine;
+  /// Test seam for the native system share sheet; production uses share_plus.
+  final Future<void> Function(String text, Rect position)? shareAction;
 
   @override
   State<AudioPlayerScreen> createState() => _AudioPlayerScreenState();
@@ -238,7 +244,46 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
     );
   }
 
+  Rect _shareOrigin(BuildContext sheetContext) {
+    final renderObject = sheetContext.findRenderObject();
+    if (renderObject is RenderBox && renderObject.hasSize) {
+      return renderObject.localToGlobal(Offset.zero) & renderObject.size;
+    }
+    final screen = MediaQuery.sizeOf(context);
+    return Rect.fromLTWH(screen.width / 2, screen.height / 2, 1, 1);
+  }
+
+  Future<void> _shareContent(String message, Rect origin) async {
+    try {
+      final action = widget.shareAction;
+      if (action != null) {
+        await action(message, origin);
+      } else {
+        await SharePlus.instance.share(
+          ShareParams(
+            text: message,
+            title: widget.episode.playerTitle ?? widget.episode.title,
+            subject: widget.episode.playerTitle ?? widget.episode.title,
+            sharePositionOrigin: origin,
+          ),
+        );
+      }
+    } catch (_) {
+      if (mounted) _showNotice('Unable to share this content.');
+    }
+  }
+
+  Future<void> _copyContent(String value, bool isLink) async {
+    try {
+      await Clipboard.setData(ClipboardData(text: value));
+      if (mounted) _showNotice(isLink ? 'Link copied.' : 'Details copied.');
+    } catch (_) {
+      if (mounted) _showNotice('Unable to copy this content.');
+    }
+  }
+
   void _showMoreOptions() {
+    final content = ListenShareContent.forEpisode(widget.episode);
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: AppColors.background,
@@ -248,18 +293,49 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
       builder: (sheetContext) {
         return SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.screenHorizontal),
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.screenHorizontal,
+              20,
+              AppSpacing.screenHorizontal,
+              AppSpacing.screenBottom,
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 const Text('More', style: AppTypography.sectionHeading),
-                const SizedBox(height: 20),
-                const Text(
-                  'Additional player options will be available in a later phase.',
-                  textAlign: TextAlign.center,
-                  style: AppTypography.homeSecondary,
+                const SizedBox(height: 16),
+                ListTile(
+                  key: const Key('player_more_share'),
+                  leading: const Icon(
+                    Icons.share_outlined,
+                    color: AppColors.primaryOrange,
+                  ),
+                  title: const Text('Share', style: AppTypography.quickAccessLabel),
+                  onTap: () {
+                    final origin = _shareOrigin(sheetContext);
+                    Navigator.of(sheetContext).pop();
+                    unawaited(_shareContent(content.message, origin));
+                  },
                 ),
-                const SizedBox(height: 10),
+                ListTile(
+                  key: const Key('player_more_copy'),
+                  leading: const Icon(
+                    Icons.copy_outlined,
+                    color: AppColors.primaryOrange,
+                  ),
+                  title: Text(
+                    content.mediaUrl == null ? 'Copy Details' : 'Copy Link',
+                    style: AppTypography.quickAccessLabel,
+                  ),
+                  onTap: () {
+                    Navigator.of(sheetContext).pop();
+                    unawaited(_copyContent(
+                      content.mediaUrl ?? content.message,
+                      content.mediaUrl != null,
+                    ));
+                  },
+                ),
+                const SizedBox(height: 8),
                 TextButton(
                   onPressed: () => Navigator.of(sheetContext).pop(),
                   child: const Text('Close'),
