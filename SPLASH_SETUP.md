@@ -1,15 +1,38 @@
-# Toward HIM Native Splash Setup
+# Toward HIM — One Large Logo on Startup
 
-This package contains the original user-supplied logo, a centered logo image for iOS and Android 11 and below, an Android 12+ circular-mask-safe image, and a flutter_native_splash configuration file. No logo artwork was redrawn or changed. Background is sampled from the supplied image: `#F6EDDE`.
+The approved official Toward HIM logo appears **once**, centered at
+**270 × 164 logical pixels** on the Flutter SplashScreen for about 1.6 seconds.
 
-Extract the ZIP directly into the root of the `towardsHim_app` Flutter project.
+Native launch screens are unavoidable while iOS/Android starts the Flutter
+engine, but their image/icon is intentionally **invisible**. They show only
+the same cream background (`#F7EDDF`), so there is no initial small logo.
 
-Then run from the project root:
+## Platform files
+
+- Flutter: `lib/features/onboarding/presentation/screens/splash_screen.dart`
+  owns the one visible large logo.
+- Android 11 and below: `res/drawable*/launch_background.xml` uses a
+  background-only shape.
+- Android 12+: `values-v31/styles.xml` and
+  `values-night-v31/styles.xml` explicitly use
+  `@drawable/empty_splash_icon`. Android's mandatory OS icon is transparent,
+  preventing a smaller logo from flashing first.
+- iOS: `LaunchScreen.storyboard` uses a background color without an
+  image view.
+
+**Do not re-run `dart run flutter_native_splash:create` without reapplying
+the transparent Android 12 icon override.** The plugin may reintroduce the
+small launcher icon if an Android 12 image is not provided. Existing
+`assets/splash` source artwork remains untouched.
+
+## Testing
+
+A native change requires a **fresh installed build**; Flutter hot reload
+will not update iOS launch storyboards or Android splash resources.
 
 ```sh
-flutter pub add --dev "flutter_native_splash:^2.4.8" && dart run flutter_native_splash:create
+flutter clean && flutter pub get && flutter run
 ```
 
-The generator will update the necessary Android resources and iOS `LaunchScreen.storyboard`. Commit the generated native files and assets together. Validate on device; on Android 12+ splash duration and circular masking are OS-controlled.
-
-To restore generated assets if the source is changed, re-run `dart run flutter_native_splash:create`.
+If the device still shows an old native splash, uninstall the old app and
+install a new build. Check startup on iPhone and Android 12+.

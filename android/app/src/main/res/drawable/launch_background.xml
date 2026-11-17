@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Native startup stays #F7EDDF until Flutter paints the one large official
+     logo. Do not show a second/smaller logo here. -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
-        <bitmap android:gravity="fill" android:src="@drawable/background"/>
-    </item>
-    <item>
-        <bitmap android:gravity="center" android:src="@drawable/splash"/>
+        <shape android:shape="rectangle">
+            <solid android:color="#F7EDDF"/>
+        </shape>
     </item>
 </layer-list>

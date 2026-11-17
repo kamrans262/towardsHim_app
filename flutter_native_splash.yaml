@@ -1,15 +1,18 @@
-# Toward HIM native splash (Android and iOS).
-# Run: dart run flutter_native_splash:create
+# Toward HIM startup: exactly one visible logo, rendered large by
+# lib/features/onboarding/presentation/screens/splash_screen.dart.
+#
+# The native splash shows the matching background only. On Android 12+,
+# the operating system would otherwise show a small launcher/logo icon.
+# The platform XML resources therefore point at a transparent drawable.
+#
+# IMPORTANT: re-running flutter_native_splash:create can restore Android 12's
+# small default app icon. See SPLASH_SETUP.md before regenerating native assets.
 flutter_native_splash:
   color: "#F7EDDF"
   color_dark: "#F7EDDF"
-  image: assets/splash/toward_him_logo.png
-  image_dark: assets/splash/toward_him_logo.png
   android: true
   ios: true
   web: false
   android_12:
     color: "#F7EDDF"
     color_dark: "#F7EDDF"
-    image: assets/splash/toward_him_android12.png
-    image_dark: assets/splash/toward_him_android12.png
