@@ -110,6 +110,7 @@ void main() {
                 borderRadius: BorderRadius.circular(AppSpacing.playerCoverRadius),
                 child: ListenMediaCarousel(
                   episode: sample(
+                    image: 'https://example.test/artwork.png',
                     video: 'https://example.test/video.mp4',
                     narration: 'Example spoken demo narration',
                   ),
