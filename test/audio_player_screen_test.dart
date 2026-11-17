@@ -213,10 +213,10 @@ void main() {
     );
     await tester.tap(find.byKey(const Key('player_action_more')));
     await tester.pumpAndSettle();
-    expect(
-      find.text('Additional player options will be available in a later phase.'),
-      findsOneWidget,
-    );
+    expect(find.byKey(const Key('player_more_share')), findsOneWidget);
+    expect(find.byKey(const Key('player_more_copy')), findsOneWidget);
+    expect(find.text('Share'), findsOneWidget);
+    expect(find.text('Copy Details'), findsOneWidget);
   });
 
   testWidgets('Selected Listen episode opens Player and back restores Listen',
