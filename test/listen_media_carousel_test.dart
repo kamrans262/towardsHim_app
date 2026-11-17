@@ -134,7 +134,7 @@ void main() {
     await tester.drag(find.byKey(const Key('player_media_pager')), const Offset(-355, 0));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 350));
-    expect(tester.getSize(find.byKey(const Key('player_media_dot_1'))).width, 18);
+    expect(tester.getSize(find.byKey(const Key('player_media_dot_1'))).width, 24);
 
     // Video is deliberately not auto-played after swiping, and tests do not
     // need a native video plugin to prove the page selection.
@@ -143,7 +143,7 @@ void main() {
     await tester.drag(find.byKey(const Key('player_media_pager')), const Offset(-355, 0));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 350));
-    expect(tester.getSize(find.byKey(const Key('player_media_dot_2'))).width, 18);
+    expect(tester.getSize(find.byKey(const Key('player_media_dot_2'))).width, 24);
     expect(find.byKey(const Key('player_cover_audio_action')), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('player_cover_audio_action')));
