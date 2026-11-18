@@ -6,6 +6,8 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
+import 'session_restore_guard.dart';
+
 /// A pending email code check. This is deliberately not a signed-in session.
 class LoginOtpChallenge {
   const LoginOtpChallenge({
@@ -75,8 +77,24 @@ class AuthRepository {
 
   /// Restore session before showing an already signed-in member the home UI.
   Future<bool> restoreSession() async {
-    _token = await _storage.read(key: _tokenKey);
-    final storedUser = await _storage.read(key: _userKey);
+    // The saved token is restored only after both secure-storage reads
+    // complete successfully. Timeout/error falls back to Welcome instead of
+    // trapping the member on the splash screen.
+    _token = null;
+    _user = null;
+    final values = await readStoredSessionValues(
+      read: (key) => _storage.read(key: key),
+      tokenKey: _tokenKey,
+      userKey: _userKey,
+    );
+    if (values == null) {
+      debugPrint('Toward HIM: saved session unavailable; opening Welcome.');
+      return false;
+    }
+    final token = values[0];
+    if (token == null || token.isEmpty) return false;
+
+    final storedUser = values[1];
     if (storedUser != null) {
       try {
         _user = Map<String, dynamic>.from(jsonDecode(storedUser) as Map);
@@ -84,7 +102,8 @@ class AuthRepository {
         _user = null;
       }
     }
-    return isAuthenticated;
+    _token = token;
+    return true;
   }
 
   Future<Map<String, dynamic>> _request(

@@ -87,12 +87,18 @@ abstract final class AppRouter {
       builder: (context) => switch (settings.name) {
         AppRoutes.splash => SplashScreen(
             onFinished: () async {
-              final signedIn = await AuthRepository.instance.restoreSession();
-              if (context.mounted) {
-                Navigator.of(context).pushReplacementNamed(
-                  signedIn ? AppRoutes.home : AppRoutes.welcome,
-                );
+              var signedIn = false;
+              try {
+                signedIn = await AuthRepository.instance.restoreSession();
+              } catch (_) {
+                // Startup must not dead-end on Splash even if session logic
+                // changes or an unexpected platform exception occurs.
+                signedIn = false;
               }
+              if (!context.mounted) return;
+              Navigator.of(context).pushReplacementNamed(
+                signedIn ? AppRoutes.home : AppRoutes.welcome,
+              );
             },
           ),
         AppRoutes.welcome => WelcomeScreen(
