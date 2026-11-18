@@ -64,6 +64,8 @@ class NotificationCard extends StatelessWidget {
                   Text(
                     notification.description,
                     style: AppTypography.homeSecondary,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 8),
                   Text(notification.dateLabel, style: AppTypography.homeSecondary),
@@ -96,6 +98,8 @@ class NotificationCard extends StatelessWidget {
                       Text(
                         notification.description,
                         style: AppTypography.homeSecondary,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 8),
                       Text(notification.dateLabel, style: AppTypography.homeSecondary),

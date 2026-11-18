@@ -10,6 +10,8 @@ class AppNotification {
     required this.dateLabel,
     required this.isRead,
     this.artworkUrl,
+    this.targetType,
+    this.dayNumber,
   });
 
   final String id;
@@ -22,6 +24,19 @@ class AppNotification {
   final String dateLabel;
   final bool isRead;
   final String? artworkUrl;
+  /// Optional destination metadata for non-audio notification types.
+  /// Existing Laravel publications default to their category (audio).
+  final String? targetType;
+  final int? dayNumber;
+
+  String get destination {
+    final type = (targetType ?? category).trim().toLowerCase();
+    if (type.contains('community') || type.contains('discussion') ||
+        type.contains('post')) return 'community';
+    if (type.contains('daily') || type.contains('day')) return 'daily';
+    if (type.contains('challenge') || type.contains('weekly')) return 'weekly';
+    return 'audio';
+  }
 
   factory AppNotification.fromApi(Map<String, dynamic> json) {
     final stamp = DateTime.tryParse(json['created_at']?.toString() ?? '')?.toLocal()
@@ -41,6 +56,11 @@ class AppNotification {
       createdAt: stamp,
       dateLabel: label,
       isRead: json['is_read'] == true,
+      targetType: json['target_type']?.toString() ??
+          json['destination_type']?.toString(),
+      dayNumber: int.tryParse(
+        (json['day_number'] ?? json['day'])?.toString() ?? '',
+      ),
     );
   }
 
@@ -55,5 +75,7 @@ class AppNotification {
         dateLabel: dateLabel,
         isRead: isRead ?? this.isRead,
         artworkUrl: artworkUrl,
+        targetType: targetType,
+        dayNumber: dayNumber,
       );
 }

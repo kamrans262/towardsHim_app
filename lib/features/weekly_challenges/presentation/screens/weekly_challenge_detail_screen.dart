@@ -331,6 +331,8 @@ class _DailyActivityCard extends StatelessWidget {
                     child: Text(
                       activity.text,
                       style: AppTypography.homeSecondary.copyWith(height: 1),
+                      maxLines: 4,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
