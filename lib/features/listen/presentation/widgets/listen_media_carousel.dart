@@ -6,7 +6,7 @@ import 'package:video_player/video_player.dart';
 import '../../../../core/models/content_media.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
-import '../../../../core/widgets/app_circular_play_button.dart';
+import '../models/video_playback_snapshot.dart';
 import '../../domain/models/listen_audio_episode.dart';
 
 enum ListenMediaKind { artwork, video, audio }
@@ -76,17 +76,22 @@ class ListenMediaSlide {
   }
 }
 
-/// Replaces the Player's original cover image, with exactly the same bounds
-/// and rounded parent container. Audio controls below the cover are unchanged.
+/// Replaces the original cover within the same bounds. The approved
+/// bottom Player controls handle video and audio; the cover has no controls.
 class ListenMediaCarousel extends StatefulWidget {
   const ListenMediaCarousel({
     required this.episode,
     required this.onVideoPlay,
+    this.onSelectionChanged,
+    this.onVideoStateChanged,
     super.key,
   });
 
   final ListenAudioEpisode episode;
   final VoidCallback onVideoPlay;
+  final void Function(int index, ListenMediaKind kind)? onSelectionChanged;
+  final void Function(int index, VideoPlaybackSnapshot snapshot)?
+      onVideoStateChanged;
 
   @override
   State<ListenMediaCarousel> createState() => ListenMediaCarouselState();
@@ -97,6 +102,7 @@ class ListenMediaCarouselState extends State<ListenMediaCarousel> {
   late final List<ListenMediaSlide> _slides;
   late final Map<int, GlobalKey<_CoverVideoState>> _videoKeys;
   int _selected = 0;
+  double _playbackSpeed = 1;
 
   @override
   void initState() {
@@ -116,9 +122,24 @@ class ListenMediaCarouselState extends State<ListenMediaCarousel> {
     }
   }
 
+  void toggleSelectedVideo() => _videoKeys[_selected]?.currentState?.toggle();
+
+  void seekSelectedVideo(double fraction) =>
+      _videoKeys[_selected]?.currentState?.seekFraction(fraction);
+
+  void skipSelectedVideo(int seconds) =>
+      _videoKeys[_selected]?.currentState?.skip(seconds);
+
+  void setVideoSpeed(double speed) {
+    _playbackSpeed = speed;
+    _videoKeys[_selected]?.currentState?.setSpeed(speed);
+  }
+
   void _onPageChanged(int index) {
+    if (index == _selected) return;
     pauseVideos();
     setState(() => _selected = index);
+    widget.onSelectionChanged?.call(index, _slides[index].kind);
   }
 
   @override
@@ -187,6 +208,8 @@ class ListenMediaCarouselState extends State<ListenMediaCarousel> {
       key: _videoKeys[index],
       url: slide.url!,
       onPlay: widget.onVideoPlay,
+      playbackSpeed: _playbackSpeed,
+      onChanged: (snapshot) => widget.onVideoStateChanged?.call(index, snapshot),
     );
   }
 
@@ -248,17 +271,20 @@ class ListenMediaCarouselState extends State<ListenMediaCarousel> {
   }
 }
 
-/// A single visible video. Controller is created only on the selected slide
-/// and disposed when navigating away, leaving the rest of the Player intact.
+/// The selected video is rendered without its own playback toolbar.
 class _CoverVideo extends StatefulWidget {
   const _CoverVideo({
     required this.url,
     required this.onPlay,
+    required this.onChanged,
+    required this.playbackSpeed,
     super.key,
   });
 
   final String url;
   final VoidCallback onPlay;
+  final ValueChanged<VideoPlaybackSnapshot> onChanged;
+  final double playbackSpeed;
 
   @override
   State<_CoverVideo> createState() => _CoverVideoState();
@@ -268,20 +294,42 @@ class _CoverVideoState extends State<_CoverVideo> {
   late final VideoPlayerController _controller;
   bool _ready = false;
   bool _failed = false;
+  VideoPlaybackSnapshot? _lastSent;
 
   @override
   void initState() {
     super.initState();
     _controller = VideoPlayerController.networkUrl(Uri.parse(widget.url));
+    _controller.addListener(_report);
     unawaited(_prepare());
+  }
+
+  void _report() {
+    if (!mounted) return;
+    final value = _controller.value;
+    final snapshot = VideoPlaybackSnapshot(
+      position: value.position,
+      duration: value.duration,
+      isPlaying: value.isPlaying,
+      isReady: _ready && value.isInitialized,
+      hasError: _failed || value.hasError,
+    );
+    if (snapshot == _lastSent) return;
+    _lastSent = snapshot;
+    widget.onChanged(snapshot);
   }
 
   Future<void> _prepare() async {
     try {
       await _controller.initialize();
-      if (mounted) setState(() => _ready = true);
+      if (!mounted) return;
+      setState(() => _ready = true);
+      await _controller.setPlaybackSpeed(widget.playbackSpeed);
+      _report();
     } catch (_) {
-      if (mounted) setState(() => _failed = true);
+      if (!mounted) return;
+      setState(() => _failed = true);
+      _report();
     }
   }
 
@@ -291,19 +339,51 @@ class _CoverVideoState extends State<_CoverVideo> {
     }
   }
 
-  void _toggle() {
-    if (!_ready) return;
+  Future<void> _restartAndPlay() async {
+    if (_controller.value.duration > Duration.zero &&
+        _controller.value.position >= _controller.value.duration) {
+      await _controller.seekTo(Duration.zero);
+    }
+    if (mounted) await _controller.play();
+  }
+
+  void toggle() {
+    if (!_ready || _failed) return;
     if (_controller.value.isPlaying) {
       unawaited(_controller.pause());
     } else {
-      // Pause the main audio before video playback is allowed.
       widget.onPlay();
-      unawaited(_controller.play());
+      unawaited(_restartAndPlay());
+    }
+  }
+
+  void seekFraction(double fraction) {
+    if (!_ready || _failed) return;
+    final snapshot = VideoPlaybackSnapshot(
+      position: _controller.value.position,
+      duration: _controller.value.duration,
+    );
+    unawaited(_controller.seekTo(snapshot.seekToFraction(fraction)));
+  }
+
+  void skip(int seconds) {
+    if (!_ready || _failed) return;
+    final snapshot = VideoPlaybackSnapshot(
+      position: _controller.value.position,
+      duration: _controller.value.duration,
+    );
+    unawaited(_controller.seekTo(snapshot.skipSeconds(seconds)));
+  }
+
+  void setSpeed(double speed) {
+    if (_ready && !_failed) {
+      unawaited(_controller.setPlaybackSpeed(speed));
     }
   }
 
   @override
   void dispose() {
+    _controller.removeListener(_report);
     unawaited(_controller.dispose());
     super.dispose();
   }
@@ -330,60 +410,23 @@ class _CoverVideoState extends State<_CoverVideo> {
       );
     }
 
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, _) {
-        final size = _controller.value.size;
-        final playing = _controller.value.isPlaying;
-        return ColoredBox(
-          color: AppColors.heading,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              if (size.width > 0 && size.height > 0)
-                FittedBox(
-                  fit: BoxFit.contain,
-                  child: SizedBox(
-                    width: size.width,
-                    height: size.height,
-                    child: VideoPlayer(_controller),
-                  ),
-                ),
-              Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  key: const Key('player_cover_video_action'),
-                  onTap: _toggle,
-                  child: playing
-                      ? const SizedBox.expand()
-                      : Center(
-                          child: AppCircularPlayButton(
-                            isPlaying: false,
-                            onPressed: _toggle,
-                            diameter: AppSpacing.playerMainPlayDiameter,
-                            iconSize: AppSpacing.playerMainPlayIcon,
-                          ),
-                        ),
-                ),
+    final size = _controller.value.size;
+    return ColoredBox(
+      color: AppColors.heading,
+      child: size.width > 0 && size.height > 0
+          ? FittedBox(
+              fit: BoxFit.contain,
+              child: SizedBox(
+                width: size.width,
+                height: size.height,
+                child: VideoPlayer(_controller),
               ),
-              Positioned(
-                bottom: 0,
-                left: 8,
-                right: 8,
-                child: VideoProgressIndicator(
-                  _controller,
-                  allowScrubbing: true,
-                  colors: const VideoProgressColors(
-                    playedColor: AppColors.primaryOrange,
-                    bufferedColor: AppColors.secondaryText,
-                    backgroundColor: AppColors.white,
-                  ),
-                ),
+            )
+          : const Center(
+              child: CircularProgressIndicator(
+                color: AppColors.primaryOrange,
               ),
-            ],
-          ),
-        );
-      },
+            ),
     );
   }
 }

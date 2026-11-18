@@ -76,6 +76,8 @@ class HomeFeaturedCard extends StatelessWidget {
                           Text(
                             content.description,
                             style: AppTypography.homeSecondary,
+                            maxLines: 3,
+                            overflow: TextOverflow.ellipsis,
                           ),
                         ],
                       ),
