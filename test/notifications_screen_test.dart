@@ -12,10 +12,133 @@ import 'package:towards_him_app/features/listen/presentation/screens/audio_playe
 import 'package:towards_him_app/features/notifications/data/notifications_demo_data.dart';
 import 'package:towards_him_app/features/notifications/presentation/controllers/notifications_controller.dart';
 import 'package:towards_him_app/features/notifications/presentation/screens/notifications_screen.dart';
+import 'package:towards_him_app/features/notifications/domain/models/app_notification.dart';
+import 'package:towards_him_app/features/weekly_challenges/presentation/screens/weekly_challenge_detail_screen.dart';
+import 'package:towards_him_app/features/weekly_challenges/presentation/screens/daily_challenge_screen.dart';
+import 'package:towards_him_app/features/community/presentation/screens/community_post_replies_screen.dart';
+import 'package:towards_him_app/features/community/data/community_demo_data.dart';
 import 'package:towards_him_app/features/notifications/presentation/widgets/notification_card.dart';
 import 'package:towards_him_app/features/notifications/presentation/widgets/notification_swipe_card.dart';
 
 void main() {
+
+  AppNotification targeted(String destination, {
+    String contentId = 'weekly-current',
+    int? dayNumber,
+  }) => AppNotification(
+    id: 'target-$destination',
+    contentId: contentId,
+    title: 'New activity published',
+    description: 'A detailed notification description that continues for a '
+        'very long time across multiple lines on a narrow phone. '
+        'It should never exceed three lines, while opening the complete item.',
+    imageAsset: 'assets/images/home/golden_hour_meditation.webp',
+    category: destination,
+    targetType: destination,
+    dayNumber: dayNumber,
+    createdAt: DateTime(2026, 11, 18),
+    dateLabel: 'Today',
+    isRead: false,
+  );
+
+  Future<void> showTargeted(WidgetTester tester, AppNotification target) async {
+    await tester.pumpWidget(MaterialApp(
+      home: NotificationsScreen(
+        controller: NotificationsController(
+          repository: FakeNotificationRepository(notifications: [target]),
+        ),
+        challengeRepository: FakeChallengeRepository(),
+        communityRepository: FakeCommunityRepository(),
+      ),
+      onGenerateRoute: AppRouter.onGenerateRoute,
+    ));
+    await tester.pumpAndSettle();
+  }
+
+  testWidgets('Notification descriptions show no more than three lines',
+      (tester) async {
+    final target = targeted('Podcast');
+    await showTargeted(tester, target);
+    final description = tester.widget<Text>(find.text(target.description));
+    expect(description.maxLines, 3);
+    expect(description.overflow, TextOverflow.ellipsis);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Narrow notification cards also clamp their description',
+      (tester) async {
+    tester.view.physicalSize = const Size(320, 568);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final target = targeted('Podcast');
+    await showTargeted(tester, target);
+    final description = tester.widget<Text>(find.text(target.description));
+    expect(description.maxLines, 3);
+    expect(description.overflow, TextOverflow.ellipsis);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Weekly notification opens its exact challenge and marks read',
+      (tester) async {
+    await showTargeted(tester, targeted('weekly_challenge'));
+    await tester.tap(find.byKey(const Key('notification_card_target-weekly_challenge')));
+    await tester.pumpAndSettle();
+    expect(find.byType(WeeklyChallengeDetailScreen), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(tester.widget<NotificationCard>(find.byType(NotificationCard))
+        .notification.isRead, isTrue);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Daily notification opens the matching challenge day',
+      (tester) async {
+    await showTargeted(tester, targeted('daily_challenge', dayNumber: 3));
+    await tester.tap(find.byKey(const Key('notification_card_target-daily_challenge')));
+    await tester.pumpAndSettle();
+    expect(find.byType(DailyChallengeScreen), findsOneWidget);
+    expect(find.text('Day 3 – Daily Challenge'), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(tester.widget<NotificationCard>(find.byType(NotificationCard))
+        .notification.isRead, isTrue);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Community notification opens its exact discussion',
+      (tester) async {
+    final post = CommunityDemoData.posts.first;
+    await showTargeted(tester, targeted('community', contentId: post.id));
+    await tester.tap(find.byKey(const Key('notification_card_target-community')));
+    await tester.pumpAndSettle();
+    expect(find.byType(CommunityPostRepliesScreen), findsOneWidget);
+    expect(find.byKey(Key('replies_original_' + post.id)), findsOneWidget);
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(tester.widget<NotificationCard>(find.byType(NotificationCard))
+        .notification.isRead, isTrue);
+    expect(tester.takeException(), isNull);
+  });
+
+  test('Notification parser maps existing audio and optional destinations', () {
+    final audio = AppNotification.fromApi({
+      'id': 3, 'content_id': 71, 'title': 'New Meditation',
+      'description': 'Listen now', 'category': 'Meditation', 'is_read': false,
+    });
+    expect(audio.destination, 'audio');
+    expect(audio.dayNumber, isNull);
+
+    final day = AppNotification.fromApi({
+      'id': 4, 'content_id': 19, 'category': 'Daily Challenge',
+      'target_type': 'daily_challenge', 'day_number': 5,
+    });
+    expect(day.destination, 'daily');
+    expect(day.dayNumber, 5);
+    expect(day.copyWith(isRead: true).dayNumber, 5);
+    expect(day.copyWith(isRead: true).destination, 'daily');
+  });
+
   test('Five notifications, server-backed deletion, open-state and read status', () async {
     final controller = NotificationsController(repository: FakeNotificationRepository());
     await controller.load();
