@@ -8,6 +8,7 @@ import '../../../../core/widgets/app_content_media_view.dart';
 import '../../../../core/models/content_media.dart';
 import '../../../listen/domain/models/listen_audio_episode.dart';
 import '../../../listen/presentation/screens/audio_player_screen.dart';
+import '../../../listen/presentation/widgets/player_secondary_actions.dart';
 import '../../domain/models/daily_challenge.dart';
 import '../controllers/daily_challenge_selection_controller.dart';
 import '../widgets/daily_challenge_option_card.dart';
@@ -25,6 +26,8 @@ class DailyChallengeScreen extends StatefulWidget {
 
 class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
   late final DailyChallengeSelectionController _selection;
+  final GlobalKey<AudioPlayerScreenState> _playerKey =
+      GlobalKey<AudioPlayerScreenState>();
 
   bool get _hasPlayableMedia => widget.challenge.media.any(
         (item) =>
@@ -82,6 +85,36 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
       child: Scaffold(
         key: const Key('daily_challenge_scaffold'),
         backgroundColor: AppColors.background,
+        bottomNavigationBar: _hasPlayableMedia
+            ? SafeArea(
+                top: false,
+                child: ColoredBox(
+                  color: AppColors.background,
+                  child: Center(
+                    heightFactor: 1,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        maxWidth: AppSpacing.homeContentMaxWidth,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          AppSpacing.screenHorizontal,
+                          10,
+                          AppSpacing.screenHorizontal,
+                          AppSpacing.screenBottom,
+                        ),
+                        child: PlayerSecondaryActions(
+                          onSpeed: () => _playerKey.currentState?.showSpeedPicker(),
+                          onDownload: () =>
+                              _playerKey.currentState?.showDownloadNotice(),
+                          onMore: () => _playerKey.currentState?.showMoreOptions(),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            : null,
         body: AnimatedBuilder(
           animation: _selection,
           builder: (context, _) => CustomScrollView(
@@ -132,9 +165,10 @@ class _DailyChallengeScreenState extends State<DailyChallengeScreen> {
                             if (_hasPlayableMedia) ...[
                               const SizedBox(height: 12),
                               AudioPlayerScreen(
-                                key: ValueKey('day_player_${widget.challenge.id}'),
+                                key: _playerKey,
                                 episode: _playerEpisode,
                                 embedded: true,
+                                showEmbeddedActions: false,
                               ),
                             ] else if (widget.challenge.media.any(
                               (item) => item.type == ContentMediaType.image &&

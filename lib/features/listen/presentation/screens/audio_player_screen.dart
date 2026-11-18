@@ -21,6 +21,7 @@ import '../controllers/audio_player_ui_controller.dart';
 import '../services/narration_engine.dart';
 import '../widgets/player_playback_controls.dart';
 import '../widgets/player_secondary_action.dart';
+import '../widgets/player_secondary_actions.dart';
 import '../widgets/player_time_row.dart';
 
 /// Preserves approved Player UI for both server audio and local TTS fixtures.
@@ -30,6 +31,7 @@ class AudioPlayerScreen extends StatefulWidget {
     this.narrationEngine,
     this.shareAction,
     this.embedded = false,
+    this.showEmbeddedActions = true,
     super.key,
   });
 
@@ -38,14 +40,16 @@ class AudioPlayerScreen extends StatefulWidget {
   /// Compact, metadata-free mode for daily challenges. Playback logic,
   /// progress, speed and More actions remain shared with the Listen Player.
   final bool embedded;
+  /// Daily Challenge anchors the same three actions in Scaffold.bottomNavigationBar.
+  final bool showEmbeddedActions;
   /// Test seam for the native system share sheet; production uses share_plus.
   final Future<void> Function(String text, Rect position)? shareAction;
 
   @override
-  State<AudioPlayerScreen> createState() => _AudioPlayerScreenState();
+  State<AudioPlayerScreen> createState() => AudioPlayerScreenState();
 }
 
-class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
+class AudioPlayerScreenState extends State<AudioPlayerScreen> {
   late final AudioPlayerUiController _player;
   NarrationEngine? _narration;
   ja.AudioPlayer? _remotePlayer;
@@ -455,7 +459,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                 : _player.progress,
             onChanged: _seekPlayback,
           ),
-          SizedBox(height: compact ? 4 : AppSpacing.playerProgressToTimes),
+          SizedBox(height: compact ? 8 : AppSpacing.playerProgressToTimes),
           PlayerTimeRow(
             current: _videoSelected
                 ? _videoState.currentTime
@@ -464,7 +468,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                 ? _videoState.totalTime
                 : _player.totalTime,
           ),
-          SizedBox(height: compact ? 10 : AppSpacing.playerTimesToControls),
+          SizedBox(height: compact ? 16 : AppSpacing.playerTimesToControls),
           PlayerPlaybackControls(
             isPlaying: _videoSelected
                 ? _videoState.isPlaying
@@ -478,35 +482,19 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
     );
   }
 
-  Widget _buildSecondaryActions() {
-    return Row(
-      children: [
-        Expanded(
-          child: PlayerSecondaryAction(
-            label: 'Speed',
-            pngAsset: 'assets/icons/player/playback_speed.png',
-            onPressed: _showSpeedPicker,
-          ),
-        ),
-        Expanded(
-          child: PlayerSecondaryAction(
-            label: 'Download',
-            svgAsset: 'assets/icons/player/download.svg',
-            onPressed: () => _showNotice(
-              'Downloading will be available after the UI phase.',
-            ),
-          ),
-        ),
-        Expanded(
-          child: PlayerSecondaryAction(
-            label: 'More',
-            svgAsset: 'assets/icons/player/more.svg',
-            onPressed: _showMoreOptions,
-          ),
-        ),
-      ],
-    );
-  }
+  void showSpeedPicker() => _showSpeedPicker();
+
+  void showDownloadNotice() => _showNotice(
+    'Downloading will be available after the UI phase.',
+  );
+
+  void showMoreOptions() => _showMoreOptions();
+
+  Widget _buildSecondaryActions() => PlayerSecondaryActions(
+        onSpeed: showSpeedPicker,
+        onDownload: showDownloadNotice,
+        onMore: showMoreOptions,
+      );
 
   Widget _buildMoreOnly() {
     return Align(
@@ -530,12 +518,14 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _buildCover(compact: true),
-        const SizedBox(height: 8),
+        const SizedBox(height: 22),
         if (_hasAudio || _videoSelected) ...[
           _buildPlaybackControls(compact: true),
-          const SizedBox(height: 10),
-          _buildSecondaryActions(),
-        ] else
+          if (widget.showEmbeddedActions) ...[
+            const SizedBox(height: 10),
+            _buildSecondaryActions(),
+          ],
+        ] else if (widget.showEmbeddedActions)
           _buildMoreOnly(),
       ],
     );
