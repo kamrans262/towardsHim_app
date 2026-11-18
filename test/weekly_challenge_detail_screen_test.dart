@@ -9,6 +9,21 @@ import 'package:towards_him_app/features/weekly_challenges/presentation/screens/
 import 'package:towards_him_app/core/navigation/app_router.dart';
 
 void main() {
+
+  testWidgets('Weekly day cards show at most four lines with ellipsis',
+      (tester) async {
+    await openDetail(tester);
+    final dayCard = find.byKey(const Key('weekly_day_open_3'));
+    await tester.ensureVisible(dayCard);
+    await tester.pumpAndSettle();
+    final texts = tester.widgetList<Text>(
+      find.descendant(of: dayCard, matching: find.byType(Text)),
+    ).toList();
+    expect(texts.last.maxLines, 4);
+    expect(texts.last.overflow, TextOverflow.ellipsis);
+    expect(tester.takeException(), isNull);
+  });
+
   Future<void> openDetail(WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: HomeShellScreen(challengeRepository: FakeChallengeRepository()),

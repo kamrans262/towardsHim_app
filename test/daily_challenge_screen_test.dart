@@ -7,6 +7,7 @@ import 'package:towards_him_app/core/widgets/app_content_media_view.dart';
 import 'package:towards_him_app/features/listen/presentation/screens/audio_player_screen.dart';
 import 'package:towards_him_app/features/listen/presentation/widgets/player_playback_controls.dart';
 import 'package:towards_him_app/features/listen/presentation/widgets/player_secondary_action.dart';
+import 'package:towards_him_app/features/listen/presentation/widgets/player_secondary_actions.dart';
 import 'package:towards_him_app/core/theme/app_spacing.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:towards_him_app/core/navigation/app_router.dart';
@@ -19,6 +20,79 @@ import 'package:towards_him_app/features/weekly_challenges/presentation/screens/
 import 'package:towards_him_app/features/weekly_challenges/presentation/widgets/daily_challenge_option_card.dart';
 
 void main() {
+
+  testWidgets('Daily video actions stay bottom aligned with spacing above progress',
+      (tester) async {
+    const challenge = DailyChallenge(
+      id: 'weekly-4-day-5',
+      subtitle: 'Day 5 – Daily Challenge',
+      title: 'Prayer with Video',
+      description: 'Short reflection.',
+      options: [],
+      initialSelectedOptionId: 'share',
+      media: [
+        ContentMedia(
+          id: 'video-bottom',
+          type: ContentMediaType.video,
+          url: 'https://example.test/day-five.mp4',
+        ),
+      ],
+    );
+    tester.view.physicalSize = const Size(430, 932);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(const MaterialApp(
+      home: DailyChallengeScreen(challenge: challenge),
+    ));
+    await tester.pump();
+    expect(find.byType(PlayerSecondaryActions), findsOneWidget);
+    expect(find.byType(PlayerSecondaryAction), findsNWidgets(3));
+    expect(find.byType(PlayerPlaybackControls), findsOneWidget);
+    final actions = tester.getRect(find.byKey(const Key('player_secondary_actions')));
+    final scaffold = tester.getRect(find.byKey(const Key('daily_challenge_scaffold')));
+    expect(scaffold.bottom - actions.bottom, closeTo(AppSpacing.screenBottom, 1.5));
+    final cover = tester.getRect(find.byKey(const Key('player_media_viewport')));
+    final seek = tester.getRect(find.byKey(const Key('player_seek_bar')));
+    expect(seek.top - cover.bottom, greaterThanOrEqualTo(20));
+    expect(actions.top, greaterThan(seek.bottom));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('Daily audio actions remain visible at the bottom on narrow phones',
+      (tester) async {
+    const challenge = DailyChallenge(
+      id: 'weekly-4-day-6',
+      subtitle: 'Day 6 – Daily Challenge',
+      title: 'Listen Today',
+      description: 'An audio reflection with a longer description so that '
+          'the page can scroll while actions remain accessible.',
+      options: [],
+      initialSelectedOptionId: 'share',
+      media: [
+        ContentMedia(
+          id: 'audio-bottom',
+          type: ContentMediaType.audio,
+          url: 'https://example.test/day-six.mp3',
+        ),
+      ],
+    );
+    tester.view.physicalSize = const Size(320, 568);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    await tester.pumpWidget(const MaterialApp(
+      home: DailyChallengeScreen(challenge: challenge),
+    ));
+    await tester.pump();
+    final actions = tester.getRect(find.byKey(const Key('player_secondary_actions')));
+    final scaffold = tester.getRect(find.byKey(const Key('daily_challenge_scaffold')));
+    expect(scaffold.bottom - actions.bottom, closeTo(AppSpacing.screenBottom, 1.5));
+    expect(find.byType(PlayerSecondaryAction), findsNWidgets(3));
+    expect(find.byKey(const Key('daily_challenge_scroll')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Published day video reuses compact Listen Player controls and displays activity once', (tester) async {
     const dayText = 'Spend five minutes in prayer this morning.';
     const challenge = DailyChallenge(
