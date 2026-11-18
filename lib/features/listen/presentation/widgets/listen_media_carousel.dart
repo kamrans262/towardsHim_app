@@ -84,6 +84,7 @@ class ListenMediaCarousel extends StatefulWidget {
     required this.onVideoPlay,
     this.onSelectionChanged,
     this.onVideoStateChanged,
+    this.preferPlayable = false,
     super.key,
   });
 
@@ -92,6 +93,8 @@ class ListenMediaCarousel extends StatefulWidget {
   final void Function(int index, ListenMediaKind kind)? onSelectionChanged;
   final void Function(int index, VideoPlaybackSnapshot snapshot)?
       onVideoStateChanged;
+  /// Daily challenges should open on their playable media, not an artwork page.
+  final bool preferPlayable;
 
   @override
   State<ListenMediaCarousel> createState() => ListenMediaCarouselState();
@@ -104,11 +107,19 @@ class ListenMediaCarouselState extends State<ListenMediaCarousel> {
   int _selected = 0;
   double _playbackSpeed = 1;
 
+  static int preferredSlideIndex(List<ListenMediaSlide> slides) {
+    final video = slides.indexWhere((slide) => slide.kind == ListenMediaKind.video);
+    if (video != -1) return video;
+    final audio = slides.indexWhere((slide) => slide.kind == ListenMediaKind.audio);
+    return audio == -1 ? 0 : audio;
+  }
+
   @override
   void initState() {
     super.initState();
-    _pageController = PageController();
     _slides = ListenMediaSlide.forEpisode(widget.episode);
+    _selected = widget.preferPlayable ? preferredSlideIndex(_slides) : 0;
+    _pageController = PageController(initialPage: _selected);
     _videoKeys = {
       for (var i = 0; i < _slides.length; i++)
         if (_slides[i].kind == ListenMediaKind.video)

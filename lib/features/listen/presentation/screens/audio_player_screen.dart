@@ -29,11 +29,15 @@ class AudioPlayerScreen extends StatefulWidget {
     required this.episode,
     this.narrationEngine,
     this.shareAction,
+    this.embedded = false,
     super.key,
   });
 
   final ListenAudioEpisode episode;
   final NarrationEngine? narrationEngine;
+  /// Compact, metadata-free mode for daily challenges. Playback logic,
+  /// progress, speed and More actions remain shared with the Listen Player.
+  final bool embedded;
   /// Test seam for the native system share sheet; production uses share_plus.
   final Future<void> Function(String text, Rect position)? shareAction;
 
@@ -157,6 +161,15 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
     super.initState();
     _player = AudioPlayerUiController(widget.episode);
     _mediaSlides = ListenMediaSlide.forEpisode(widget.episode);
+    if (widget.embedded) {
+      _activeMediaIndex = ListenMediaCarouselState.preferredSlideIndex(_mediaSlides);
+      if (_mediaSlides[_activeMediaIndex].kind == ListenMediaKind.video) {
+        // A day with both video and audio must not start hidden audio behind
+        // the selected video.
+        _audioMayAutoplay = false;
+        _player.togglePlayPauseIfPlaying();
+      }
+    }
     final mediaUrl = widget.episode.audioUrl;
     if (mediaUrl != null && mediaUrl.isNotEmpty) {
       unawaited(_openRemote(mediaUrl));
@@ -413,8 +426,124 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
     );
   }
 
+  Widget _buildCover({required bool compact}) {
+    return AspectRatio(
+      aspectRatio: compact ? 2 : AppSpacing.playerCoverAspectRatio,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppSpacing.playerCoverRadius),
+        child: ListenMediaCarousel(
+          key: _coverKey,
+          episode: widget.episode,
+          onVideoPlay: _pauseAudioForVideo,
+          onSelectionChanged: _mediaChanged,
+          onVideoStateChanged: _onVideoState,
+          preferPlayable: widget.embedded,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPlaybackControls({required bool compact}) {
+    return AnimatedBuilder(
+      animation: _player,
+      builder: (context, _) => Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          AppAudioSeekBar(
+            progress: _videoSelected
+                ? _videoState.progress
+                : _player.progress,
+            onChanged: _seekPlayback,
+          ),
+          SizedBox(height: compact ? 4 : AppSpacing.playerProgressToTimes),
+          PlayerTimeRow(
+            current: _videoSelected
+                ? _videoState.currentTime
+                : _player.currentTime,
+            total: _videoSelected
+                ? _videoState.totalTime
+                : _player.totalTime,
+          ),
+          SizedBox(height: compact ? 10 : AppSpacing.playerTimesToControls),
+          PlayerPlaybackControls(
+            isPlaying: _videoSelected
+                ? _videoState.isPlaying
+                : _player.isPlaying,
+            onToggle: _togglePlayback,
+            onRewind: () => _skipPlayback(-10),
+            onForward: () => _skipPlayback(10),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSecondaryActions() {
+    return Row(
+      children: [
+        Expanded(
+          child: PlayerSecondaryAction(
+            label: 'Speed',
+            pngAsset: 'assets/icons/player/playback_speed.png',
+            onPressed: _showSpeedPicker,
+          ),
+        ),
+        Expanded(
+          child: PlayerSecondaryAction(
+            label: 'Download',
+            svgAsset: 'assets/icons/player/download.svg',
+            onPressed: () => _showNotice(
+              'Downloading will be available after the UI phase.',
+            ),
+          ),
+        ),
+        Expanded(
+          child: PlayerSecondaryAction(
+            label: 'More',
+            svgAsset: 'assets/icons/player/more.svg',
+            onPressed: _showMoreOptions,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMoreOnly() {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: SizedBox(
+        width: 100,
+        child: PlayerSecondaryAction(
+          label: 'More',
+          svgAsset: 'assets/icons/player/more.svg',
+          onPressed: _showMoreOptions,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmbeddedPlayer() {
+    // In this mode the day heading and instructions are already on screen:
+    // no Player header, duplicate description or default media caption.
+    return Column(
+      key: const Key('daily_challenge_embedded_player'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _buildCover(compact: true),
+        const SizedBox(height: 8),
+        if (_hasAudio || _videoSelected) ...[
+          _buildPlaybackControls(compact: true),
+          const SizedBox(height: 10),
+          _buildSecondaryActions(),
+        ] else
+          _buildMoreOnly(),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (widget.embedded) return _buildEmbeddedPlayer();
     final episode = widget.episode;
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -455,21 +584,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                     ),
                   ),
                   const SizedBox(height: AppSpacing.playerHeaderToCover),
-                  AspectRatio(
-                    aspectRatio: AppSpacing.playerCoverAspectRatio,
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(
-                        AppSpacing.playerCoverRadius,
-                      ),
-                      child: ListenMediaCarousel(
-                        key: _coverKey,
-                        episode: episode,
-                        onVideoPlay: _pauseAudioForVideo,
-                        onSelectionChanged: _mediaChanged,
-                        onVideoStateChanged: _onVideoState,
-                      ),
-                    ),
-                  ),
+                  _buildCover(compact: false),
                   const SizedBox(height: AppSpacing.playerCoverToTag),
                   Align(
                     alignment: Alignment.centerLeft,
@@ -497,85 +612,15 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                     style: AppTypography.homeSecondary,
                   ),
                   if (_hasAudio || _videoSelected) ...[
-                  const SizedBox(height: AppSpacing.playerDescriptionToProgress),
-                  AnimatedBuilder(
-                    animation: _player,
-                    builder: (context, _) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          AppAudioSeekBar(
-                            progress: _videoSelected
-                                ? _videoState.progress
-                                : _player.progress,
-                            onChanged: _seekPlayback,
-                          ),
-                          const SizedBox(height: AppSpacing.playerProgressToTimes),
-                          PlayerTimeRow(
-                            current: _videoSelected
-                                ? _videoState.currentTime
-                                : _player.currentTime,
-                            total: _videoSelected
-                                ? _videoState.totalTime
-                                : _player.totalTime,
-                          ),
-                          const SizedBox(height: AppSpacing.playerTimesToControls),
-                          PlayerPlaybackControls(
-                            isPlaying: _videoSelected
-                                ? _videoState.isPlaying
-                                : _player.isPlaying,
-                            onToggle: _togglePlayback,
-                            onRewind: () => _skipPlayback(-10),
-                            onForward: () => _skipPlayback(10),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                  const SizedBox(height: AppSpacing.playerControlsToActions),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: PlayerSecondaryAction(
-                          label: 'Speed',
-                          pngAsset: 'assets/icons/player/playback_speed.png',
-                          onPressed: _showSpeedPicker,
-                        ),
-                      ),
-                      Expanded(
-                        child: PlayerSecondaryAction(
-                          label: 'Download',
-                          svgAsset: 'assets/icons/player/download.svg',
-                          onPressed: () => _showNotice(
-                            'Downloading will be available after the UI phase.',
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: PlayerSecondaryAction(
-                          label: 'More',
-                          svgAsset: 'assets/icons/player/more.svg',
-                          onPressed: _showMoreOptions,
-                        ),
-                      ),
-                    ],
-                  ),
+                    const SizedBox(height: AppSpacing.playerDescriptionToProgress),
+                    _buildPlaybackControls(compact: false),
+                    const SizedBox(height: AppSpacing.playerControlsToActions),
+                    _buildSecondaryActions(),
                   ],
                   // Visual-only and written items still offer real sharing.
-                  // Audio-only speed/seek controls are not added to them.
                   if (!_hasAudio && !_videoSelected) ...[
                     const SizedBox(height: 24),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: SizedBox(
-                        width: 100,
-                        child: PlayerSecondaryAction(
-                          label: 'More',
-                          svgAsset: 'assets/icons/player/more.svg',
-                          onPressed: _showMoreOptions,
-                        ),
-                      ),
-                    ),
+                    _buildMoreOnly(),
                   ],
                   // Rich text remains below the audio controls. All images,
                   // videos and audio are shown in the top swipeable media area.
