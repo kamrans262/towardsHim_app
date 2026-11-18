@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:towards_him_app/core/navigation/app_router.dart';
 import 'package:towards_him_app/core/widgets/app_bottom_navigation.dart';
+import 'package:towards_him_app/core/widgets/app_back_button.dart';
 import 'package:towards_him_app/core/widgets/app_content_type_tag.dart';
 import 'package:towards_him_app/features/home/presentation/screens/home_shell_screen.dart';
 import 'package:towards_him_app/features/listen/presentation/screens/audio_player_screen.dart';
@@ -85,7 +86,7 @@ void main() {
     await tester.tap(find.byKey(const Key('notification_card_target-weekly_challenge')));
     await tester.pumpAndSettle();
     expect(find.byType(WeeklyChallengeDetailScreen), findsOneWidget);
-    await tester.pageBack();
+    await tester.tap(find.byType(AppBackButton).last);
     await tester.pumpAndSettle();
     expect(tester.widget<NotificationCard>(find.byType(NotificationCard))
         .notification.isRead, isTrue);
@@ -99,7 +100,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(DailyChallengeScreen), findsOneWidget);
     expect(find.text('Day 3 – Daily Challenge'), findsOneWidget);
-    await tester.pageBack();
+    await tester.tap(find.byType(AppBackButton).last);
     await tester.pumpAndSettle();
     expect(tester.widget<NotificationCard>(find.byType(NotificationCard))
         .notification.isRead, isTrue);
@@ -114,7 +115,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(CommunityPostRepliesScreen), findsOneWidget);
     expect(find.byKey(Key('replies_original_' + post.id)), findsOneWidget);
-    await tester.pageBack();
+    await tester.tap(find.byType(AppBackButton).last);
     await tester.pumpAndSettle();
     expect(tester.widget<NotificationCard>(find.byType(NotificationCard))
         .notification.isRead, isTrue);
@@ -196,7 +197,7 @@ void main() {
       expect(find.byType(NotificationsScreen), findsOneWidget);
       expect(find.byType(AppBottomNavigation), findsNothing);
       expect(find.text('Notifications'), findsWidgets);
-      await tester.pageBack();
+      await tester.tap(find.byType(AppBackButton).last);
       await tester.pumpAndSettle();
       expect(find.byType(NotificationsScreen), findsNothing);
       expect(find.byType(AppBottomNavigation), findsOneWidget);
@@ -276,7 +277,7 @@ void main() {
       find.byKey(const Key('notification_card_notification-1')),
       findsNothing,
     );
-    await tester.pageBack();
+    await tester.tap(find.byType(AppBackButton).last);
     await tester.pumpAndSettle();
     await tester.tap(find.byTooltip('Notifications'));
     await tester.pumpAndSettle();
@@ -289,7 +290,7 @@ void main() {
     await tester.tap(find.byKey(const Key('notification_card_notification-1')));
     await tester.pumpAndSettle();
     expect(find.byType(AudioPlayerScreen), findsOneWidget);
-    await tester.pageBack();
+    await tester.tap(find.byType(AppBackButton).last);
     await tester.pumpAndSettle();
     expect(find.byType(NotificationsScreen), findsOneWidget);
     expect(tester.takeException(), isNull);
