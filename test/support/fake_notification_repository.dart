@@ -6,8 +6,10 @@ import 'package:towards_him_app/features/notifications/domain/models/app_notific
 
 /// Deterministic fixture for tests; production always reads from Laravel.
 class FakeNotificationRepository extends NotificationRepository {
-  FakeNotificationRepository()
-      : _notifications = List.of(NotificationsDemoData.notifications);
+  FakeNotificationRepository({List<AppNotification>? notifications})
+      : _notifications = List.of(
+          notifications ?? NotificationsDemoData.notifications,
+        );
 
   final List<AppNotification> _notifications;
 
