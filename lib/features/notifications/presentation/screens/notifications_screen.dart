@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/navigation/app_router.dart';
+import '../../../weekly_challenges/data/challenge_repository.dart';
+import '../../../weekly_challenges/domain/models/daily_challenge.dart';
+import '../../../community/data/community_repository.dart';
+import '../../../community/presentation/controllers/community_controller.dart';
+import '../../../community/presentation/models/community_replies_args.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -13,15 +18,24 @@ import '../widgets/notification_swipe_card.dart';
 
 /// Approved Notifications page, backed by server-side member notifications.
 class NotificationsScreen extends StatefulWidget {
-  const NotificationsScreen({required this.controller, super.key});
+  const NotificationsScreen({
+    required this.controller,
+    this.challengeRepository,
+    this.communityRepository,
+    super.key,
+  });
 
   final NotificationsController controller;
+  final ChallengeRepository? challengeRepository;
+  final CommunityRepository? communityRepository;
 
   @override
   State<NotificationsScreen> createState() => _NotificationsScreenState();
 }
 
 class _NotificationsScreenState extends State<NotificationsScreen> {
+  final Set<String> _opening = <String>{};
+
   @override
   void initState() {
     super.initState();
@@ -43,15 +57,86 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   }
 
   Future<void> _openContent(AppNotification notification) async {
+    if (!_opening.add(notification.id)) return;
     try {
-      // The audio endpoint prevents navigation to unpublished/deleted media.
-      final episode = await widget.controller.loadAudio(notification.contentId);
+      // A failing read-status request must never prevent opening the content.
+      try {
+        await widget.controller.markRead(notification.id);
+      } catch (_) {
+        // Server remains authoritative; keep the card unread if it fails.
+      }
       if (!mounted) return;
-      await widget.controller.markRead(notification.id);
-      if (!mounted) return;
-      Navigator.of(context).pushNamed(AppRoutes.player, arguments: episode);
+
+      switch (notification.destination) {
+        case 'weekly':
+          final challenge = await (widget.challengeRepository ??
+              ChallengeRepository.instance).detail(notification.contentId);
+          if (!mounted) return;
+          await Navigator.of(context).pushNamed(
+            AppRoutes.weeklyChallengeDetail,
+            arguments: WeeklyChallengeNavigationArgs(
+              challenge: challenge,
+              repository: widget.challengeRepository,
+            ),
+          );
+        case 'daily':
+          final dayNumber = notification.dayNumber;
+          if (dayNumber == null || dayNumber < 1 || dayNumber > 7) {
+            throw StateError('This daily challenge has no valid day.');
+          }
+          final challenge = await (widget.challengeRepository ??
+              ChallengeRepository.instance).detail(notification.contentId);
+          if (!mounted) return;
+          final day = challenge.days.where((item) => item.day == dayNumber);
+          if (day.isEmpty) throw StateError('This day is no longer available.');
+          await Navigator.of(context).pushNamed(
+            AppRoutes.dailyChallengeDetail,
+            arguments: DailyChallenge(
+              id: 'challenge-${challenge.id}-day-$dayNumber',
+              subtitle: 'Day $dayNumber – Daily Challenge',
+              title: challenge.title,
+              description: day.first.text,
+              initialSelectedOptionId: 'share',
+              options: const [],
+              media: day.first.media,
+            ),
+          );
+        case 'community':
+          final controller = CommunityController(
+            repository: widget.communityRepository,
+          );
+          try {
+            await controller.loadPosts();
+            if (!mounted) return;
+            if (controller.postById(notification.contentId) == null) {
+              throw StateError('This discussion is no longer available.');
+            }
+            await Navigator.of(context).pushNamed(
+              AppRoutes.communityPostReplies,
+              arguments: CommunityRepliesArgs(
+                postId: notification.contentId,
+                controller: controller,
+              ),
+            );
+          } finally {
+            controller.dispose();
+          }
+        default:
+          // Current backend publications are Podcasts, Meditations and Prayers;
+          // fetch the exact published item, not a generic category screen.
+          final episode = await widget.controller.loadAudio(
+            notification.contentId,
+          );
+          if (!mounted) return;
+          await Navigator.of(context).pushNamed(
+            AppRoutes.player,
+            arguments: episode,
+          );
+      }
     } catch (error) {
-      if (mounted) _notice('Unable to open audio: ' + error.toString());
+      if (mounted) _notice('Unable to open notification: $error');
+    } finally {
+      _opening.remove(notification.id);
     }
   }
 
