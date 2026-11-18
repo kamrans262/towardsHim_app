@@ -178,7 +178,9 @@ void main() {
       const BorderRadius.vertical(top: Radius.circular(20)),
     );
  
-    expect(find.byType(DailyChallengeOptionCard), findsNWidgets(3));
+    // Published challenges use actual server activities; they don't
+    // include the three separate choices from the local October 8 demo.
+    expect(find.byType(DailyChallengeOptionCard), findsNothing);
     await tester.tap(find.byType(AppBackButton));
     await tester.pumpAndSettle();
     expect(find.byType(DailyChallengeScreen), findsNothing);
@@ -186,8 +188,12 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('Selection is exclusive and responds to taps', (tester) async {
-    await openDaily(tester);
+  testWidgets('Local October 8 choices remain exclusive and respond to taps',
+      (tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: DailyChallengeScreen(challenge: DailyChallengeDemoData.october8),
+    ));
+    await tester.pumpAndSettle();
     final cards = tester.widgetList<DailyChallengeOptionCard>(
       find.byType(DailyChallengeOptionCard),
     ).toList();
@@ -214,7 +220,7 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
       await openDaily(tester);
       expect(find.byKey(const Key('daily_challenge_scroll')), findsOneWidget);
-      expect(find.byType(DailyChallengeOptionCard), findsNWidgets(3));
+      expect(find.byType(DailyChallengeOptionCard), findsNothing);
       expect(tester.takeException(), isNull);
     });
   }
