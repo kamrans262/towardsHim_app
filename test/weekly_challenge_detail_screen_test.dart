@@ -10,6 +10,17 @@ import 'package:towards_him_app/core/navigation/app_router.dart';
 
 void main() {
 
+  Future<void> openDetail(WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: HomeShellScreen(challengeRepository: FakeChallengeRepository()),
+      onGenerateRoute: AppRouter.onGenerateRoute,
+    ));
+    await tester.tap(find.byKey(const Key('nav_Towards HIM 3')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('weekly_card_weekly-current')));
+    await tester.pumpAndSettle();
+  }
+
   testWidgets('Weekly day cards show at most four lines with ellipsis',
       (tester) async {
     await openDetail(tester);
@@ -23,17 +34,6 @@ void main() {
     expect(texts.last.overflow, TextOverflow.ellipsis);
     expect(tester.takeException(), isNull);
   });
-
-  Future<void> openDetail(WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      home: HomeShellScreen(challengeRepository: FakeChallengeRepository()),
-      onGenerateRoute: AppRouter.onGenerateRoute,
-    ));
-    await tester.tap(find.byKey(const Key('nav_Towards HIM 3')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('weekly_card_weekly-current')));
-    await tester.pumpAndSettle();
-  }
 
   testWidgets('Weekly detail opens from card and back returns to tab', (tester) async {
     await openDetail(tester);
