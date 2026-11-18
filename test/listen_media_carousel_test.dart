@@ -32,6 +32,24 @@ ListenAudioEpisode sample({
 );
 
 void main() {
+  test('Compact day player starts on playable media instead of optional artwork', () {
+    final slides = ListenMediaSlide.forEpisode(sample(
+      image: 'https://example.test/day.png',
+      video: 'https://example.test/day.mp4',
+      audio: 'https://example.test/day.mp3',
+    ));
+    expect(ListenMediaCarouselState.preferredSlideIndex(slides), 1);
+    expect(ListenMediaCarouselState.preferredSlideIndex(
+      ListenMediaSlide.forEpisode(sample(
+        image: 'https://example.test/day.png',
+        audio: 'https://example.test/day.mp3',
+      )),
+    ), 1);
+    expect(ListenMediaCarouselState.preferredSlideIndex(
+      ListenMediaSlide.forEpisode(sample()),
+    ), 0);
+  });
+
   test('All three media types share a single cover in artwork-video-audio order', () {
     final slides = ListenMediaSlide.forEpisode(sample(
       image: 'https://example.test/artwork.png',
