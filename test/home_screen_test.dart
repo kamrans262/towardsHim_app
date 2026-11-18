@@ -17,6 +17,7 @@ import 'package:towards_him_app/features/home/domain/models/home_models.dart';
 import 'package:towards_him_app/features/home/presentation/controllers/home_navigation_controller.dart';
 import 'package:towards_him_app/features/home/presentation/screens/home_shell_screen.dart';
 import 'package:towards_him_app/features/home/presentation/widgets/home_quick_access_card.dart';
+import 'package:towards_him_app/features/home/presentation/widgets/home_featured_card.dart';
 import 'package:towards_him_app/features/home/presentation/widgets/home_recent_activity_card.dart';
 
 class FakeAudioCatalogRepository extends AudioCatalogRepository {
@@ -60,7 +61,39 @@ const publishedEpisodes = [
   ),
 ];
 
+void _doNothing() {}
+
 void main() {
+  testWidgets('Home weekly challenge description is clamped to three lines',
+      (tester) async {
+    const fullDescription = 'A detailed weekly challenge about prayer, '
+        'gratitude, meditation, scripture, forgiveness, giving, kindness, '
+        'connection, and growing closer to HIM throughout each day.';
+    await tester.pumpWidget(const MaterialApp(
+      home: Scaffold(
+        body: SizedBox(
+          width: 390,
+          child: HomeFeaturedCard(
+            content: HomeFeaturedContent(
+              id: 'week-1',
+              category: 'Weekly Toward HIM 3',
+              title: '7 Days of Growing Closer to HIM',
+              description: fullDescription,
+              imageAsset: 'assets/images/home/golden_hour_meditation.webp',
+            ),
+            onPressed: _doNothing,
+          ),
+        ),
+      ),
+    ));
+
+    final description = tester.widget<Text>(find.text(fullDescription));
+    expect(description.maxLines, 3);
+    expect(description.overflow, TextOverflow.ellipsis);
+    expect(find.text('7 Days of Growing Closer to HIM'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   test('Demo models and order of five tabs match Figma', () {
     expect(HomeDemoData.profile.firstName, 'Sarah');
     expect(HomeDemoData.listening.progress, closeTo(0.38, 0.001));
