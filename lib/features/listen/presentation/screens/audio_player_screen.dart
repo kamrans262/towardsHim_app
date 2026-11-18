@@ -13,6 +13,7 @@ import '../../../../core/widgets/app_back_button.dart';
 import '../../../../core/widgets/app_content_type_tag.dart';
 import '../../../../core/widgets/app_content_media_view.dart';
 import '../widgets/listen_media_carousel.dart';
+import '../models/video_playback_snapshot.dart';
 import '../../../../core/models/content_media.dart';
 import '../../domain/models/listen_audio_episode.dart';
 import '../../domain/models/listen_share_content.dart';
@@ -51,6 +52,68 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
   final GlobalKey<ListenMediaCarouselState> _coverKey =
       GlobalKey<ListenMediaCarouselState>();
   bool _audioMayAutoplay = true;
+  late final List<ListenMediaSlide> _mediaSlides;
+  int _activeMediaIndex = 0;
+  VideoPlaybackSnapshot _videoState = const VideoPlaybackSnapshot();
+
+  bool get _videoSelected =>
+      _mediaSlides[_activeMediaIndex].kind == ListenMediaKind.video;
+
+  bool get _hasAudio =>
+      widget.episode.audioUrl != null || widget.episode.narrationText != null;
+
+  void _mediaChanged(int index, ListenMediaKind kind) {
+    if (kind == ListenMediaKind.video) _pauseAudioForVideo();
+    if (!mounted) return;
+    setState(() {
+      _activeMediaIndex = index;
+      _videoState = const VideoPlaybackSnapshot();
+    });
+  }
+
+  void _onVideoState(int index, VideoPlaybackSnapshot state) {
+    if (!mounted || !_videoSelected || _activeMediaIndex != index ||
+        _videoState == state) return;
+    setState(() => _videoState = state);
+  }
+
+  void _togglePlayback() {
+    if (!_videoSelected) {
+      _toggleAudioPlayback();
+      return;
+    }
+    if (_videoState.hasError) {
+      _showNotice('Video playback is unavailable.');
+      return;
+    }
+    if (!_videoState.isReady) {
+      _showNotice('Video is loading.');
+      return;
+    }
+    _coverKey.currentState?.toggleSelectedVideo();
+  }
+
+  void _seekPlayback(double fraction) {
+    if (_videoSelected) {
+      if (_videoState.isReady) _coverKey.currentState?.seekSelectedVideo(fraction);
+      return;
+    }
+    _player.seekFraction(fraction);
+    final voice = _narration;
+    if (voice != null) unawaited(voice.seek(fraction));
+    final remote = _remotePlayer;
+    if (remote != null) {
+      unawaited(remote.seek(Duration(seconds: _player.positionSeconds)));
+    }
+  }
+
+  void _skipPlayback(int seconds) {
+    if (_videoSelected) {
+      if (_videoState.isReady) _coverKey.currentState?.skipSelectedVideo(seconds);
+    } else {
+      _skip(seconds);
+    }
+  }
 
   void _pauseAudioForVideo() {
     // A delayed network audio initialization must not resume after video starts.
@@ -93,6 +156,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
   void initState() {
     super.initState();
     _player = AudioPlayerUiController(widget.episode);
+    _mediaSlides = ListenMediaSlide.forEpisode(widget.episode);
     final mediaUrl = widget.episode.audioUrl;
     if (mediaUrl != null && mediaUrl.isNotEmpty) {
       unawaited(_openRemote(mediaUrl));
@@ -233,6 +297,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                       if (voice != null) unawaited(voice.setSpeed(speed));
                       final remote = _remotePlayer;
                       if (remote != null) unawaited(remote.setSpeed(speed));
+                      _coverKey.currentState?.setVideoSpeed(speed);
                       Navigator.of(sheetContext).pop();
                     },
                   ),
@@ -400,6 +465,8 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                         key: _coverKey,
                         episode: episode,
                         onVideoPlay: _pauseAudioForVideo,
+                        onSelectionChanged: _mediaChanged,
+                        onVideoStateChanged: _onVideoState,
                       ),
                     ),
                   ),
@@ -429,8 +496,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                     episode.playerDescription ?? episode.description,
                     style: AppTypography.homeSecondary,
                   ),
-                  if (episode.audioUrl != null ||
-                      episode.narrationText != null) ...[
+                  if (_hasAudio || _videoSelected) ...[
                   const SizedBox(height: AppSpacing.playerDescriptionToProgress),
                   AnimatedBuilder(
                     animation: _player,
@@ -439,32 +505,28 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           AppAudioSeekBar(
-                            progress: _player.progress,
-                            onChanged: (fraction) {
-                              _player.seekFraction(fraction);
-                              final voice = _narration;
-                              if (voice != null) {
-                                unawaited(voice.seek(fraction));
-                              }
-                              final remote = _remotePlayer;
-                              if (remote != null) {
-                                unawaited(remote.seek(
-                                  Duration(seconds: _player.positionSeconds),
-                                ));
-                              }
-                            },
+                            progress: _videoSelected
+                                ? _videoState.progress
+                                : _player.progress,
+                            onChanged: _seekPlayback,
                           ),
                           const SizedBox(height: AppSpacing.playerProgressToTimes),
                           PlayerTimeRow(
-                            current: _player.currentTime,
-                            total: _player.totalTime,
+                            current: _videoSelected
+                                ? _videoState.currentTime
+                                : _player.currentTime,
+                            total: _videoSelected
+                                ? _videoState.totalTime
+                                : _player.totalTime,
                           ),
                           const SizedBox(height: AppSpacing.playerTimesToControls),
                           PlayerPlaybackControls(
-                            isPlaying: _player.isPlaying,
-                            onToggle: _toggleAudioPlayback,
-                            onRewind: () => _skip(-10),
-                            onForward: () => _skip(10),
+                            isPlaying: _videoSelected
+                                ? _videoState.isPlaying
+                                : _player.isPlaying,
+                            onToggle: _togglePlayback,
+                            onRewind: () => _skipPlayback(-10),
+                            onForward: () => _skipPlayback(10),
                           ),
                         ],
                       );
@@ -501,8 +563,7 @@ class _AudioPlayerScreenState extends State<AudioPlayerScreen> {
                   ],
                   // Visual-only and written items still offer real sharing.
                   // Audio-only speed/seek controls are not added to them.
-                  if (episode.audioUrl == null &&
-                      episode.narrationText == null) ...[
+                  if (!_hasAudio && !_videoSelected) ...[
                     const SizedBox(height: 24),
                     Align(
                       alignment: Alignment.centerRight,
