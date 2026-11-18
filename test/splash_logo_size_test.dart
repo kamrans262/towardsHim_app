@@ -8,6 +8,14 @@ import 'package:towards_him_app/core/widgets/toward_him_logo.dart';
 import 'package:towards_him_app/features/onboarding/presentation/screens/splash_screen.dart';
 
 void main() {
+  test('Android callback manifest path is valid for AAPT resource linking', () {
+    final manifest = File('android/app/src/main/AndroidManifest.xml')
+        .readAsStringSync();
+    expect(manifest, contains('android:scheme="signinwithapple"'));
+    expect(manifest, contains('android:path="/callback"'));
+    expect(manifest, isNot(contains('android:path="callback"')));
+  });
+
   test('Native startup remains cream with no smaller duplicate logo', () {
     const androidSplashXmls = [
       'android/app/src/main/res/drawable/launch_background.xml',
